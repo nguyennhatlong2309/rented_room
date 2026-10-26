@@ -88,3 +88,18 @@
 
 ### 3. Kết Quả Kiểm Tra
 - `npm run build` hoàn thành trong 1.4s với Turbopack, không phát sinh lỗi TypeScript.
+
+
+---
+## [Cập Nhật Bộ Option Chọn Quận Khi Upload Phòng]
+**Thời gian:** 2026-10-26 18:48:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Trong modal Upload / Đăng Quỹ Phòng Mới, bổ sung đầy đủ các Option quận tại TP.HCM linh hoạt, trực quan để sale thao tác nhanh.
+
+### 2. Chi tiết thực hiện
+- **`src/components/CreateRoomModal.tsx`**:
+  - Tích hợp cụm **Option Pills 1-chạm** cho các quận trọng điểm sôi động nhất tại TP.HCM (Quận 1, Quận 3, Quận 7, Quận 10, Bình Thạnh, Phú Nhuận, Tân Bình, Gò Vấp, TP. Thủ Đức). Bấm là chọn ngay với icon check và viền xanh nổi bật.
+  - Tích hợp **Dropdown mở rộng đầy đủ 22 Quận / Huyện** của TP.HCM (Quận 1 đến 12, Bình Tân, Tân Phú, Huyện Nhà Bè, Bình Chánh, Hóc Môn, Củ Chi, Cần Giờ).
+  - Tích hợp nút **"+ Nhập quận / khu vực khác"**: Cho phép sale tự nhập địa bàn đặc thù (VD: *Thảo Điền*, *Khu Him Lam Q7*, *Khu chế xuất Tân Thuận*). Khi đăng, khu vực tự nhập này sẽ tự động xuất hiện trên bộ lọc FilterBar của toàn đội sale.
+- Đã kiểm thử `npm run build` thành công trong 2.6s và đồng bộ lên GitHub branch `main`.
