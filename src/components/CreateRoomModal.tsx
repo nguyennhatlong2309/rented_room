@@ -18,6 +18,8 @@ import {
   Layers,
   Plus,
   Trash2,
+  MapPin,
+  Check,
 } from "lucide-react";
 
 interface CreateRoomModalProps {
@@ -25,6 +27,43 @@ interface CreateRoomModalProps {
   onClose: () => void;
   onCreateRoom: (room: Room) => void;
 }
+
+const POPULAR_DISTRICTS = [
+  "Quận 1",
+  "Quận 3",
+  "Quận 7",
+  "Quận 10",
+  "Bình Thạnh",
+  "Phú Nhuận",
+  "Tân Bình",
+  "Gò Vấp",
+  "TP. Thủ Đức",
+];
+
+const ALL_HCM_DISTRICTS = [
+  "Quận 1",
+  "Quận 3",
+  "Quận 4",
+  "Quận 5",
+  "Quận 6",
+  "Quận 7",
+  "Quận 8",
+  "Quận 10",
+  "Quận 11",
+  "Quận 12",
+  "Bình Thạnh",
+  "Phú Nhuận",
+  "Tân Bình",
+  "Tân Phú",
+  "Gò Vấp",
+  "Bình Tân",
+  "TP. Thủ Đức",
+  "Huyện Nhà Bè",
+  "Huyện Bình Chánh",
+  "Huyện Hóc Môn",
+  "Huyện Củ Chi",
+  "Huyện Cần Giờ",
+];
 
 export function CreateRoomModal({
   isOpen,
@@ -37,6 +76,8 @@ export function CreateRoomModal({
   const [roomCode, setRoomCode] = useState("");
   const [buildingName, setBuildingName] = useState("");
   const [district, setDistrict] = useState("Quận 7");
+  const [isCustomDistrict, setIsCustomDistrict] = useState(false);
+  const [customDistrict, setCustomDistrict] = useState("");
   const [address, setAddress] = useState("");
   const [floor, setFloor] = useState(2);
   const [type, setType] = useState<RoomType>("studio");
@@ -98,11 +139,20 @@ export function CreateRoomModal({
     setUploadedImages((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  const selectedFinalDistrict = isCustomDistrict
+    ? customDistrict.trim() || "Quận khác"
+    : district;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!roomCode || !buildingName || !address || !landlordPhone) {
       showToast("Vui lòng điền các thông tin bắt buộc (*)", "error");
+      return;
+    }
+
+    if (isCustomDistrict && !customDistrict.trim()) {
+      showToast("Vui lòng nhập tên quận / khu vực!", "error");
       return;
     }
 
@@ -116,7 +166,7 @@ export function CreateRoomModal({
       roomCode: roomCode.trim().toUpperCase(),
       buildingId: `bld-${Date.now()}`,
       buildingName: buildingName.trim(),
-      district,
+      district: selectedFinalDistrict,
       address: address.trim(),
       floor: Number(floor),
       type,
@@ -156,7 +206,7 @@ export function CreateRoomModal({
     };
 
     onCreateRoom(newRoom);
-    showToast(`Đã upload & đăng phòng ${newRoom.roomCode} thành công!`, "success");
+    showToast(`Đã upload & đăng phòng ${newRoom.roomCode} tại ${newRoom.district} thành công!`, "success");
     onClose();
   };
 
@@ -177,7 +227,7 @@ export function CreateRoomModal({
                 Upload & Đăng Quỹ Phòng Mới (Dành Cho Sale)
               </h2>
               <p className="text-xs text-zinc-500">
-                Thêm thông tin phòng, ảnh thực tế và SĐT chủ hộ để toàn đội sale cùng khai thác
+                Thêm thông tin phòng, chọn quận tại TP.HCM, ảnh thực tế và SĐT chủ hộ
               </p>
             </div>
           </div>
@@ -323,12 +373,89 @@ export function CreateRoomModal({
             </div>
           </div>
 
-          {/* 3. THÔNG TIN PHÒNG & GIÁ THUÊ */}
+          {/* 3. THÔNG TIN PHÒNG, ĐỊA CHỈ & OPTION CHỌN QUẬN TP.HCM */}
           <div className="space-y-3">
             <span className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
-              3. Thông tin Phòng & Bảng Giá
+              3. Thông tin Phòng & Khu vực (TP.HCM)
             </span>
 
+            {/* PHẦN OPTION CHỌN QUẬN TẠI TP.HCM */}
+            <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/80 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Khu vực / Quận tại TP.HCM *:</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-extrabold ml-1">
+                    {selectedFinalDistrict}
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsCustomDistrict(!isCustomDistrict)}
+                  className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold hover:underline cursor-pointer"
+                >
+                  {isCustomDistrict ? "← Chọn từ danh sách quận" : "+ Nhập quận/khu vực khác"}
+                </button>
+              </div>
+
+              {isCustomDistrict ? (
+                <div className="space-y-1">
+                  <input
+                    type="text"
+                    required={isCustomDistrict}
+                    value={customDistrict}
+                    onChange={(e) => setCustomDistrict(e.target.value)}
+                    placeholder="VD: Thảo Điền (TP. Thủ Đức), KDC Him Lam Q7, v.v..."
+                    className="w-full px-3 py-2 bg-white dark:bg-zinc-800 rounded-xl text-xs border border-emerald-500 text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                  <span className="text-[10px] text-zinc-400 block">
+                    Khu vực bạn nhập sẽ tự động xuất hiện trên bộ lọc của toàn đội sale.
+                  </span>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {/* Option Pills: Các quận trọng điểm 1-click */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {POPULAR_DISTRICTS.map((d) => {
+                      const isSelected = district === d;
+                      return (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setDistrict(d)}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 ${
+                            isSelected
+                              ? "bg-emerald-600 text-white font-bold shadow-sm shadow-emerald-600/20"
+                              : "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"
+                          }`}
+                        >
+                          {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          <span>{d}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Dropdown chọn toàn bộ 22 quận/huyện TP.HCM */}
+                  <div className="flex items-center gap-2 pt-1 border-t border-zinc-200/50 dark:border-zinc-700/50">
+                    <span className="text-[11px] text-zinc-400 shrink-0">Hoặc chọn quận khác:</span>
+                    <select
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                      className="flex-1 px-2.5 py-1 bg-white dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                    >
+                      {ALL_HCM_DISTRICTS.map((d) => (
+                        <option key={d} value={d}>
+                          📍 {d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Các thông số phòng khác */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
@@ -360,33 +487,24 @@ export function CreateRoomModal({
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
-                  Quận (TP.HCM) *
-                </label>
-                <select
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
-                >
-                  <option value="Quận 1">Quận 1</option>
-                  <option value="Quận 3">Quận 3</option>
-                  <option value="Quận 7">Quận 7</option>
-                  <option value="Quận 10">Quận 10</option>
-                  <option value="Bình Thạnh">Bình Thạnh</option>
-                  <option value="Phú Nhuận">Phú Nhuận</option>
-                  <option value="Tân Bình">Tân Bình</option>
-                  <option value="Gò Vấp">Gò Vấp</option>
-                  <option value="Thủ Đức">TP. Thủ Đức</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   Tầng
                 </label>
                 <input
                   type="number"
                   value={floor}
                   onChange={(e) => setFloor(Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
+                  Diện tích (m²)
+                </label>
+                <input
+                  type="number"
+                  value={area}
+                  onChange={(e) => setArea(Number(e.target.value))}
                   className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
                 />
               </div>
@@ -407,34 +525,20 @@ export function CreateRoomModal({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
-                    Kiểu phòng
-                  </label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value as RoomType)}
-                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
-                  >
-                    <option value="studio">Studio</option>
-                    <option value="duplex">Duplex (Gác)</option>
-                    <option value="1pn">1 Phòng Ngủ</option>
-                    <option value="2pn">2 Phòng Ngủ</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
-                    Diện tích (m²)
-                  </label>
-                  <input
-                    type="number"
-                    value={area}
-                    onChange={(e) => setArea(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
+                  Kiểu phòng
+                </label>
+                <select
+                  value={type}
+                  onChange={(e) => setType(e.target.value as RoomType)}
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                >
+                  <option value="studio">Studio</option>
+                  <option value="duplex">Duplex (Gác lửng)</option>
+                  <option value="1pn">1 Phòng Ngủ (1PN)</option>
+                  <option value="2pn">2 Phòng Ngủ (2PN)</option>
+                </select>
               </div>
             </div>
 
@@ -536,13 +640,13 @@ export function CreateRoomModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 cursor-pointer"
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 flex items-center gap-2 cursor-pointer"
             >
               <Upload className="w-4 h-4" />
               <span>Đăng Quỹ Phòng Ngay</span>
