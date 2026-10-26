@@ -20,7 +20,7 @@ export default function SalesRentedRoomPage() {
   // 1. Rooms state (TP.HCM only)
   const [rooms, setRooms] = useState<Room[]>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("roomsales_rooms_cache_hcm_v3");
+      const saved = localStorage.getItem("roomsales_rooms_cache_hcm_v4");
       if (saved) {
         try {
           return JSON.parse(saved);
@@ -54,7 +54,7 @@ export default function SalesRentedRoomPage() {
   // Sync rooms state to local cache for persistence
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("roomsales_rooms_cache_hcm_v3", JSON.stringify(rooms));
+      localStorage.setItem("roomsales_rooms_cache_hcm_v4", JSON.stringify(rooms));
     }
   }, [rooms]);
 
@@ -185,6 +185,7 @@ export default function SalesRentedRoomPage() {
           const matchBuilding = room.buildingName.toLowerCase().includes(q);
           const matchAddress = room.address.toLowerCase().includes(q);
           const matchDistrict = room.district.toLowerCase().includes(q);
+          const matchWard = room.ward?.toLowerCase().includes(q);
           const matchNotes = room.notesForSale?.toLowerCase().includes(q);
           const matchLandlord = room.landlord?.name?.toLowerCase().includes(q) || room.landlord?.phone?.includes(q);
           const matchFurniture = room.furniture.some((f) =>
@@ -196,6 +197,7 @@ export default function SalesRentedRoomPage() {
             !matchBuilding &&
             !matchAddress &&
             !matchDistrict &&
+            !matchWard &&
             !matchNotes &&
             !matchLandlord &&
             !matchFurniture
@@ -280,7 +282,7 @@ export default function SalesRentedRoomPage() {
     if (confirm("Bạn có muốn tải lại danh sách phòng TP.HCM mặc định không?")) {
       setRooms(INITIAL_ROOMS);
       if (typeof window !== "undefined") {
-        localStorage.removeItem("roomsales_rooms_cache_hcm_v3");
+        localStorage.removeItem("roomsales_rooms_cache_hcm_v4");
       }
       showToast("Đã khôi phục danh sách phòng TP.HCM thành công!", "success");
     }

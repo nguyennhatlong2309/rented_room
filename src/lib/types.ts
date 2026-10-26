@@ -42,6 +42,7 @@ export interface Room {
   buildingId: string;
   buildingName: string;
   district: string;
+  ward?: string;         // Phường / Xã (VD: "Phường Tân Hưng", "Phường Bến Nghé")
   address: string;
   floor: number;
   type: RoomType;

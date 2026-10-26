@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Room, RoomType } from "@/lib/types";
 import { useToast } from "./Toast";
 import {
@@ -20,6 +20,7 @@ import {
   Trash2,
   MapPin,
   Check,
+  Compass,
 } from "lucide-react";
 
 interface CreateRoomModalProps {
@@ -65,6 +66,102 @@ const ALL_HCM_DISTRICTS = [
   "Huyện Cần Giờ",
 ];
 
+export const HCM_WARDS_BY_DISTRICT: Record<string, string[]> = {
+  "Quận 1": [
+    "Phường Bến Nghé",
+    "Phường Bến Thành",
+    "Phường Đa Kao",
+    "Phường Tân Định",
+    "Phường Phạm Ngũ Lão",
+    "Phường Cầu Ông Lãnh",
+    "Phường Nguyễn Thái Bình",
+    "Phường Cô Giang",
+    "Phường Cầu Kho",
+    "Phường Nguyễn Cư Trinh",
+  ],
+  "Quận 3": [
+    "Phường Võ Thị Sáu",
+    "Phường 1",
+    "Phường 2",
+    "Phường 3",
+    "Phường 4",
+    "Phường 5",
+    "Phường 9",
+    "Phường 11",
+    "Phường 12",
+    "Phường 14",
+  ],
+  "Quận 4": [
+    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 6", "Phường 8", "Phường 9", "Phường 10", "Phường 13", "Phường 14", "Phường 15", "Phường 16", "Phường 18"
+  ],
+  "Quận 5": [
+    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14"
+  ],
+  "Quận 6": [
+    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14"
+  ],
+  "Quận 7": [
+    "Phường Tân Hưng",
+    "Phường Tân Phong",
+    "Phường Tân Quy",
+    "Phường Tân Kiểng",
+    "Phường Tân Phú",
+    "Phường Phú Mỹ",
+    "Phường Bình Thuận",
+    "Phường Tân Thuận Đông",
+    "Phường Tân Thuận Tây",
+    "Phường Phú Thuận",
+  ],
+  "Quận 8": [
+    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 16"
+  ],
+  "Quận 10": [
+    "Phường 1", "Phường 2", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15"
+  ],
+  "Quận 11": [
+    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 16"
+  ],
+  "Quận 12": [
+    "Phường Thạnh Xuân", "Phường Thạnh Lộc", "Phường Hiệp Thành", "Phường Thới An", "Phường Tân Chánh Hiệp", "Phường An Phú Đông", "Phường Tân Thới Hiệp", "Phường Trung Mỹ Tây", "Phường Tân Hưng Thuận", "Phường Đông Hưng Thuận", "Phường Tân Thới Nhất"
+  ],
+  "Bình Thạnh": [
+    "Phường 1", "Phường 2", "Phường 3", "Phường 5", "Phường 6", "Phường 7", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 17", "Phường 19", "Phường 21", "Phường 22", "Phường 24", "Phường 25", "Phường 26", "Phường 27", "Phường 28"
+  ],
+  "Phú Nhuận": [
+    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 13", "Phường 15", "Phường 17"
+  ],
+  "Tân Bình": [
+    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15"
+  ],
+  "Tân Phú": [
+    "Phường Hiệp Tân", "Phường Hòa Thạnh", "Phường Phú Thạnh", "Phường Phú Thọ Hòa", "Phường Phú Trung", "Phường Sơn Kỳ", "Phường Tân Quý", "Phường Tân Sơn Nhì", "Phường Tân Thành", "Phường Tân Thới Hòa", "Phường Tây Thạnh"
+  ],
+  "Gò Vấp": [
+    "Phường 1", "Phường 3", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 16", "Phường 17"
+  ],
+  "Bình Tân": [
+    "Phường An Lạc", "Phường An Lạc A", "Phường Bình Hưng Hòa", "Phường Bình Hưng Hòa A", "Phường Bình Hưng Hòa B", "Phường Bình Trị Đông", "Phường Bình Trị Đông A", "Phường Bình Trị Đông B", "Phường Tân Tạo", "Phường Tân Tạo A"
+  ],
+  "TP. Thủ Đức": [
+    "Phường Thảo Điền", "Phường An Phú", "Phường An Khánh", "Phường Thủ Thiêm", "Phường Hiệp Bình Chánh", "Phường Hiệp Bình Phước", "Phường Linh Tây", "Phường Linh Trung", "Phường Linh Chiểu", "Phường Linh Đông", "Phường Tam Bình", "Phường Tam Phú", "Phường Bình Chiểu", "Phường Tăng Nhơn Phú A", "Phường Tăng Nhơn Phú B", "Phường Phước Long A", "Phường Phước Long B", "Phường Trường Thạnh", "Phường Long Trường", "Phường Long Phước"
+  ],
+  "Huyện Nhà Bè": [
+    "Thị trấn Nhà Bè", "Xã Phước Kiển", "Xã Phước Lộc", "Xã Nhơn Đức", "Xã Phú Xuân", "Xã Long Thới", "Xã Hiệp Phước"
+  ],
+  "Huyện Bình Chánh": [
+    "Thị trấn Tân Túc", "Xã Bình Hưng", "Xã Phong Phú", "Xã An Phú Tây", "Xã Đa Phước", "Xã Vĩnh Lộc A", "Xã Vĩnh Lộc B"
+  ],
+  "Huyện Hóc Môn": [
+    "Thị trấn Hóc Môn", "Xã Bà Điểm", "Xã Tân Xuân", "Xã Trung Chánh", "Xã Xuân Thới Đông", "Xã Thới Tam Thôn"
+  ],
+  "Huyện Củ Chi": [
+    "Thị trấn Củ Chi", "Xã Tân An Hội", "Xã Phước Vĩnh An", "Xã Tân Thạnh Đông", "Xã Bình Mỹ"
+  ],
+  "Huyện Cần Giờ": [
+    "Thị trấn Cần Thạnh", "Xã Long Hòa", "Xã Bình Khánh", "Xã Tam Thôn Hiệp"
+  ],
+};
+
 export function CreateRoomModal({
   isOpen,
   onClose,
@@ -78,6 +175,12 @@ export function CreateRoomModal({
   const [district, setDistrict] = useState("Quận 7");
   const [isCustomDistrict, setIsCustomDistrict] = useState(false);
   const [customDistrict, setCustomDistrict] = useState("");
+  
+  // Ward states
+  const [ward, setWard] = useState("Phường Tân Hưng");
+  const [isCustomWard, setIsCustomWard] = useState(false);
+  const [customWard, setCustomWard] = useState("");
+
   const [address, setAddress] = useState("");
   const [floor, setFloor] = useState(2);
   const [type, setType] = useState<RoomType>("studio");
@@ -108,6 +211,19 @@ export function CreateRoomModal({
   // Image Uploads (File & Preview)
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageUrlInput, setImageUrlInput] = useState("");
+
+  // Khi thay đổi Quận -> tự động cập nhật danh sách Phường tương ứng
+  const handleSelectDistrict = (newDistrict: string) => {
+    setDistrict(newDistrict);
+    setIsCustomDistrict(false);
+    const availableWards = HCM_WARDS_BY_DISTRICT[newDistrict] || [];
+    if (availableWards.length > 0) {
+      setWard(availableWards[0]);
+    } else {
+      setWard("");
+    }
+    setIsCustomWard(false);
+  };
 
   if (!isOpen) return null;
 
@@ -143,6 +259,12 @@ export function CreateRoomModal({
     ? customDistrict.trim() || "Quận khác"
     : district;
 
+  const selectedFinalWard = isCustomWard
+    ? customWard.trim() || undefined
+    : ward || undefined;
+
+  const availableWardsForCurrentDistrict = HCM_WARDS_BY_DISTRICT[district] || [];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -167,6 +289,7 @@ export function CreateRoomModal({
       buildingId: `bld-${Date.now()}`,
       buildingName: buildingName.trim(),
       district: selectedFinalDistrict,
+      ward: selectedFinalWard,
       address: address.trim(),
       floor: Number(floor),
       type,
@@ -206,7 +329,8 @@ export function CreateRoomModal({
     };
 
     onCreateRoom(newRoom);
-    showToast(`Đã upload & đăng phòng ${newRoom.roomCode} tại ${newRoom.district} thành công!`, "success");
+    const wardText = newRoom.ward ? `${newRoom.ward}, ` : "";
+    showToast(`Đã upload & đăng phòng ${newRoom.roomCode} tại ${wardText}${newRoom.district} thành công!`, "success");
     onClose();
   };
 
@@ -227,7 +351,7 @@ export function CreateRoomModal({
                 Upload & Đăng Quỹ Phòng Mới (Dành Cho Sale)
               </h2>
               <p className="text-xs text-zinc-500">
-                Thêm thông tin phòng, chọn quận tại TP.HCM, ảnh thực tế và SĐT chủ hộ
+                Thêm thông tin phòng, chọn Quận và Phường tại TP.HCM, ảnh thực tế và SĐT chủ hộ
               </p>
             </div>
           </div>
@@ -373,18 +497,18 @@ export function CreateRoomModal({
             </div>
           </div>
 
-          {/* 3. THÔNG TIN PHÒNG, ĐỊA CHỈ & OPTION CHỌN QUẬN TP.HCM */}
-          <div className="space-y-3">
+          {/* 3. THÔNG TIN PHÒNG, ĐỊA CHỈ & OPTION CHỌN QUẬN + PHƯỜNG */}
+          <div className="space-y-4">
             <span className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
-              3. Thông tin Phòng & Khu vực (TP.HCM)
+              3. Vị Trí & Khu Vực (Quận & Phường tại TP.HCM)
             </span>
 
-            {/* PHẦN OPTION CHỌN QUẬN TẠI TP.HCM */}
+            {/* PHẦN 3.1: CHỌN QUẬN */}
             <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/80 space-y-2.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Khu vực / Quận tại TP.HCM *:</span>
+                  <span>Quận / Huyện *:</span>
                   <span className="text-emerald-600 dark:text-emerald-400 font-extrabold ml-1">
                     {selectedFinalDistrict}
                   </span>
@@ -394,7 +518,7 @@ export function CreateRoomModal({
                   onClick={() => setIsCustomDistrict(!isCustomDistrict)}
                   className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold hover:underline cursor-pointer"
                 >
-                  {isCustomDistrict ? "← Chọn từ danh sách quận" : "+ Nhập quận/khu vực khác"}
+                  {isCustomDistrict ? "← Chọn từ danh sách quận" : "+ Nhập quận khác"}
                 </button>
               </div>
 
@@ -405,12 +529,9 @@ export function CreateRoomModal({
                     required={isCustomDistrict}
                     value={customDistrict}
                     onChange={(e) => setCustomDistrict(e.target.value)}
-                    placeholder="VD: Thảo Điền (TP. Thủ Đức), KDC Him Lam Q7, v.v..."
+                    placeholder="VD: Khu Thảo Điền, KDC Him Lam Q7, v.v..."
                     className="w-full px-3 py-2 bg-white dark:bg-zinc-800 rounded-xl text-xs border border-emerald-500 text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-emerald-500"
                   />
-                  <span className="text-[10px] text-zinc-400 block">
-                    Khu vực bạn nhập sẽ tự động xuất hiện trên bộ lọc của toàn đội sale.
-                  </span>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -422,7 +543,7 @@ export function CreateRoomModal({
                         <button
                           key={d}
                           type="button"
-                          onClick={() => setDistrict(d)}
+                          onClick={() => handleSelectDistrict(d)}
                           className={`px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 ${
                             isSelected
                               ? "bg-emerald-600 text-white font-bold shadow-sm shadow-emerald-600/20"
@@ -441,7 +562,7 @@ export function CreateRoomModal({
                     <span className="text-[11px] text-zinc-400 shrink-0">Hoặc chọn quận khác:</span>
                     <select
                       value={district}
-                      onChange={(e) => setDistrict(e.target.value)}
+                      onChange={(e) => handleSelectDistrict(e.target.value)}
                       className="flex-1 px-2.5 py-1 bg-white dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 cursor-pointer"
                     >
                       {ALL_HCM_DISTRICTS.map((d) => (
@@ -451,6 +572,88 @@ export function CreateRoomModal({
                       ))}
                     </select>
                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* PHẦN 3.2: CHỌN PHƯỜNG / XÃ (TỰ ĐỘNG ĐỔ THEO QUẬN ĐÃ CHỌN) */}
+            <div className="p-3.5 rounded-2xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/40 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                  <Compass className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>Phường / Xã thuộc {selectedFinalDistrict} *:</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-extrabold ml-1">
+                    {selectedFinalWard || "Chưa chọn"}
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsCustomWard(!isCustomWard)}
+                  className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold hover:underline cursor-pointer"
+                >
+                  {isCustomWard ? "← Chọn từ danh sách phường" : "+ Tự nhập phường khác"}
+                </button>
+              </div>
+
+              {isCustomWard ? (
+                <div className="space-y-1">
+                  <input
+                    type="text"
+                    value={customWard}
+                    onChange={(e) => setCustomWard(e.target.value)}
+                    placeholder="VD: Phường Tân Hưng, Phường Bến Nghé, Xã Phước Kiển..."
+                    className="w-full px-3 py-2 bg-white dark:bg-zinc-800 rounded-xl text-xs border border-emerald-500 text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+              ) : availableWardsForCurrentDistrict.length > 0 ? (
+                <div className="space-y-2">
+                  {/* Option Pills: Các Phường thuộc Quận đã chọn */}
+                  <div className="flex flex-wrap items-center gap-1.5 max-h-36 overflow-y-auto pr-1">
+                    {availableWardsForCurrentDistrict.map((w) => {
+                      const isSelected = ward === w;
+                      return (
+                        <button
+                          key={w}
+                          type="button"
+                          onClick={() => setWard(w)}
+                          className={`px-2.5 py-1 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                            isSelected
+                              ? "bg-emerald-700 text-white font-bold shadow-sm shadow-emerald-700/20"
+                              : "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-emerald-100/50 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"
+                          }`}
+                        >
+                          {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          <span>{w}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Dropdown Phường phòng khi danh sách dài */}
+                  <div className="flex items-center gap-2 pt-1 border-t border-emerald-200/40 dark:border-emerald-800/30">
+                    <span className="text-[11px] text-zinc-500 shrink-0">Hoặc chọn từ menu:</span>
+                    <select
+                      value={ward}
+                      onChange={(e) => setWard(e.target.value)}
+                      className="flex-1 px-2.5 py-1 bg-white dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                    >
+                      {availableWardsForCurrentDistrict.map((w) => (
+                        <option key={w} value={w}>
+                          {w}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <input
+                    type="text"
+                    value={ward}
+                    onChange={(e) => setWard(e.target.value)}
+                    placeholder="Nhập tên Phường / Xã..."
+                    className="w-full px-3 py-2 bg-white dark:bg-zinc-800 rounded-xl text-xs border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                  />
                 </div>
               )}
             </div>
@@ -513,14 +716,14 @@ export function CreateRoomModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
-                  Địa chỉ số nhà & đường *
+                  Địa chỉ số nhà & tên đường *
                 </label>
                 <input
                   type="text"
                   required
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="VD: 42 Đường số 9, P. Tân Hưng"
+                  placeholder="VD: Số 42 Đường số 9"
                   className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
                 />
               </div>

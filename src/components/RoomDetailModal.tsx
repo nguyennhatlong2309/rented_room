@@ -89,7 +89,7 @@ export function RoomDetailModal({
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                {room.address}, {room.district} (Tầng {room.floor})
+                {room.address}, {room.ward ? room.ward + ", " : ""}{room.district} (Tầng {room.floor})
               </p>
             </div>
           </div>

@@ -105,7 +105,7 @@ export function RoomCard({
             </h3>
             <p className="text-xs text-zinc-200 flex items-center gap-1 drop-shadow-sm truncate">
               <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              {room.address}, {room.district}
+              {room.address}, {room.ward ? room.ward + ", " : ""}{room.district}
             </p>
           </div>
         </div>

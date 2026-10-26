@@ -77,7 +77,7 @@ export function generateClientShareMessage(room: Room, saleInfo?: { name: string
     : statusLabel;
 
   return `🏠 [CĂN HỘ / PHÒNG CHO THUÊ TIỆN NGHI]
-📍 Địa chỉ: ${room.address}, ${room.district}
+📍 Địa chỉ: ${room.address}, ${room.ward ? room.ward + ', ' : ''}${room.district}
 🏢 Toà nhà: ${room.buildingName} - Mã phòng: ${room.roomCode} (Tầng ${room.floor})
 📐 Diện tích: ${room.area}m² - Loại phòng: ${ROOM_TYPE_MAP[room.type]}
 
