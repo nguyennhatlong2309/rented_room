@@ -103,3 +103,24 @@
   - Tích hợp **Dropdown mở rộng đầy đủ 22 Quận / Huyện** của TP.HCM (Quận 1 đến 12, Bình Tân, Tân Phú, Huyện Nhà Bè, Bình Chánh, Hóc Môn, Củ Chi, Cần Giờ).
   - Tích hợp nút **"+ Nhập quận / khu vực khác"**: Cho phép sale tự nhập địa bàn đặc thù (VD: *Thảo Điền*, *Khu Him Lam Q7*, *Khu chế xuất Tân Thuận*). Khi đăng, khu vực tự nhập này sẽ tự động xuất hiện trên bộ lọc FilterBar của toàn đội sale.
 - Đã kiểm thử `npm run build` thành công trong 2.6s và đồng bộ lên GitHub branch `main`.
+
+
+---
+## [Cập Nhật Tính Năng Chọn Phường / Xã Tự Động Theo Quận Khi Upload]
+**Thời gian:** 2026-10-26 18:55:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Trong modal Upload / Đăng Quỹ Phòng Mới, bổ sung tùy chọn **chọn Phường / Xã** tự động phụ thuộc theo Quận đã chọn tại TP.HCM.
+
+### 2. Chi tiết thực hiện
+- **`src/lib/types.ts`**: Bổ sung trường `ward?: string` vào interface `Room`.
+- **`src/components/CreateRoomModal.tsx`**:
+  - Tích hợp từ điển danh sách đầy đủ toàn bộ Phường / Xã cho 22 quận/huyện TP.HCM (`HCM_WARDS_BY_DISTRICT`).
+  - Khi sale chọn bất kỳ Quận nào (ví dụ: Quận 7, Bình Thạnh, Quận 1...), hệ thống **tự động đổi danh sách Phường tương ứng** của quận đó ngay lập tức.
+  - Hỗ trợ **Option Pills Phường 1-chạm** (click chọn nhanh phường bằng nút bấm trực quan có tick xanh `✓`), kèm dropdown menu và nút `+ Tự nhập phường khác`.
+- **`src/components/RoomCard.tsx` & `RoomDetailModal.tsx` & `src/lib/utils.ts`**:
+  - Hiển thị đầy đủ địa chỉ kèm Phường và Quận (VD: *Số 42 Đường số 9, Phường Tân Hưng, Quận 7*).
+  - Tự động cập nhật vào mẫu tin nhắn Zalo 1-Click gửi khách.
+- **`src/app/page.tsx`**:
+  - Hỗ trợ tìm kiếm nhanh theo tên Phường (gõ "Tân Hưng", "Đa Kao", "Võ Thị Sáu" là tìm ra ngay).
+- Toàn bộ thay đổi đã được kiểm thử biên dịch và đồng bộ lên GitHub branch `main`.
