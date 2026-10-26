@@ -124,3 +124,20 @@
 - **`src/app/page.tsx`**:
   - Hỗ trợ tìm kiếm nhanh theo tên Phường (gõ "Tân Hưng", "Đa Kao", "Võ Thị Sáu" là tìm ra ngay).
 - Toàn bộ thay đổi đã được kiểm thử biên dịch và đồng bộ lên GitHub branch `main`.
+
+
+---
+## [Tối Giản Giao Diện Upload: Dùng Menu Dropdown Cho Quận & Phường]
+**Thời gian:** 2026-10-26 19:08:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Lược bỏ toàn bộ các nút bấm Option pills (các badge chip) của Quận và Phường trong modal Upload để giao diện gọn gàng, sạch sẽ, chỉ sử dụng menu dropdown (`<select>`) có sẵn.
+
+### 2. Chi tiết thực hiện
+- **`src/components/CreateRoomModal.tsx`**:
+  - Gỡ bỏ khối danh sách các nút bấm pill rườm rà của Quận và Phường.
+  - Tối ưu lại thành **bố cục 2 cột gọn gàng**:
+    - **Cột 1**: Menu dropdown chọn Quận / Huyện (Quận 1 đến 12, Bình Thạnh, Phú Nhuận, Tân Bình, Gò Vấp, Thủ Đức, Nhà Bè, Bình Chánh...).
+    - **Cột 2**: Menu dropdown chọn Phường / Xã (tự động cập nhật danh sách các phường tương ứng theo quận đã chọn).
+  - Vẫn giữ nút tiện ích `+ Nhập khác` nếu sale muốn tự nhập địa bàn đặc thù.
+- Đã kiểm tra biên dịch thành công 100% trong 0.89s và push lên GitHub branch `main`.
