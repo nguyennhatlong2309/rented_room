@@ -55,98 +55,197 @@ const ALL_HCM_DISTRICTS = [
 ];
 
 export const HCM_WARDS_BY_DISTRICT: Record<string, string[]> = {
+  "Tân Bình": [
+    "Phường Tân Sơn Nhất",
+    "Phường Tân Sơn Hòa",
+    "Phường Tân Hòa",
+    "Phường Bảy Hiền",
+    "Phường Tân Bình",
+    "Phường Tân Sơn",
+    "Phường 2 (cũ)",
+    "Phường 4 (cũ)",
+    "Phường 12 (cũ)",
+    "Phường 13 (cũ)",
+    "Phường 15 (cũ)",
+  ],
   "Quận 1": [
-    "Phường Bến Nghé",
+    "Phường Sài Gòn",
     "Phường Bến Thành",
-    "Phường Đa Kao",
     "Phường Tân Định",
-    "Phường Phạm Ngũ Lão",
     "Phường Cầu Ông Lãnh",
-    "Phường Nguyễn Thái Bình",
-    "Phường Cô Giang",
-    "Phường Cầu Kho",
-    "Phường Nguyễn Cư Trinh",
+    "Phường Bến Nghé (cũ)",
+    "Phường Đa Kao (cũ)",
+    "Phường Phạm Ngũ Lão (cũ)",
+    "Phường Nguyễn Thái Bình (cũ)",
   ],
   "Quận 3": [
-    "Phường Võ Thị Sáu",
-    "Phường 1",
-    "Phường 2",
-    "Phường 3",
-    "Phường 4",
-    "Phường 5",
-    "Phường 9",
-    "Phường 11",
-    "Phường 12",
-    "Phường 14",
+    "Phường Xuân Hòa",
+    "Phường Bàn Cờ",
+    "Phường Nhiêu Lộc",
+    "Phường Võ Thị Sáu (cũ)",
+    "Phường 1 (cũ)",
+    "Phường 3 (cũ)",
+    "Phường 14 (cũ)",
   ],
   "Quận 4": [
-    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 6", "Phường 8", "Phường 9", "Phường 10", "Phường 13", "Phường 14", "Phường 15", "Phường 16", "Phường 18"
+    "Phường Xóm Chiếu",
+    "Phường Khánh Hội",
+    "Phường Vĩnh Hội",
+    "Phường 1 (cũ)",
+    "Phường 4 (cũ)",
+    "Phường 9 (cũ)",
   ],
   "Quận 5": [
-    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14"
+    "Phường Chợ Quán",
+    "Phường An Đông",
+    "Phường Chợ Lớn",
+    "Phường 1 (cũ)",
+    "Phường 5 (cũ)",
+    "Phường 11 (cũ)",
   ],
   "Quận 6": [
-    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14"
+    "Phường Bình Tây",
+    "Phường Bình Tiên",
+    "Phường Bình Phú",
+    "Phường Phú Lâm",
   ],
   "Quận 7": [
     "Phường Tân Hưng",
     "Phường Tân Phong",
     "Phường Tân Quy",
     "Phường Tân Kiểng",
+    "Phường Tân Thuận",
+    "Phường Phú Thuận",
+    "Phường Tân Mỹ",
     "Phường Tân Phú",
     "Phường Phú Mỹ",
     "Phường Bình Thuận",
-    "Phường Tân Thuận Đông",
-    "Phường Tân Thuận Tây",
-    "Phường Phú Thuận",
   ],
   "Quận 8": [
-    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 16"
+    "Phường Chánh Hưng",
+    "Phường Phú Định",
+    "Phường Bình Đông",
+    "Phường Rạch Ông",
+    "Phường Hưng Phú",
   ],
   "Quận 10": [
-    "Phường 1", "Phường 2", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15"
+    "Phường Diên Hồng",
+    "Phường Vườn Lài",
+    "Phường Hòa Hưng",
+    "Phường 12 (cũ)",
+    "Phường 14 (cũ)",
+    "Phường 15 (cũ)",
   ],
   "Quận 11": [
-    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 16"
+    "Phường Minh Phụng",
+    "Phường Bình Thới",
+    "Phường Hòa Bình",
+    "Phường Phú Thọ",
   ],
   "Quận 12": [
-    "Phường Thạnh Xuân", "Phường Thạnh Lộc", "Phường Hiệp Thành", "Phường Thới An", "Phường Tân Chánh Hiệp", "Phường An Phú Đông", "Phường Tân Thới Hiệp", "Phường Trung Mỹ Tây", "Phường Tân Hưng Thuận", "Phường Đông Hưng Thuận", "Phường Tân Thới Nhất"
+    "Phường Đông Hưng Thuận",
+    "Phường Trung Mỹ Tây",
+    "Phường Tân Thới Hiệp",
+    "Phường Thới An",
+    "Phường An Phú Đông",
+    "Phường Thạnh Xuân",
+    "Phường Thạnh Lộc",
+    "Phường Hiệp Thành",
   ],
   "Bình Thạnh": [
-    "Phường 1", "Phường 2", "Phường 3", "Phường 5", "Phường 6", "Phường 7", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 17", "Phường 19", "Phường 21", "Phường 22", "Phường 24", "Phường 25", "Phường 26", "Phường 27", "Phường 28"
+    "Phường Gia Định",
+    "Phường Bình Thạnh",
+    "Phường Bình Lợi Trung",
+    "Phường Thạnh Mỹ Tây",
+    "Phường Bình Quới",
+    "Phường 24 (cũ)",
+    "Phường 25 (cũ)",
+    "Phường 26 (cũ)",
+    "Phường 19 (cũ)",
+    "Phường 2 (cũ)",
   ],
   "Phú Nhuận": [
-    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 13", "Phường 15", "Phường 17"
-  ],
-  "Tân Bình": [
-    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15"
+    "Phường Đức Nhuận",
+    "Phường Cầu Kiệu",
+    "Phường Phú Nhuận",
+    "Phường 2 (cũ)",
+    "Phường 7 (cũ)",
+    "Phường 15 (cũ)",
   ],
   "Tân Phú": [
-    "Phường Hiệp Tân", "Phường Hòa Thạnh", "Phường Phú Thạnh", "Phường Phú Thọ Hòa", "Phường Phú Trung", "Phường Sơn Kỳ", "Phường Tân Quý", "Phường Tân Sơn Nhì", "Phường Tân Thành", "Phường Tân Thới Hòa", "Phường Tây Thạnh"
+    "Phường Tây Thạnh",
+    "Phường Tân Sơn Nhì",
+    "Phường Phú Thọ Hòa",
+    "Phường Tân Quý",
+    "Phường Tân Thành",
+    "Phường Hòa Thạnh",
+    "Phường Phú Trung",
   ],
   "Gò Vấp": [
-    "Phường 1", "Phường 3", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 16", "Phường 17"
+    "Phường Hạnh Thông",
+    "Phường An Nhơn",
+    "Phường Gò Vấp",
+    "Phường An Hội Đông",
+    "Phường Thông Tây Hội",
+    "Phường An Hội Tây",
   ],
   "Bình Tân": [
-    "Phường An Lạc", "Phường An Lạc A", "Phường Bình Hưng Hòa", "Phường Bình Hưng Hòa A", "Phường Bình Hưng Hòa B", "Phường Bình Trị Đông", "Phường Bình Trị Đông A", "Phường Bình Trị Đông B", "Phường Tân Tạo", "Phường Tân Tạo A"
+    "Phường An Lạc",
+    "Phường Bình Tân",
+    "Phường Tân Tạo",
+    "Phường Bình Trị Đông",
+    "Phường Bình Hưng Hòa",
   ],
   "TP. Thủ Đức": [
-    "Phường Thảo Điền", "Phường An Phú", "Phường An Khánh", "Phường Thủ Thiêm", "Phường Hiệp Bình Chánh", "Phường Hiệp Bình Phước", "Phường Linh Tây", "Phường Linh Trung", "Phường Linh Chiểu", "Phường Linh Đông", "Phường Tam Bình", "Phường Tam Phú", "Phường Bình Chiểu", "Phường Tăng Nhơn Phú A", "Phường Tăng Nhơn Phú B", "Phường Phước Long A", "Phường Phước Long B", "Phường Trường Thạnh", "Phường Long Trường", "Phường Long Phước"
+    "Phường Thảo Điền",
+    "Phường An Phú",
+    "Phường Thủ Thiêm",
+    "Phường An Khánh",
+    "Phường Hiệp Bình Chánh",
+    "Phường Hiệp Bình Phước",
+    "Phường Linh Trung",
+    "Phường Linh Chiểu",
+    "Phường Linh Tây",
+    "Phường Phước Long A",
+    "Phường Phước Long B",
+    "Phường Tăng Nhơn Phú A",
+    "Phường Tăng Nhơn Phú B",
   ],
   "Huyện Nhà Bè": [
-    "Thị trấn Nhà Bè", "Xã Phước Kiển", "Xã Phước Lộc", "Xã Nhơn Đức", "Xã Phú Xuân", "Xã Long Thới", "Xã Hiệp Phước"
+    "Thị trấn Nhà Bè",
+    "Xã Phước Kiển",
+    "Xã Phước Lộc",
+    "Xã Nhơn Đức",
+    "Xã Phú Xuân",
+    "Xã Long Thới",
+    "Xã Hiệp Phước",
   ],
   "Huyện Bình Chánh": [
-    "Thị trấn Tân Túc", "Xã Bình Hưng", "Xã Phong Phú", "Xã An Phú Tây", "Xã Đa Phước", "Xã Vĩnh Lộc A", "Xã Vĩnh Lộc B"
+    "Thị trấn Tân Túc",
+    "Xã Bình Hưng",
+    "Xã Phong Phú",
+    "Xã An Phú Tây",
+    "Xã Đa Phước",
+    "Xã Vĩnh Lộc A",
+    "Xã Vĩnh Lộc B",
   ],
   "Huyện Hóc Môn": [
-    "Thị trấn Hóc Môn", "Xã Bà Điểm", "Xã Tân Xuân", "Xã Trung Chánh", "Xã Xuân Thới Đông", "Xã Thới Tam Thôn"
+    "Thị trấn Hóc Môn",
+    "Xã Bà Điểm",
+    "Xã Tân Xuân",
+    "Xã Trung Chánh",
+    "Xã Xuân Thới Đông",
   ],
   "Huyện Củ Chi": [
-    "Thị trấn Củ Chi", "Xã Tân An Hội", "Xã Phước Vĩnh An", "Xã Tân Thạnh Đông", "Xã Bình Mỹ"
+    "Thị trấn Củ Chi",
+    "Xã Tân An Hội",
+    "Xã Phước Vĩnh An",
+    "Xã Tân Thạnh Đông",
   ],
   "Huyện Cần Giờ": [
-    "Thị trấn Cần Thạnh", "Xã Long Hòa", "Xã Bình Khánh", "Xã Tam Thôn Hiệp"
+    "Thị trấn Cần Thạnh",
+    "Xã Long Hòa",
+    "Xã Bình Khánh",
   ],
 };
 
