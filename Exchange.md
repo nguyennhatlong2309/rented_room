@@ -141,3 +141,22 @@
     - **Cột 2**: Menu dropdown chọn Phường / Xã (tự động cập nhật danh sách các phường tương ứng theo quận đã chọn).
   - Vẫn giữ nút tiện ích `+ Nhập khác` nếu sale muốn tự nhập địa bàn đặc thù.
 - Đã kiểm tra biên dịch thành công 100% trong 0.89s và push lên GitHub branch `main`.
+
+
+---
+## [Cập Nhật Danh Sách Phường Theo Nghị Quyết Sắp Xếp Hành Chính Mới Nhất TP.HCM]
+**Thời gian:** 2026-10-26 19:12:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Kiểm tra danh sách phường theo quy hoạch hành chính mới nhất của TP.HCM (đặc biệt là Quận Tân Bình có **Phường Tân Sơn Nhất**).
+
+### 2. Chi tiết thực hiện
+- Cập nhật chuẩn hóa toàn bộ danh mục phường theo **Nghị quyết sắp xếp đơn vị hành chính mới nhất của TP.HCM**:
+  - **Quận Tân Bình**: Bổ sung đầy đủ 6 phường mới gồm **Phường Tân Sơn Nhất** (hợp nhất từ P.4, P.5, P.7), **Phường Tân Sơn Hòa** (P.1, 2, 3), **Phường Tân Hòa** (P.6, 8, 9), **Phường Bảy Hiền** (P.10, 11, 12), **Phường Tân Bình**, **Phường Tân Sơn** (kèm các số phường cũ đối chiếu).
+  - **Quận 1**: Phường Sài Gòn, Phường Bến Thành, Phường Tân Định, Phường Cầu Ông Lãnh...
+  - **Quận 3**: Phường Xuân Hòa, Phường Bàn Cờ, Phường Nhiêu Lộc...
+  - **Bình Thạnh**: Phường Gia Định, Phường Bình Thạnh, Phường Bình Lợi Trung, Phường Thạnh Mỹ Tây, Phường Bình Quới...
+  - **Phú Nhuận**: Phường Đức Nhuận, Phường Cầu Kiệu, Phường Phú Nhuận...
+  - **Quận 10**: Phường Diên Hồng, Phường Vườn Lài, Phường Hòa Hưng...
+  - Và các phường/xã chuẩn hóa khác của toàn bộ các quận huyện TP.HCM.
+- Đã kiểm tra biên dịch thành công và đồng bộ lên GitHub branch `main`.
