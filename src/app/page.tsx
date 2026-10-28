@@ -302,39 +302,40 @@ export default function SalesRentedRoomPage() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner Hero - Real Estate Luxury Standard */}
-        <div className="relative overflow-hidden rounded-3xl bg-zinc-950 text-white p-7 sm:p-10 shadow-2xl border border-amber-500/20 min-h-[270px] flex items-center">
-          {/* Background image on the right with smooth gradient blend */}
-          <div className="absolute right-0 top-0 bottom-0 w-full sm:w-3/5 lg:w-1/2 overflow-hidden pointer-events-none">
+        {/* Banner Hero - Luxury Real Estate Full-Image Showcase */}
+        <div className="relative overflow-hidden rounded-3xl min-h-[300px] sm:min-h-[340px] flex items-center p-5 sm:p-9 shadow-xl border border-zinc-200/80 dark:border-zinc-800">
+          {/* Full-bleed high-res background image */}
+          <div className="absolute inset-0 z-0">
             <img
               src={bannerTheme === "penthouse" ? "/banner-hero.jpg" : "/banner-saigon.jpg"}
               alt="Luxury Real Estate TP.HCM"
-              className="w-full h-full object-cover object-center opacity-65 sm:opacity-85 transform scale-105 transition-all duration-700 ease-out"
+              className="w-full h-full object-cover object-center transition-all duration-700 ease-out"
             />
-            {/* Smooth gradient blend from left obsidian to transparent */}
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/75 sm:via-zinc-950/50 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-zinc-950/40" />
+            {/* Subtle natural vignette - only slight darkening for text readability, avoiding heavy solid black */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
           </div>
 
-          <div className="relative z-10 max-w-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-widest bg-amber-500/15 text-amber-300 border border-amber-500/30 font-sans backdrop-blur-md">
+          {/* Elegant Frosted Glass Content Box on the left */}
+          <div className="relative z-10 max-w-xl p-6 sm:p-8 rounded-3xl bg-zinc-950/65 dark:bg-black/70 backdrop-blur-md border border-white/20 text-white shadow-2xl space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40 font-sans">
               <MapPin className="w-3.5 h-3.5 text-amber-400" />
-              <span>Hệ Thống Quỹ Phòng Đội Sale • TP. Hồ Chí Minh</span>
+              <span>Hệ Thống Quỹ Phòng Đội Sale • TP.HCM</span>
             </div>
-            <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
+            <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
               Tra Cứu SĐT Chủ Hộ & Quỹ Phòng Tức Thì
             </h1>
-            <p className="text-zinc-300 text-sm sm:text-base leading-relaxed font-sans max-w-xl">
-              Hiển thị số điện thoại chủ nhà, pass cửa vân tay và hoa hồng sale. Nút bấm 1-chạm gọi trực tiếp cho chủ hộ hoặc tải ảnh và đăng quỹ phòng mới bất kỳ lúc nào.
+            <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed font-sans">
+              Số điện thoại chủ nhà, pass cửa vân tay và hoa hồng sale. Nút bấm 1-chạm gọi trực tiếp cho chủ hộ hoặc tải ảnh và đăng quỹ phòng mới bất kỳ lúc nào.
             </p>
           </div>
 
           {/* Quick theme switcher on banner */}
-          <div className="absolute bottom-3.5 right-3.5 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-[11px] text-zinc-300">
+          <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-[11px] text-zinc-200 shadow-lg">
             <ImageIcon className="w-3.5 h-3.5 text-amber-400 mr-0.5" />
             <button
               onClick={() => setBannerTheme("penthouse")}
-              className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
+              className={`px-2.5 py-0.5 rounded-lg transition-all cursor-pointer ${
                 bannerTheme === "penthouse"
                   ? "bg-amber-500 text-zinc-950 font-bold shadow-xs"
                   : "hover:text-white"
@@ -342,10 +343,10 @@ export default function SalesRentedRoomPage() {
             >
               Penthouse
             </button>
-            <span className="text-zinc-600">|</span>
+            <span className="text-zinc-500">|</span>
             <button
               onClick={() => setBannerTheme("saigon")}
-              className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
+              className={`px-2.5 py-0.5 rounded-lg transition-all cursor-pointer ${
                 bannerTheme === "saigon"
                   ? "bg-amber-500 text-zinc-950 font-bold shadow-xs"
                   : "hover:text-white"

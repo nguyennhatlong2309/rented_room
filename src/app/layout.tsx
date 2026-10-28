@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cinzel, Josefin_Sans } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/Toast";
+import { Agentation } from "agentation";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -33,7 +34,10 @@ export default function RootLayout({
       className={`${cinzel.variable} ${josefin.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#FBFBFA] dark:bg-[#0B0F17] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500 selection:text-white">
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          {children}
+          <Agentation />
+        </ToastProvider>
       </body>
     </html>
   );

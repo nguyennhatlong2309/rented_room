@@ -214,3 +214,29 @@
   - Tái cấu trúc Banner Hero theo bố cục bất đối xứng cao cấp: phần chữ ở bên trái sắc nét trên nền tối Obsidian, hình ảnh căn hộ cao cấp chiếm 50-60% bên phải với hiệu ứng gradient hòa tan mượt mà (`bg-gradient-to-r from-zinc-950 via-zinc-950/75 to-transparent`).
   - Tích hợp cụm nút chuyển đổi nhanh **[Penthouse / Sài Gòn Đêm]** ngay trên góc phải banner để người dùng có thể linh hoạt chuyển đổi phong cách yêu thích.
 - Đã kiểm tra biên dịch `npm run build` thành công trong 0.95s và đồng bộ lên GitHub branch `main`.
+
+---
+## [Thu Nhỏ Vùng Nền Đen Banner & Tích Hợp Thư Viện Agentation Visual Feedback]
+**Thời gian:** 2026-10-28 14:04:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Thu gọn diện tích nền đen ở Banner Hero (trước đó nền đen đặc chiếm diện tích quá lớn khiến giao diện cảm giác tối).
+- Tích hợp thư viện **Agentation** trực tiếp vào dự án để hỗ trợ chấm điểm/chú thích trực quan (visual feedback & annotation).
+
+### 2. Chi tiết thực hiện
+
+1. **Thu nhỏ vùng nền đen & Mở rộng hình ảnh căn hộ cao cấp:**
+   - **`src/app/page.tsx`**:
+     - Cho hình ảnh bất động sản (Penthouse / Skyline) tràn viền toàn bộ Banner Card (`absolute inset-0`).
+     - Thu gọn vùng chữ vào một khung kính mờ Frosted Glass nổi thanh lịch ở góc trái (`max-w-xl bg-zinc-950/65 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/20`).
+     - Giảm cường độ lớp phủ đen (chỉ giữ một lớp vignette tự nhiên mỏng nhẹ để chữ đọc rõ, không còn mảng đen khối nặng nề).
+     - Hình ảnh nội thất và phong cảnh Sài Gòn sáng rõ, chiếm trọn 100% chiều rộng banner.
+
+2. **Cài đặt & Tích hợp Thư viện Agentation:**
+   - Cài đặt gói `agentation` (`v3.1.2`) vào `devDependencies`.
+   - **`src/app/layout.tsx`**: Import và chèn component `<Agentation />` vào layout gốc của ứng dụng.
+   - Khi chạy ứng dụng trên trình duyệt, thanh công cụ Agentation sẽ hiển thị ở góc dưới màn hình: người dùng có thể nhấp chuột vào bất kỳ phần tử nào để ghi chú, vẽ vùng chọn (bounding box) và bấm sao chép thông tin phản hồi có cấu trúc cho AI.
+
+### 3. Kết Quả Kiểm Tra
+- Đã chạy `npm run build` hoàn thành trong **0.80s** với Turbopack.
+- Đảm bảo 0 lỗi TypeScript, 0 lỗi render, push mã nguồn thành công lên GitHub `main`.
