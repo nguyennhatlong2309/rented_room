@@ -7,6 +7,7 @@ import { Room } from "@/lib/types";
 import { INITIAL_ROOMS } from "@/data/initialRooms";
 import {
   formatVND,
+  formatPriceNumber,
   ROOM_STATUS_MAP,
   ROOM_TYPE_MAP,
   generateClientShareMessage,
@@ -562,9 +563,10 @@ function RoomDetailContent() {
                 <span className="text-xs text-zinc-500 uppercase tracking-wider block">Giá thuê niêm yết</span>
                 <div className="flex items-baseline gap-1 mt-1">
                   <span className="font-serif text-3xl sm:text-4xl font-bold text-zinc-950 dark:text-white tracking-tight">
-                    {formatVND(currentRoom.price)}
+                    {formatPriceNumber(currentRoom.price)}
                   </span>
-                  <span className="text-xs text-zinc-500">/tháng</span>
+                  <span className="font-sans text-lg font-bold text-zinc-800 dark:text-zinc-200">đ</span>
+                  <span className="text-xs text-zinc-500 font-sans">/tháng</span>
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
                   Tiền cọc: <strong className="text-zinc-800 dark:text-zinc-200">{formatVND(currentRoom.deposit)}</strong>

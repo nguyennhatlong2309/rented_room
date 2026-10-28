@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Room } from "@/lib/types";
 import {
   formatVND,
+  formatPriceNumber,
   ROOM_STATUS_MAP,
   ROOM_TYPE_MAP,
   generateClientShareMessage,
@@ -114,10 +115,11 @@ export function RoomCard({
         <div className="p-4 space-y-3.5">
           {/* Price & Commission Block (Sắp xếp theo hướng dọc) */}
           <div className="flex flex-col gap-2 border-b border-zinc-200/60 dark:border-zinc-800/60 pb-3">
-            <div>
+            <div className="flex items-baseline gap-1">
               <span className="font-serif text-2xl font-bold text-zinc-950 dark:text-zinc-50 tracking-tight">
-                {formatVND(room.price)}
+                {formatPriceNumber(room.price)}
               </span>
+              <span className="font-sans text-sm font-semibold text-zinc-700 dark:text-zinc-300">đ</span>
               <span className="text-xs text-zinc-500 font-sans ml-1">/tháng</span>
             </div>
 

@@ -536,3 +536,28 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` thành công trong **1.13s** với Turbopack (0 lỗi TypeScript).
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Khắc Phục Lỗi Hiển Thị Dấu Gạch Ngang Ký Tự 'đ' Trên Font Cinzel]
+**Thời gian:** 2026-10-29 00:14:00
+
+### 1. Nguyên nhân gốc rễ (Root Cause)
+- Kiểu font serif **Cinzel** là kiểu chữ Latinh hoa cổ điển (Roman inscriptional capitals). Trong bảng mã của Cinzel, ký tự chữ `Đ` (U+0110) được thiết kế theo dạng chữ số La Mã với thanh gạch ngang nằm lơ lửng trên đỉnh đầu (`D̄` - biểu thị giá trị 500.000 trong số La Mã).
+- Khi hiển thị giá tiền bằng hàm `formatVND` (trả về chuỗi gồm số và chữ `đ`), toàn bộ chuỗi nằm bên trong thẻ có class `font-serif`, dẫn đến ký tự `đ` bị font Cinzel biến thành `D̄` với thanh ngang trên đỉnh đầu thay vì thanh gạch xuyên qua thân chữ.
+
+### 2. Chi tiết thực hiện
+
+1. **Bổ sung hàm `formatPriceNumber` tại `src/lib/utils.ts`:**
+   - Tách riêng phần định dạng số (`toLocaleString('vi-VN')`) và đơn vị tiền tệ (`đ`).
+
+2. **Tách biệt Typography cho Số và Ký tự đơn vị tiền tệ:**
+   - **`src/app/rooms/[id]/page.tsx`**:
+     - Phần số tiền (ví dụ: `7.500.000`): Giữ nguyên font `Cinzel` (`font-serif`) sang trọng, uy quyền.
+     - Ký tự `đ`: Đặt trong thẻ `<span className="font-sans">` sử dụng font hình học hiện đại `Josefin Sans`. Ký tự `đ` hiển thị chuẩn xác 100% với nét gạch ngang nằm ngay ngắn ở giữa thân chữ.
+   - **`src/components/RoomCard.tsx`**: Áp dụng cùng cấu trúc tách số `font-serif` và đơn vị `font-sans`.
+   - **`src/components/RoomDetailModal.tsx`**: Áp dụng cùng cấu trúc tách số `font-serif` và đơn vị `font-sans`.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` thành công trong **1.12s** với Turbopack (0 lỗi TypeScript).
+- Chữ `đ` hiển thị chuẩn tiếng Việt, thanh thoát, không còn bị biến dạng thành `D̄`.
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.

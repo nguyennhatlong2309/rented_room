@@ -14,6 +14,10 @@ export function formatCurrency(amount: number): string {
   return `${amount.toLocaleString("vi-VN")} đ/tháng`;
 }
 
+export function formatPriceNumber(amount: number): string {
+  return amount.toLocaleString("vi-VN");
+}
+
 export function formatVND(amount: number): string {
   return `${amount.toLocaleString("vi-VN")} đ`;
 }
