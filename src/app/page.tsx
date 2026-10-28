@@ -12,7 +12,7 @@ import { RoomDetailModal } from "@/components/RoomDetailModal";
 import { HoldRoomModal } from "@/components/HoldRoomModal";
 import { CreateRoomModal } from "@/components/CreateRoomModal";
 import { useToast } from "@/components/Toast";
-import { Sparkles, RefreshCw, AlertCircle, MapPin, Upload } from "lucide-react";
+import { Sparkles, RefreshCw, AlertCircle, MapPin, Upload, Image as ImageIcon } from "lucide-react";
 
 export default function SalesRentedRoomPage() {
   const { showToast } = useToast();
@@ -42,6 +42,9 @@ export default function SalesRentedRoomPage() {
     }
     return { name: "Minh Tuấn (Sale)", phone: "0988.123.456" };
   });
+
+  // Banner image theme state
+  const [bannerTheme, setBannerTheme] = useState<"penthouse" | "saigon">("penthouse");
 
   const handleUpdateSaleUser = (user: { name: string; phone: string }) => {
     setSaleUser(user);
@@ -300,20 +303,57 @@ export default function SalesRentedRoomPage() {
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Banner Hero - Real Estate Luxury Standard */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-950 via-zinc-900 to-amber-950/40 text-white p-7 sm:p-10 shadow-xl border border-amber-500/20">
-          <div className="relative z-10 max-w-3xl space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-widest bg-amber-500/15 text-amber-300 border border-amber-500/30 font-sans">
+        <div className="relative overflow-hidden rounded-3xl bg-zinc-950 text-white p-7 sm:p-10 shadow-2xl border border-amber-500/20 min-h-[270px] flex items-center">
+          {/* Background image on the right with smooth gradient blend */}
+          <div className="absolute right-0 top-0 bottom-0 w-full sm:w-3/5 lg:w-1/2 overflow-hidden pointer-events-none">
+            <img
+              src={bannerTheme === "penthouse" ? "/banner-hero.jpg" : "/banner-saigon.jpg"}
+              alt="Luxury Real Estate TP.HCM"
+              className="w-full h-full object-cover object-center opacity-65 sm:opacity-85 transform scale-105 transition-all duration-700 ease-out"
+            />
+            {/* Smooth gradient blend from left obsidian to transparent */}
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/75 sm:via-zinc-950/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-zinc-950/40" />
+          </div>
+
+          <div className="relative z-10 max-w-2xl space-y-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-widest bg-amber-500/15 text-amber-300 border border-amber-500/30 font-sans backdrop-blur-md">
               <MapPin className="w-3.5 h-3.5 text-amber-400" />
               <span>Hệ Thống Quỹ Phòng Đội Sale • TP. Hồ Chí Minh</span>
             </div>
             <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
               Tra Cứu SĐT Chủ Hộ & Quỹ Phòng Tức Thì
             </h1>
-            <p className="text-zinc-300 text-sm sm:text-base leading-relaxed font-sans max-w-2xl">
+            <p className="text-zinc-300 text-sm sm:text-base leading-relaxed font-sans max-w-xl">
               Hiển thị số điện thoại chủ nhà, pass cửa vân tay và hoa hồng sale. Nút bấm 1-chạm gọi trực tiếp cho chủ hộ hoặc tải ảnh và đăng quỹ phòng mới bất kỳ lúc nào.
             </p>
           </div>
-          <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-radial from-amber-500/15 via-transparent to-transparent pointer-events-none" />
+
+          {/* Quick theme switcher on banner */}
+          <div className="absolute bottom-3.5 right-3.5 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-[11px] text-zinc-300">
+            <ImageIcon className="w-3.5 h-3.5 text-amber-400 mr-0.5" />
+            <button
+              onClick={() => setBannerTheme("penthouse")}
+              className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
+                bannerTheme === "penthouse"
+                  ? "bg-amber-500 text-zinc-950 font-bold shadow-xs"
+                  : "hover:text-white"
+              }`}
+            >
+              Penthouse
+            </button>
+            <span className="text-zinc-600">|</span>
+            <button
+              onClick={() => setBannerTheme("saigon")}
+              className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
+                bannerTheme === "saigon"
+                  ? "bg-amber-500 text-zinc-950 font-bold shadow-xs"
+                  : "hover:text-white"
+              }`}
+            >
+              Sài Gòn Đêm
+            </button>
+          </div>
         </div>
 
         {/* Stats Overview */}

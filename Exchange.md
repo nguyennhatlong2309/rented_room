@@ -198,3 +198,19 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` hoàn thành trong **1.2s** với Next.js 16 (Turbopack).
 - Đảm bảo 0 lỗi TypeScript, 0 lỗi cú pháp CSS, sẵn sàng triển khai thực tế.
+
+---
+## [Cập Nhật Hình Ảnh Banner Hero Chuẩn Real Estate Luxury]
+**Thời gian:** 2026-10-28 13:51:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Bổ sung hình ảnh chất lượng cao cho Banner Hero của trang chủ (khắc phục khoảng trống gradient tối ở góc phải banner theo ảnh chụp màn hình thực tế).
+
+### 2. Chi tiết thực hiện
+- Tải về và tích hợp trực tiếp 2 ảnh bất động sản cao cấp định dạng chất lượng cao vào thư mục `public/`:
+  - **`public/banner-hero.jpg`**: Ảnh nội thất Penthouse sang trọng với tông gỗ và ánh sáng vàng hổ phách ấm áp, cửa kính lớn nhìn ra thành phố.
+  - **`public/banner-saigon.jpg`**: Toàn cảnh Skyline TP. Hồ Chí Minh lung linh về đêm với toà nhà Landmark 81 và ánh đèn sông Sài Gòn.
+- **`src/app/page.tsx`**:
+  - Tái cấu trúc Banner Hero theo bố cục bất đối xứng cao cấp: phần chữ ở bên trái sắc nét trên nền tối Obsidian, hình ảnh căn hộ cao cấp chiếm 50-60% bên phải với hiệu ứng gradient hòa tan mượt mà (`bg-gradient-to-r from-zinc-950 via-zinc-950/75 to-transparent`).
+  - Tích hợp cụm nút chuyển đổi nhanh **[Penthouse / Sài Gòn Đêm]** ngay trên góc phải banner để người dùng có thể linh hoạt chuyển đổi phong cách yêu thích.
+- Đã kiểm tra biên dịch `npm run build` thành công trong 0.95s và đồng bộ lên GitHub branch `main`.
