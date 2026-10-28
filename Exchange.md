@@ -447,3 +447,19 @@
 - Chạy `npm run build` hoàn thành xuất sắc trong **1.5s** với Turbopack (0 lỗi TypeScript).
 - Cả hai route `/` và `/rooms/[id]` đều hỗ trợ dynamic streaming với Partial Prerender.
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Cập Nhật Màu Xanh Lá Chuẩn Cuộc Gọi Cho Nút Gọi Chủ Hộ Trên RoomCard]
+**Thời gian:** 2026-10-28 16:07:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Phản hồi từ Agentation trên trang chủ `/`: Nút "Gọi Chủ Hộ" trên thẻ phòng `RoomCard` cần đổi sang màu xanh lá cây (màu cuộc gọi tiêu chuẩn) thay vì màu đen/xám trước đó để tăng tính nhận diện và trực quan cho sale.
+
+### 2. Chi tiết thực hiện
+- **`src/components/RoomCard.tsx`**:
+  - Chuyển class nút `Gọi Chủ Hộ` sang `bg-emerald-600 hover:bg-emerald-700 text-white font-bold`.
+  - Đồng bộ nhận diện nút gọi với trang chi tiết phòng và modal chi tiết.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` thành công trong **1.16s** với Turbopack (0 lỗi TypeScript).
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.

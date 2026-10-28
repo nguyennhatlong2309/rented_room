@@ -171,7 +171,7 @@ export function RoomCard({
               <div className="flex items-center gap-2 pt-0.5">
                 <a
                   href={`tel:${cleanLandlordPhone}`}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 rounded-xl text-[11px] font-semibold shadow-xs transition-colors cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold shadow-xs transition-colors cursor-pointer"
                 >
                   <Phone className="w-3 h-3" />
                   <span>Gọi Chủ Hộ</span>
