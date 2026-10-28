@@ -299,3 +299,41 @@
 ### 3. Kết Quả Kiểm Tra
 - Đã chạy `npm run build` hoàn thành trong **0.98s** với Turbopack (0 lỗi TypeScript).
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Chuyển Hướng Trang Chi Tiết Riêng /rooms/[id] & Đề Xuất Phòng Liên Quan]
+**Thời gian:** 2026-10-28 15:21:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Khi chọn xem 1 phòng, thay vì mở popup modal (RoomDetailModal), hãy chuyển hướng trang sang trang chi tiết phòng riêng biệt (`/rooms/[id]`).
+- Thiết kế phần **đề xuất các phòng liên quan** ở bên dưới trang chi tiết (cùng quận, sêm giá) để sale dễ dàng tư vấn thêm phương án cho khách.
+
+### 2. Chi tiết thực hiện
+
+1. **Khởi tạo trang chi tiết phòng chuyên dụng (`src/app/rooms/[id]/page.tsx`):**
+   - **Cấu trúc tuyến đường động (Dynamic Route)**: Nhận `id` phòng từ đường dẫn URL (`useParams`) và bọc bằng `Suspense` theo chuẩn Next.js 16 Partial Prerendering.
+   - **Thanh điều hướng Breadcrumb**: Cho phép 1 chạm quay trở lại trang chủ (`/`) kèm phân cấp khu vực trực quan (TP.HCM / Quận / Mã phòng).
+   - **Bộ sưu tập hình ảnh (Photo Gallery)**: Ảnh lớn độ phân giải cao tỉ lệ 16:9 kèm hàng thumbnails bên dưới để chuyển đổi góc chụp êm ái.
+   - **Quy mô, Tiện ích & Bảng phí dịch vụ**: Hiển thị rõ ràng diện tích, số người tối đa, ban công, pet, thang máy, điện, nước (theo người hoặc khối), gửi xe, wifi, và danh sách toàn bộ nội thất bàn giao.
+   - **Thanh Sidebar cố định (Sticky Sidebar)**:
+     - Giá niêm yết, tiền cọc, và **hoa hồng sale** nổi bật.
+     - Khối thông tin Chủ Hộ / Quản lý nội bộ: Số điện thoại, **nút Gọi Chủ Hộ** trực tiếp, **nút Nhắn tin Zalo**, pass cửa cổng / vân tay, và ghi chú dẫn khách.
+     - Nút **1-Click Copy Zalo Gửi Khách** và nút **Giữ chỗ dẫn khách xem phòng**.
+
+2. **Thuật toán Đề xuất Phòng Liên quan Thông minh (`relatedRooms`):**
+   - Lọc bỏ phòng hiện tại và chấm điểm độ tương quan:
+     - **Ưu tiên 1 (+100 điểm)**: Các phòng có cùng Quận tại TP.HCM.
+     - **Ưu tiên 2 (+20 điểm)**: Các phòng có cùng Kiểu phòng (Studio, 1PN, Duplex, v.v.).
+     - **Ưu tiên 3 (lên đến +50 điểm)**: Các phòng có giá thuê chênh lệch ít nhất (tầm giá sêm sêm nhau).
+   - Sắp xếp theo tổng điểm giảm dần và hiển thị 4 phòng đề xuất tối ưu nhất bằng thẻ `RoomCard` ở cuối trang.
+   - Khi sale bấm vào phòng đề xuất, trang tự động chuyển URL và cuộn mượt mà lên đầu (`window.scrollTo({ top: 0, behavior: 'smooth' })`).
+
+3. **Cập nhật Trang Chủ (`src/app/page.tsx`):**
+   - Tích hợp hook `useRouter` từ `next/navigation`.
+   - Cập nhật sự kiện click vào thẻ phòng `RoomCard` để gọi `router.push('/rooms/' + room.id)`, thay thế hoàn toàn popup modal trước đó.
+   - Dọn dẹp state và component modal không còn sử dụng để giao diện trang chủ gọn nhẹ, tăng tốc độ phản hồi.
+
+### 3. Kết Quả Kiểm Tra
+- Đã chạy `npm run build` hoàn thành trong **1.3s** với Turbopack.
+- Đảm bảo biên dịch thành công 100%, trang `/rooms/[id]` được tối ưu hóa Partial Prerendering (`◐ /rooms/[id]`).
+- Mã nguồn sẵn sàng triển khai thực tế.

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Room, FilterOptions } from "@/lib/types";
 import { INITIAL_ROOMS } from "@/data/initialRooms";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -8,13 +9,13 @@ import { Header } from "@/components/Header";
 import { StatsOverview } from "@/components/StatsOverview";
 import { FilterBar } from "@/components/FilterBar";
 import { RoomCard } from "@/components/RoomCard";
-import { RoomDetailModal } from "@/components/RoomDetailModal";
 import { HoldRoomModal } from "@/components/HoldRoomModal";
 import { CreateRoomModal } from "@/components/CreateRoomModal";
 import { useToast } from "@/components/Toast";
 import { Sparkles, RefreshCw, AlertCircle, MapPin, Upload, Image as ImageIcon } from "lucide-react";
 
 export default function SalesRentedRoomPage() {
+  const router = useRouter();
   const { showToast } = useToast();
 
   // 1. Rooms state (TP.HCM only)
@@ -220,7 +221,6 @@ export default function SalesRentedRoomPage() {
   }, [rooms, filters]);
 
   // 7. Modals state
-  const [selectedRoomForDetail, setSelectedRoomForDetail] = useState<Room | null>(null);
   const [selectedRoomForHold, setSelectedRoomForHold] = useState<Room | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -382,7 +382,7 @@ export default function SalesRentedRoomPage() {
                 key={room.id}
                 room={room}
                 saleUser={saleUser}
-                onOpenDetail={(r) => setSelectedRoomForDetail(r)}
+                onOpenDetail={(r) => router.push(`/rooms/${r.id}`)}
                 onOpenHoldModal={(r) => setSelectedRoomForHold(r)}
                 onReleaseHold={handleReleaseHold}
               />
@@ -433,13 +433,6 @@ export default function SalesRentedRoomPage() {
       </main>
 
       {/* Modals */}
-      <RoomDetailModal
-        room={selectedRoomForDetail}
-        saleUser={saleUser}
-        onClose={() => setSelectedRoomForDetail(null)}
-        onOpenHoldModal={(r) => setSelectedRoomForHold(r)}
-      />
-
       <HoldRoomModal
         room={selectedRoomForHold}
         saleUser={saleUser}
