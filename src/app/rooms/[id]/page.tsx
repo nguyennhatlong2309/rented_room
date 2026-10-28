@@ -17,6 +17,7 @@ import { HoldRoomModal } from "@/components/HoldRoomModal";
 import { CreateRoomModal } from "@/components/CreateRoomModal";
 import { useToast } from "@/components/Toast";
 import {
+  Home,
   ArrowLeft,
   MapPin,
   Sparkles,
@@ -275,8 +276,13 @@ function RoomDetailContent() {
             </button>
 
             <nav className="text-zinc-400 flex items-center gap-1.5 text-xs">
-              <Link href="/" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
-                Quỹ phòng TP.HCM
+              <Link
+                href="/"
+                className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center gap-1"
+                title="Về trang chủ Quỹ phòng TP.HCM"
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>Quỹ phòng TP.HCM</span>
               </Link>
               <span>/</span>
               <Link

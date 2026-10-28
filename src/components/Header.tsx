@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Building2, Zap, UserCheck, Upload, Sparkles } from "lucide-react";
 
 interface HeaderProps {
@@ -11,6 +12,7 @@ interface HeaderProps {
 }
 
 export function Header({ saleUser, onUpdateSaleUser, onOpenCreateRoom }: HeaderProps) {
+  const pathname = usePathname();
   const [isEditing, setIsEditing] = React.useState(false);
   const [tempName, setTempName] = React.useState(saleUser.name);
   const [tempPhone, setTempPhone] = React.useState(saleUser.phone);
@@ -21,14 +23,31 @@ export function Header({ saleUser, onUpdateSaleUser, onOpenCreateRoom }: HeaderP
     setIsEditing(false);
   };
 
+  const handleHomeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      // Đặt tọa độ cuộn về đỉnh (0, 0)
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+        // Nếu có query param hoặc hash, reset về URL trang chủ sạch và reload lại trang
+        if (window.location.search || window.location.hash) {
+          window.location.href = "/";
+        } else {
+          window.location.reload();
+        }
+      }
+    }
+  };
+
   return (
     <header className="sticky top-0 z-30 w-full luxury-glass border-b transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
         {/* Brand Logo & Name */}
         <Link
           href="/"
+          onClick={handleHomeClick}
           className="flex items-center gap-3.5 group cursor-pointer transition-opacity hover:opacity-95"
-          title="Về trang chủ Quỹ phòng TP.HCM"
+          title="Về trang chủ Quỹ phòng TP.HCM (Reset tọa độ & Load lại trang)"
         >
           <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-800 to-amber-950/70 dark:from-zinc-100 dark:via-zinc-200 dark:to-amber-200/80 flex items-center justify-center text-amber-400 dark:text-zinc-900 shadow-md shadow-black/10 border border-amber-500/20 group-hover:scale-105 transition-transform duration-300">
             <Building2 className="w-5 h-5 stroke-[1.75]" />

@@ -463,3 +463,27 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` thành công trong **1.16s** với Turbopack (0 lỗi TypeScript).
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Tự Động Reset Tọa Độ Cuộn (0, 0) & Load Lại Trang Khi Bấm Icon Home Tại Trang Chủ]
+**Thời gian:** 2026-10-28 16:12:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Khi nhấp vào icon Home / Logo trên Header, ngay cả khi người dùng đang ở sẵn tại trang chủ, hệ thống phải tự động đặt lại tọa độ cuộn về đỉnh trang (`0, 0`) và tải lại trạng thái trang mới nhất (`load lại trang`).
+
+### 2. Chi tiết thực hiện
+
+1. **Xử lý sự kiện nhấp tại `src/components/Header.tsx`:**
+   - Sử dụng hook `usePathname` để kiểm tra vị trí trang hiện tại.
+   - Thêm hàm `handleHomeClick`:
+     - Khi `pathname === "/"`: Ngăn chặn hành vi mặc định không phản hồi của Next.js Link.
+     - Thực hiện cuộn mượt về đỉnh trang `window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })`.
+     - Xóa bỏ sạch các query search params (ví dụ: `?district=...`) và tải lại trang với `window.location.href = '/'` hoặc `window.location.reload()`.
+     - Nếu đang ở trang khác (ví dụ: `/rooms/[id]`), thực hiện chuyển hướng về trang chủ và tự động cuộn lên đầu.
+
+2. **Bổ sung icon `Home` tại thanh Breadcrumb (`src/app/rooms/[id]/page.tsx`):**
+   - Chèn icon `Home` của Lucide ngay trước liên kết `Quỹ phòng TP.HCM` để tăng tính nhận diện thị giác rõ ràng cho người dùng.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` thành công trong **0.82s** với Turbopack (0 lỗi TypeScript).
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.
