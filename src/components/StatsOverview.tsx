@@ -25,7 +25,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Toàn bộ quỹ phòng",
       icon: Building,
       color: "zinc",
-      activeClass: "ring-1.5 ring-zinc-950 dark:ring-zinc-100 bg-white dark:bg-zinc-900 shadow-md",
+      activeClass: "ring-1.5 ring-zinc-950 dark:ring-amber-500 bg-white dark:bg-zinc-850 shadow-md",
     },
     {
       id: "available" as const,
@@ -34,7 +34,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Sẵn sàng dắt khách",
       icon: CheckCircle2,
       color: "emerald",
-      activeClass: "ring-1.5 ring-emerald-600 dark:ring-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30 shadow-md",
+      activeClass: "ring-1.5 ring-emerald-600 dark:ring-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/40 shadow-md",
     },
     {
       id: "holding" as const,
@@ -43,7 +43,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Sale đang hẹn khách",
       icon: Clock,
       color: "amber",
-      activeClass: "ring-1.5 ring-amber-600 dark:ring-amber-400 bg-amber-50/50 dark:bg-amber-950/30 shadow-md",
+      activeClass: "ring-1.5 ring-amber-600 dark:ring-amber-400 bg-amber-50/50 dark:bg-amber-950/40 shadow-md",
     },
     {
       id: "soon_available" as const,
@@ -52,7 +52,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Trong vòng 15 ngày",
       icon: CalendarClock,
       color: "blue",
-      activeClass: "ring-1.5 ring-sky-600 dark:ring-sky-400 bg-sky-50/50 dark:bg-sky-950/30 shadow-md",
+      activeClass: "ring-1.5 ring-sky-600 dark:ring-sky-400 bg-sky-50/50 dark:bg-sky-950/40 shadow-md",
     },
     {
       id: "deposited" as const,
@@ -61,7 +61,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Tạm dừng dẫn khách",
       icon: BookmarkCheck,
       color: "purple",
-      activeClass: "ring-1.5 ring-purple-600 dark:ring-purple-400 bg-purple-50/50 dark:bg-purple-950/30 shadow-md",
+      activeClass: "ring-1.5 ring-purple-600 dark:ring-purple-400 bg-purple-50/50 dark:bg-purple-950/40 shadow-md",
     },
   ];
 
@@ -78,7 +78,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
             className={`text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer luxury-card-hover ${
               isSelected
                 ? c.activeClass
-                : "bg-white/80 dark:bg-zinc-900/60 border-zinc-200/80 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700 shadow-xs"
+                : "bg-white/80 dark:bg-zinc-900/80 border-zinc-200/80 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-amber-500/30 shadow-xs"
             }`}
           >
             <div className="flex items-center justify-between mb-2">

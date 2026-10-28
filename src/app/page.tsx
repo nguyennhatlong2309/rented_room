@@ -308,7 +308,7 @@ function SalesRentedRoomContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-[#0E1218]">
       {/* Top App Header with Upload button */}
       <Header
         saleUser={saleUser}
@@ -333,7 +333,7 @@ function SalesRentedRoomContent() {
           </div>
 
           {/* Elegant Frosted Glass Content Box on the left */}
-          <div className="relative z-10 max-w-xl p-6 sm:p-8 rounded-3xl bg-zinc-950/65 dark:bg-black/70 backdrop-blur-md border border-white/20 text-white shadow-2xl space-y-3">
+          <div className="relative z-10 max-w-xl p-6 sm:p-8 rounded-3xl bg-zinc-950/65 dark:bg-zinc-900/80 backdrop-blur-md border border-white/20 dark:border-amber-500/30 text-white shadow-2xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40 font-sans">
               <MapPin className="w-3.5 h-3.5 text-amber-400" />
               <span>Hệ Thống Quỹ Phòng Đội Sale • TP.HCM</span>

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Zap, UserCheck, Upload, Sparkles } from "lucide-react";
+import { Building2, Zap, UserCheck, Upload, Sparkles, Sun, Moon } from "lucide-react";
 
 interface HeaderProps {
   saleUser: { name: string; phone: string };
@@ -16,6 +16,28 @@ export function Header({ saleUser, onUpdateSaleUser, onOpenCreateRoom }: HeaderP
   const [isEditing, setIsEditing] = React.useState(false);
   const [tempName, setTempName] = React.useState(saleUser.name);
   const [tempPhone, setTempPhone] = React.useState(saleUser.phone);
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isDark = document.documentElement.classList.contains("dark");
+      setIsDarkMode(isDark);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextDark = !isDarkMode;
+    setIsDarkMode(nextDark);
+    if (typeof window !== "undefined") {
+      if (nextDark) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("roomsales_theme_mode", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("roomsales_theme_mode", "light");
+      }
+    }
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,8 +89,21 @@ export function Header({ saleUser, onUpdateSaleUser, onOpenCreateRoom }: HeaderP
           </div>
         </Link>
 
-        {/* Right Actions: Upload Button + Sale User Profile */}
-        <div className="flex items-center gap-3">
+        {/* Right Actions: Upload Button + Theme Toggle + Sale User Profile */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Nút Đổi Giao Diện Sáng / Tối */}
+          <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-xl border border-zinc-200/80 bg-white/70 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 text-zinc-700 dark:text-amber-400 shadow-2xs transition-all cursor-pointer flex items-center justify-center"
+            title={isDarkMode ? "Chuyển sang giao diện Sáng (Editorial Light)" : "Chuyển sang giao diện Tối (Obsidian Luxury)"}
+          >
+            {isDarkMode ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-zinc-600" />
+            )}
+          </button>
+
           {/* Nút Upload / Đăng Quỹ Phòng Mới */}
           <button
             onClick={onOpenCreateRoom}

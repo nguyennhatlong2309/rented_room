@@ -32,8 +32,24 @@ export default function RootLayout({
     <html
       lang="vi"
       className={`${cinzel.variable} ${josefin.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-[#FBFBFA] dark:bg-[#0B0F17] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500 selection:text-white">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.getItem('roomsales_theme_mode') === 'dark') {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-[#FBFBFA] dark:bg-[#0E1218] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500 selection:text-white">
         <ToastProvider>
           {children}
           <Agentation />

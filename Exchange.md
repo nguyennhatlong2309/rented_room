@@ -487,3 +487,35 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` thành công trong **0.82s** với Turbopack (0 lỗi TypeScript).
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Tắt Ép Buộc Dark Mode Tự Động, Bổ Sung Nút Đổi Theme & Nâng Cấp Dark Mode Chuẩn Obsidian Luxury]
+**Thời gian:** 2026-10-29 00:08:00
+
+### 1. Nguyên nhân & Vấn đề từ phản hồi người dùng
+- Khi trình duyệt của người dùng bật Dark Mode của Windows/Chrome, hệ thống tự động nhận diện qua `@media (prefers-color-scheme: dark)` và ép toàn bộ giao diện thành Dark Mode.
+- Dark mode trước đó có nhiều điểm yếu thẩm mỹ:
+  - Nền đen khối đặc (`#0B0F17`) tạo cảm giác tối tăm, thiếu chiều sâu.
+  - Các nút được chọn (ví dụ: "Toàn bộ TP.HCM", kiểu phòng) bị chuyển thành màu trắng tinh (`bg-white text-zinc-950`), tương phản chói gắt trên nền tối như đèn pha rọi vào mắt.
+  - Khung nội dung trên Banner kết hợp cùng gradient tạo thành một vùng đen đặc chiếm nửa màn hình.
+
+### 2. Chi tiết thực hiện
+
+1. **Khử hoàn toàn việc tự động kích hoạt Dark Mode theo trình duyệt:**
+   - Cấu hình `@custom-variant dark (&:where(.dark, .dark *));` trong `src/app/globals.css`.
+   - Tailwind v4 chuyển sang cơ chế kích hoạt theo class `.dark` có chủ đích, không còn tự ý đổi màu chỉ vì OS/trình duyệt đang bật dark mode.
+   - **Mặc định**: Trang web luôn hiển thị phong cách **Editorial Light (Trắng Alabaster & Vàng Champagne)** trang nhã, ấm áp, cao cấp chuẩn BĐS hạng sang.
+
+2. **Tích hợp nút chuyển đổi giao diện Sáng / Tối (`ThemeToggle`) tại Header (`src/components/Header.tsx`):**
+   - Bổ sung nút bấm icon `☀️ Sáng / 🌙 Tối` trên thanh Header để người dùng chủ động chuyển đổi theo ý muốn.
+   - Lưu lựa chọn vào `localStorage` và đồng bộ qua script chặn nhấp nháy (zero-flash) trong `src/app/layout.tsx`.
+
+3. **Tái thiết kế Dark Mode sang chuẩn Obsidian & Champagne Luxury:**
+   - **Màu nền**: Chuyển sang tone đá hắc diện ấm `#0E1218`, dịu mắt và giàu chiều sâu.
+   - **Nút bấm đã chọn (`FilterBar.tsx`)**: Chuyển từ màu trắng chói gắt sang **Vàng Hổ Phách Champagne (`dark:bg-amber-500 dark:text-zinc-950 font-bold shadow-amber-500/20`)**, tạo cảm giác vương giả, sang trọng như các thương hiệu hạng sang.
+   - **Thẻ thống kê (`StatsOverview.tsx`)**: Viền sáng vàng hổ phách tinh tế (`dark:ring-amber-500`), nền thẻ kính mờ elevated obsidian.
+   - **Banner Hero (`page.tsx`)**: Card kính mờ trong suốt thanh thoát (`dark:bg-zinc-900/80 border-amber-500/30`), để lộ ánh sáng nội thất Penthouse sang trọng mà không bị che đen khối.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` thành công trong **1.11s** với Turbopack (0 lỗi TypeScript).
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.

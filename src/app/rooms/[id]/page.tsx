@@ -202,7 +202,7 @@ function RoomDetailContent() {
   // Guard while mounting to prevent SSR / Client hydration mismatch
   if (!isMounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FBFBFA] dark:bg-[#0B0F17]">
+      <div className="min-h-screen flex items-center justify-center bg-[#FBFBFA] dark:bg-[#0E1218]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Đang tải dữ liệu căn hộ...</p>
@@ -214,7 +214,7 @@ function RoomDetailContent() {
   // If Room Not Found (only after mounted and localStorage is read)
   if (!currentRoom) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#FBFBFA] dark:bg-[#0B0F17]">
+      <div className="min-h-screen flex flex-col bg-[#FBFBFA] dark:bg-[#0E1218]">
         <Header
           saleUser={saleUser}
           onUpdateSaleUser={handleUpdateSaleUser}
@@ -248,7 +248,7 @@ function RoomDetailContent() {
     : "";
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FBFBFA] dark:bg-[#0B0F17]">
+    <div className="min-h-screen flex flex-col bg-[#FBFBFA] dark:bg-[#0E1218]">
       {/* Top Navbar */}
       <Header
         saleUser={saleUser}

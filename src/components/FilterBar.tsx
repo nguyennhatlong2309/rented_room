@@ -150,8 +150,8 @@ export function FilterBar({
             onClick={() => onUpdateFilters({ districts: [] })}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
               filters.districts.length === 0
-                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-zinc-950 shadow-sm"
-                : "bg-white/60 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-800"
+                ? "bg-zinc-950 text-white dark:bg-amber-500 dark:text-zinc-950 font-bold shadow-sm shadow-amber-500/20"
+                : "bg-white/60 dark:bg-zinc-800/60 border border-zinc-200/70 dark:border-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700/80"
             }`}
           >
             Toàn bộ TP.HCM
@@ -164,11 +164,11 @@ export function FilterBar({
                 onClick={() => toggleDistrict(d)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                   isSelected
-                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-semibold shadow-sm"
-                    : "bg-white/60 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800"
+                    ? "bg-zinc-900 text-white dark:bg-amber-500 dark:text-zinc-950 font-bold shadow-sm shadow-amber-500/20"
+                    : "bg-white/60 dark:bg-zinc-800/60 border border-zinc-200/70 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700/80"
                 }`}
               >
-                {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5] text-amber-400 dark:text-amber-600" />}
+                {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5] text-amber-400 dark:text-zinc-950" />}
                 <span>{d}</span>
               </button>
             );
@@ -202,12 +202,12 @@ export function FilterBar({
                   onClick={() => toggleRoomType(opt.id)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
                     isSelected
-                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-semibold shadow-sm"
-                      : "bg-white/60 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800"
+                      ? "bg-zinc-900 text-white dark:bg-amber-500 dark:text-zinc-950 font-bold shadow-sm shadow-amber-500/20"
+                      : "bg-white/60 dark:bg-zinc-800/60 border border-zinc-200/70 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700/80"
                   }`}
                 >
                   {isSelected ? (
-                    <CheckSquare className="w-3.5 h-3.5 text-amber-400 dark:text-amber-600" />
+                    <CheckSquare className="w-3.5 h-3.5 text-amber-400 dark:text-zinc-950" />
                   ) : (
                     <Square className="w-3.5 h-3.5 text-zinc-400" />
                   )}
@@ -242,12 +242,12 @@ export function FilterBar({
                   onClick={() => togglePriceBracket(opt.id)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
                     isSelected
-                      ? "bg-amber-600 text-white font-semibold shadow-sm"
-                      : "bg-white/60 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800"
+                      ? "bg-amber-600 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold shadow-sm shadow-amber-500/20"
+                      : "bg-white/60 dark:bg-zinc-800/60 border border-zinc-200/70 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700/80"
                   }`}
                 >
                   {isSelected ? (
-                    <CheckSquare className="w-3.5 h-3.5 text-white" />
+                    <CheckSquare className="w-3.5 h-3.5 text-white dark:text-zinc-950" />
                   ) : (
                     <Square className="w-3.5 h-3.5 text-zinc-400" />
                   )}
