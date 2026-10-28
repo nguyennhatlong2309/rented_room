@@ -355,3 +355,28 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` thành công trong **1.03s** với Turbopack (0 lỗi TypeScript).
 - Đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Khắc Phục Triệt Để Lỗi Hydration Mismatch Giữa SSR & Client Cache]
+**Thời gian:** 2026-10-28 15:47:00
+
+### 1. Nguyên nhân lỗi (Root Cause)
+- Khi người dùng tạo thêm phòng mới (ví dụ: phòng `101 - proposal`), dữ liệu được lưu vào `localStorage`.
+- Trên máy chủ (SSR / Next.js Prerender), `window` chưa tồn tại nên component khởi tạo với danh sách mẫu `INITIAL_ROOMS` (ví dụ: `P.302 - Aura Home Tân Hưng`).
+- Trên trình duyệt (Client), hàm khởi tạo `useState(() => { if (typeof window !== "undefined") ... })` chạy ngay trong lần render đầu tiên và lấy dữ liệu từ `localStorage`.
+- Sự sai lệch giữa HTML máy chủ gửi về (`P.302`) và DOM render ban đầu của client (`101`) gây ra lỗi `Hydration failed because the server rendered text didn't match the client`.
+
+### 2. Chi tiết thực hiện
+
+1. **Chuẩn hóa chu kỳ Hydration tại `src/app/rooms/[id]/page.tsx`:**
+   - Khởi tạo `rooms` và `saleUser` đồng nhất từ `INITIAL_ROOMS` trên cả Server và Client ở lần render đầu tiên.
+   - Sử dụng state `isMounted` và hook `useEffect` để đọc dữ liệu từ `localStorage` sau khi client đã hoàn tất hydrate DOM.
+   - Thêm loading guard `if (!isMounted) return <LoadingSpinner />` giúp đồng bộ 100% HTML render ban đầu giữa Server và Client, loại bỏ hoàn toàn lỗi hydration mismatch.
+   - Đảm bảo logic lưu cache (`localStorage.setItem`) chỉ kích hoạt sau khi `isMounted === true`, tránh việc ghi đè vô tình `INITIAL_ROOMS` lên dữ liệu người dùng.
+
+2. **Đồng bộ cơ chế tại `src/app/page.tsx`:**
+   - Áp dụng cùng mô hình `isMounted` và `useEffect` cho trang chủ để loại trừ triệt để tình trạng lệch DOM khi người dùng tải lại trang (F5).
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` thành công trong **1.14s** với Turbopack (0 lỗi TypeScript).
+- Khắc phục hoàn toàn cảnh báo `Hydration failed`, tải trang mượt mà không bị giật hay tái tạo cây DOM đột ngột.

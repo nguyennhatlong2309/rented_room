@@ -48,37 +48,36 @@ function RoomDetailContent() {
   const { showToast } = useToast();
   const roomId = params.id as string;
 
-  // 1. Rooms state (synced with localStorage)
-  const [rooms, setRooms] = useState<Room[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("roomsales_rooms_cache_hcm_v4");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {}
-      }
-    }
-    return INITIAL_ROOMS;
-  });
+  const [isMounted, setIsMounted] = useState(false);
+
+  // 1. Rooms state (synced with localStorage safely after mount)
+  const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
 
   // 2. Sale user profile
-  const [saleUser, setSaleUser] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("roomsales_current_user");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {}
-      }
-    }
-    return { name: "Minh Tuấn (Sale)", phone: "0988.123.456" };
-  });
+  const [saleUser, setSaleUser] = useState({ name: "Minh Tuấn (Sale)", phone: "0988.123.456" });
 
   // Modal states
   const [selectedRoomForHold, setSelectedRoomForHold] = useState<Room | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+
+  // Load client-side cached rooms & sale user after mounting to avoid hydration mismatch
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("roomsales_rooms_cache_hcm_v4");
+      if (saved) {
+        setRooms(JSON.parse(saved));
+      }
+      const savedUser = localStorage.getItem("roomsales_current_user");
+      if (savedUser) {
+        setSaleUser(JSON.parse(savedUser));
+      }
+    } catch (e) {
+      console.error("Error reading localStorage:", e);
+    }
+    setIsMounted(true);
+  }, []);
 
   // Reset image and scroll to top on roomId switch
   useEffect(() => {
@@ -88,12 +87,15 @@ function RoomDetailContent() {
     }
   }, [roomId]);
 
-  // Sync rooms state to local cache for persistence
+  // Sync rooms state to local cache for persistence (only after initial load to avoid overwriting)
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (!isMounted) return;
+    try {
       localStorage.setItem("roomsales_rooms_cache_hcm_v4", JSON.stringify(rooms));
+    } catch (e) {
+      console.error("Error saving to localStorage:", e);
     }
-  }, [rooms]);
+  }, [rooms, isMounted]);
 
   // Current Room
   const currentRoom = useMemo(() => {
@@ -196,7 +198,19 @@ function RoomDetailContent() {
     }
   };
 
-  // If Room Not Found
+  // Guard while mounting to prevent SSR / Client hydration mismatch
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FBFBFA] dark:bg-[#0B0F17]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Đang tải dữ liệu căn hộ...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If Room Not Found (only after mounted and localStorage is read)
   if (!currentRoom) {
     return (
       <div className="min-h-screen flex flex-col bg-[#FBFBFA] dark:bg-[#0B0F17]">

@@ -18,34 +18,33 @@ export default function SalesRentedRoomPage() {
   const router = useRouter();
   const { showToast } = useToast();
 
-  // 1. Rooms state (TP.HCM only)
-  const [rooms, setRooms] = useState<Room[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("roomsales_rooms_cache_hcm_v4");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {}
-      }
-    }
-    return INITIAL_ROOMS;
-  });
+  const [isMounted, setIsMounted] = useState(false);
+
+  // 1. Rooms state (TP.HCM only) - initialized consistently for SSR
+  const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
 
   // 2. Sale user profile
-  const [saleUser, setSaleUser] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("roomsales_current_user");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {}
-      }
-    }
-    return { name: "Minh Tuấn (Sale)", phone: "0988.123.456" };
-  });
+  const [saleUser, setSaleUser] = useState({ name: "Minh Tuấn (Sale)", phone: "0988.123.456" });
 
   // Banner image theme state
   const [bannerTheme, setBannerTheme] = useState<"penthouse" | "saigon">("penthouse");
+
+  // Load client-side cached rooms & sale user after mounting to prevent SSR hydration mismatch
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("roomsales_rooms_cache_hcm_v4");
+      if (saved) {
+        setRooms(JSON.parse(saved));
+      }
+      const savedUser = localStorage.getItem("roomsales_current_user");
+      if (savedUser) {
+        setSaleUser(JSON.parse(savedUser));
+      }
+    } catch (e) {
+      console.error("Error reading localStorage:", e);
+    }
+    setIsMounted(true);
+  }, []);
 
   const handleUpdateSaleUser = (user: { name: string; phone: string }) => {
     setSaleUser(user);
@@ -55,12 +54,15 @@ export default function SalesRentedRoomPage() {
     showToast("Đã cập nhật thông tin cá nhân của bạn!", "success");
   };
 
-  // Sync rooms state to local cache for persistence
+  // Sync rooms state to local cache for persistence (only after initial load)
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (!isMounted) return;
+    try {
       localStorage.setItem("roomsales_rooms_cache_hcm_v4", JSON.stringify(rooms));
+    } catch (e) {
+      console.error("Error saving to localStorage:", e);
     }
-  }, [rooms]);
+  }, [rooms, isMounted]);
 
   // 3. Optional Supabase Realtime Subscription
   useEffect(() => {
