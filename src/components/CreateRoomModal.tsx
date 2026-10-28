@@ -306,7 +306,8 @@ export function CreateRoomModal({
 
   // Services
   const [electricity, setElectricity] = useState("3.800đ/kWh");
-  const [water, setWater] = useState("100.000đ/người");
+  const [waterPerPerson, setWaterPerPerson] = useState("100.000đ/người");
+  const [waterPerM3, setWaterPerM3] = useState("");
   const [internet, setInternet] = useState("Miễn phí");
   const [parking, setParking] = useState("100.000đ/xe");
   const [serviceFee, setServiceFee] = useState("150.000đ/phòng");
@@ -423,6 +424,18 @@ export function CreateRoomModal({
       "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80",
     ];
 
+    // Compose water fee string
+    let formattedWater = "";
+    if (waterPerPerson.trim() && waterPerM3.trim()) {
+      formattedWater = `${waterPerPerson.trim()} (hoặc ${waterPerM3.trim()})`;
+    } else if (waterPerPerson.trim()) {
+      formattedWater = waterPerPerson.trim();
+    } else if (waterPerM3.trim()) {
+      formattedWater = waterPerM3.trim();
+    } else {
+      formattedWater = "100.000đ/người";
+    }
+
     const newRoom: Room = {
       id: `room-${Date.now()}`,
       roomCode: roomCode.trim().toUpperCase(),
@@ -442,7 +455,9 @@ export function CreateRoomModal({
       furniture: furnitureList.length > 0 ? furnitureList : ["Nội thất cơ bản"],
       serviceFees: {
         electricity: electricity.trim() || "3.800đ/kWh",
-        water: water.trim() || "100.000đ/người",
+        water: formattedWater,
+        waterPerPerson: waterPerPerson.trim() || undefined,
+        waterPerM3: waterPerM3.trim() || undefined,
         internet: internet.trim() || "Miễn phí",
         parking: parking.trim() || "100.000đ/xe",
         serviceFee: serviceFee.trim() || "150.000đ/phòng",
@@ -897,34 +912,98 @@ export function CreateRoomModal({
                 </div>
               </div>
 
-              {/* Tiền nước */}
-              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5">
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
-                  <Droplets className="w-3.5 h-3.5 text-sky-500" />
-                  <span>Tiền nước</span>
-                </label>
-                <input
-                  type="text"
-                  value={water}
-                  onChange={(e) => setWater(e.target.value)}
-                  placeholder="VD: 100.000đ/người hoặc 25.000đ/m³"
-                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
-                />
-                <div className="flex flex-wrap gap-1 pt-0.5">
-                  {["100.000đ/người", "120.000đ/người", "25.000đ/m³", "Miễn phí"].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setWater(preset)}
-                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
-                        water === preset
-                          ? "bg-sky-500 text-white font-bold border-sky-500"
-                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
-                      }`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
+              {/* Tiền nước - Chia thành 2 input: theo người & theo m3 */}
+              <div className="p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-2 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 font-sans">
+                    <Droplets className="w-3.5 h-3.5 text-sky-500" />
+                    <span>Tiền nước (Chia 2 input: Theo người & Theo m³)</span>
+                  </label>
+                  <span className="text-[11px] text-zinc-400">Có thể điền 1 hoặc cả 2 cách tính</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {/* Input 1: Theo người */}
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-700 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                        1. Tính theo người (/người)
+                      </span>
+                      {waterPerPerson && (
+                        <button
+                          type="button"
+                          onClick={() => setWaterPerPerson("")}
+                          className="text-[10px] text-zinc-400 hover:text-rose-500 cursor-pointer"
+                        >
+                          Xóa
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={waterPerPerson}
+                      onChange={(e) => setWaterPerPerson(e.target.value)}
+                      placeholder="VD: 100.000đ/người"
+                      className="w-full px-2.5 py-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
+                    />
+                    <div className="flex flex-wrap gap-1 pt-0.5">
+                      {["100.000đ/người", "120.000đ/người", "Miễn phí"].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setWaterPerPerson(preset)}
+                          className={`text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
+                            waterPerPerson === preset
+                              ? "bg-sky-500 text-white font-bold border-sky-500"
+                              : "bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                          }`}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Input 2: Theo khối m3 */}
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-700 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                        2. Tính theo khối (/m³)
+                      </span>
+                      {waterPerM3 && (
+                        <button
+                          type="button"
+                          onClick={() => setWaterPerM3("")}
+                          className="text-[10px] text-zinc-400 hover:text-rose-500 cursor-pointer"
+                        >
+                          Xóa
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={waterPerM3}
+                      onChange={(e) => setWaterPerM3(e.target.value)}
+                      placeholder="VD: 25.000đ/m³"
+                      className="w-full px-2.5 py-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
+                    />
+                    <div className="flex flex-wrap gap-1 pt-0.5">
+                      {["20.000đ/m³", "25.000đ/m³", "30.000đ/m³", "Giá nhà nước"].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setWaterPerM3(preset)}
+                          className={`text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
+                            waterPerM3 === preset
+                              ? "bg-sky-500 text-white font-bold border-sky-500"
+                              : "bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                          }`}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 

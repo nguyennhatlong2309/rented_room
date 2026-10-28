@@ -272,3 +272,30 @@
 ### 3. Kết Quả Kiểm Tra
 - Đã chạy `npm run build` hoàn thành trong **1.5s** với Turbopack (0 lỗi TypeScript).
 - Đồng bộ thành công lên GitHub branch `main`.
+
+---
+## [Tách Tiền Nước Thành 2 Input Riêng: Theo Người & Theo Khối m³]
+**Thời gian:** 2026-10-28 15:03:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Chia trường Tiền nước trong modal Upload thành 2 ô nhập liệu độc lập:
+  - Một input tính theo người (`/người`).
+  - Một input tính theo khối (`/m³`).
+
+### 2. Chi tiết thực hiện
+
+1. **`src/lib/types.ts`**:
+   - Cập nhật interface `ServiceFees` bổ sung 2 trường tùy chọn: `waterPerPerson?: string` và `waterPerM3?: string`.
+
+2. **`src/components/CreateRoomModal.tsx`**:
+   - Tách state `water` thành 2 state riêng: `waterPerPerson` (mặc định `100.000đ/người`) và `waterPerM3` (mặc định để trống).
+   - Thiết kế lại khối Tiền nước thành khung 2 cột song song đẹp mắt:
+     - **Cột 1: Tính theo người (/người)**: Ô nhập liệu + nút chọn nhanh `[100.000đ/người]`, `[120.000đ/người]`, `[Miễn phí]`, nút Xóa.
+     - **Cột 2: Tính theo khối (/m³)**: Ô nhập liệu + nút chọn nhanh `[20.000đ/m³]`, `[25.000đ/m³]`, `[30.000đ/m³]`, `[Giá nhà nước]`, nút Xóa.
+   - Khi lưu (`handleSubmit`), hệ thống tự động tổng hợp thông minh:
+     - Nếu sale điền cả 2: tự format thành dạng `100.000đ/người (hoặc 25.000đ/m³)`.
+     - Nếu chỉ điền 1 trong 2: lấy đúng giá trị của ô đó hiển thị ra chi tiết phòng và mẫu tin nhắn Zalo gửi khách.
+
+### 3. Kết Quả Kiểm Tra
+- Đã chạy `npm run build` hoàn thành trong **0.98s** với Turbopack (0 lỗi TypeScript).
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.

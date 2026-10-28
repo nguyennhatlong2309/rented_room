@@ -23,6 +23,8 @@ export interface Building {
 export interface ServiceFees {
   electricity: string;
   water: string;
+  waterPerPerson?: string;
+  waterPerM3?: string;
   internet: string;
   parking: string;
   serviceFee?: string;
