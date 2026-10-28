@@ -519,3 +519,20 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` thành công trong **1.11s** với Turbopack (0 lỗi TypeScript).
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Chuyển Bố Cục Giá Thuê & Hoa Hồng Trên RoomCard Sang Chiều Dọc]
+**Thời gian:** 2026-10-29 00:10:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Phản hồi từ Agentation trên trang chủ `/`: Tại khối giá và hoa hồng trên thẻ phòng `RoomCard` (`.luxury-glass > div > .p-4 > .flex`), chuyển từ sắp xếp chiều ngang (`flex-row`) sang sắp xếp theo **chiều dọc (`flex-col`)**.
+
+### 2. Chi tiết thực hiện
+- **`src/components/RoomCard.tsx`**:
+  - Tái cấu trúc khối giá thuê và hoa hồng:
+    - **Hàng 1**: Giá thuê niêm yết (font `Cinzel` nổi bật, cỡ chữ lớn, thông thoáng).
+    - **Hàng 2**: Huy hiệu Hoa hồng Sale (`inline-flex items-center w-fit`), hiển thị rõ ràng nhãn `Hoa hồng: [Số tiền/%]` đầy đủ, không còn bị cắt bớt (`truncate`) hay chen chúc về chiều ngang với giá thuê.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` thành công trong **1.13s** với Turbopack (0 lỗi TypeScript).
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.

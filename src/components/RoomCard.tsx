@@ -112,8 +112,8 @@ export function RoomCard({
 
         {/* Content Details */}
         <div className="p-4 space-y-3.5">
-          {/* Price & Commission Row */}
-          <div className="flex items-baseline justify-between gap-2 border-b border-zinc-200/60 dark:border-zinc-800/60 pb-3">
+          {/* Price & Commission Block (Sắp xếp theo hướng dọc) */}
+          <div className="flex flex-col gap-2 border-b border-zinc-200/60 dark:border-zinc-800/60 pb-3">
             <div>
               <span className="font-serif text-2xl font-bold text-zinc-950 dark:text-zinc-50 tracking-tight">
                 {formatVND(room.price)}
@@ -123,11 +123,11 @@ export function RoomCard({
 
             {/* Commission Tag for Sale */}
             <div
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/25 tracking-wide"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/25 tracking-wide w-fit"
               title="Hoa hồng nhận được khi sale chốt phòng này"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span className="truncate max-w-[130px] font-sans">{room.commission}</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span className="font-sans">Hoa hồng: <strong>{room.commission}</strong></span>
             </div>
           </div>
 
