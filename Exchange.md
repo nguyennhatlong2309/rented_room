@@ -337,3 +337,21 @@
 - Đã chạy `npm run build` hoàn thành trong **1.3s** với Turbopack.
 - Đảm bảo biên dịch thành công 100%, trang `/rooms/[id]` được tối ưu hóa Partial Prerendering (`◐ /rooms/[id]`).
 - Mã nguồn sẵn sàng triển khai thực tế.
+
+---
+## [Điều Chỉnh Tone Màu Sáng Sang Trọng Cho Khối Thông Tin Chủ Hộ]
+**Thời gian:** 2026-10-28 15:42:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Phản hồi từ Agentation trên trang chi tiết `/rooms/room-09`: Tại cột phải (`.lg:col-span-4 > .luxury-glass > .p-4`), khối thông tin chủ hộ/quản lý trước đó dùng nền tối đen (`bg-zinc-950`) cảm giác bị nặng nề, cần chuyển sang tone màu sáng ấm sang trọng và đồng bộ hơn với toàn trang.
+
+### 2. Chi tiết thực hiện
+- **`src/app/rooms/[id]/page.tsx`**:
+  - Chuyển đổi khung nền từ đen đặc (`bg-zinc-950 text-white`) sang phong cách **Warm Champagne / Amber sáng** (`bg-amber-50/70 dark:bg-amber-950/20 border-amber-200/90 dark:border-amber-800/60 shadow-xs`).
+  - Hộp hiển thị số điện thoại chủ hộ được làm nổi bật với nền trắng ngọc trai sáng bóng (`bg-white/95 text-amber-950 dark:bg-zinc-900/90 dark:text-amber-100 border border-amber-300/70`).
+  - Phối màu các nhãn văn bản: Tiêu đề chủ hộ màu hổ phách ấm (`text-amber-900/80`), tên chủ hộ in đậm (`text-amber-950`), pass cửa vân tay và lưu ý khi liên hệ chuyển sang tone màu sáng rõ nét, dễ đọc.
+  - Giữ nguyên cặp nút thao tác nhanh: **Gọi Chủ Hộ** (xanh lá Emerald) và **Nhắn Zalo** (xanh dương Royal) với độ tương phản cao.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` thành công trong **1.03s** với Turbopack (0 lỗi TypeScript).
+- Đồng bộ mã nguồn lên GitHub branch `main`.

@@ -538,13 +538,18 @@ function RoomDetailContent() {
 
               {/* THÔNG TIN CHỦ HỘ / QUẢN LÝ (NỘI BỘ CHO SALE) */}
               {currentRoom.landlord && (
-                <div className="p-4 rounded-2xl bg-zinc-950 text-white dark:bg-zinc-900 border border-zinc-800 space-y-3">
+                <div className="p-4.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/90 dark:border-amber-800/60 shadow-xs space-y-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-400 font-medium">Chủ Hộ / Quản Lý:</span>
-                    <span className="font-bold text-amber-300">{currentRoom.landlord.name}</span>
+                    <span className="text-amber-900/80 dark:text-amber-300/80 font-medium flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                      <span>Chủ Hộ / Quản Lý:</span>
+                    </span>
+                    <span className="font-bold text-amber-950 dark:text-amber-100 text-sm tracking-wide">
+                      {currentRoom.landlord.name}
+                    </span>
                   </div>
 
-                  <div className="text-lg font-mono font-bold text-white text-center py-1 bg-white/5 rounded-xl border border-white/10">
+                  <div className="text-xl font-mono font-bold text-amber-950 dark:text-amber-100 text-center py-2 px-3 bg-white/95 dark:bg-zinc-900/90 rounded-xl border border-amber-300/70 dark:border-amber-700/50 shadow-2xs tracking-wider">
                     {currentRoom.landlord.phone}
                   </div>
 
@@ -570,15 +575,18 @@ function RoomDetailContent() {
 
                   {/* Pass cửa / Vân tay */}
                   {currentRoom.landlord.doorPassword && (
-                    <div className="flex items-start gap-1.5 text-xs text-zinc-300 pt-2 border-t border-white/10 font-sans">
-                      <Key className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                      <span>{currentRoom.landlord.doorPassword}</span>
+                    <div className="flex items-start gap-1.5 text-xs text-amber-950/90 dark:text-amber-200/90 pt-2 border-t border-amber-200/80 dark:border-amber-800/60 font-sans">
+                      <Key className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <span>
+                        <strong className="font-semibold text-amber-950 dark:text-amber-100">Cửa / Vân tay:</strong>{" "}
+                        {currentRoom.landlord.doorPassword}
+                      </span>
                     </div>
                   )}
 
                   {/* Lưu ý khi dẫn khách */}
                   {currentRoom.landlord.callNotice && (
-                    <p className="text-[11px] text-zinc-400 italic">
+                    <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80 italic font-sans">
                       * {currentRoom.landlord.callNotice}
                     </p>
                   )}
