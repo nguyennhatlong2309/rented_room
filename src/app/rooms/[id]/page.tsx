@@ -256,22 +256,33 @@ function RoomDetailContent() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        {/* Navigation Breadcrumb */}
+        {/* Navigation Breadcrumb with True Back action */}
         <div className="flex items-center justify-between text-xs">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200/80 bg-white/80 dark:border-zinc-800 dark:bg-zinc-900/80 text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors shadow-2xs"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại danh sách quỹ phòng</span>
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push("/");
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200/80 bg-white/80 dark:border-zinc-800 dark:bg-zinc-900/80 text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors shadow-2xs cursor-pointer"
+              title="Quay lại trang trước đó"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Quay lại</span>
+            </button>
 
-          <div className="text-zinc-400 hidden sm:flex items-center gap-2">
-            <span>TP.HCM</span>
-            <span>/</span>
-            <span className="text-zinc-600 dark:text-zinc-300 font-medium">{currentRoom.district}</span>
-            <span>/</span>
-            <span className="text-amber-600 dark:text-amber-400 font-bold">{currentRoom.roomCode}</span>
+            <nav className="text-zinc-400 flex items-center gap-1.5 text-xs">
+              <Link href="/" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                Quỹ phòng TP.HCM
+              </Link>
+              <span>/</span>
+              <span className="text-zinc-600 dark:text-zinc-300 font-medium">{currentRoom.district}</span>
+              <span>/</span>
+              <span className="text-amber-600 dark:text-amber-400 font-bold">{currentRoom.roomCode}</span>
+            </nav>
           </div>
         </div>
 

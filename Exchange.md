@@ -398,3 +398,25 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` thành công trong **1.18s** với Turbopack (0 lỗi TypeScript).
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Tối Ưu Nút Điều Hướng Quay Lại Trang Trước (router.back) & Breadcrumb]
+**Thời gian:** 2026-10-28 15:59:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Phản hồi từ Agentation trên trang chi tiết `/rooms/room-01`:
+  - Nút "Quay lại danh sách quỹ phòng" trước đó cố định liên kết `href="/"`. Khi người dùng xem một phòng liên quan từ trong một phòng khác và bấm nút này, trang bị nhảy thẳng về trang chủ thay vì quay lại phòng trước đó.
+  - Cần tinh chỉnh để nút hoạt động như một nút Quay lại thực sự (Back theo lịch sử duyệt).
+
+### 2. Chi tiết thực hiện
+- **`src/app/rooms/[id]/page.tsx`**:
+  - Chuyển đổi nút bấm từ thẻ `<Link href="/">` cứng nhắc sang nút hành động **Quay lại** thông minh:
+    - Sử dụng `router.back()` khi có lịch sử duyệt trang (`window.history.length > 1`), giúp người dùng đang xem phòng liên quan B bấm quay lại phòng A trước đó một cách mượt mà và tự nhiên.
+    - Dự phòng an toàn `router.push('/')` nếu người dùng vào thẳng trang bằng URL trực tiếp.
+  - Tích hợp thanh đường dẫn (Breadcrumb) ngay bên cạnh:
+    - Liên kết `Quỹ phòng TP.HCM` trỏ về trang chủ `/`.
+    - Phân cấp `Quận` và `Mã phòng` rõ ràng, thanh thoát, tránh cảm giác thừa thãi hay trùng lặp với Logo ở Header.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` hoàn thành trong **0.99s** với Turbopack (0 lỗi TypeScript).
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.
