@@ -279,7 +279,25 @@ function RoomDetailContent() {
                 Quỹ phòng TP.HCM
               </Link>
               <span>/</span>
-              <span className="text-zinc-600 dark:text-zinc-300 font-medium">{currentRoom.district}</span>
+              <Link
+                href={`/?district=${encodeURIComponent(currentRoom.district)}`}
+                className="text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 font-medium underline-offset-2 hover:underline transition-colors"
+                title={`Xem tất cả phòng tại ${currentRoom.district}`}
+              >
+                {currentRoom.district}
+              </Link>
+              {currentRoom.ward && (
+                <>
+                  <span>/</span>
+                  <Link
+                    href={`/?district=${encodeURIComponent(currentRoom.district)}&ward=${encodeURIComponent(currentRoom.ward)}`}
+                    className="text-zinc-600 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                    title={`Xem phòng tại ${currentRoom.ward}, ${currentRoom.district}`}
+                  >
+                    {currentRoom.ward}
+                  </Link>
+                </>
+              )}
               <span>/</span>
               <span className="text-amber-600 dark:text-amber-400 font-bold">{currentRoom.roomCode}</span>
             </nav>

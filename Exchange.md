@@ -420,3 +420,30 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` hoàn thành trong **0.99s** với Turbopack (0 lỗi TypeScript).
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Tích Hợp Click Quận / Phường Trên Breadcrumb & Đồng Bộ Bộ Lọc Trang Chủ Qua URL]
+**Thời gian:** 2026-10-28 16:06:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Phản hồi từ Agentation trên trang chi tiết `/rooms/room-06`:
+  - Cho phép người dùng nhấp chuột vào tên **Quận** (và **Phường**) trên thanh Breadcrumb để lọc nhanh các phòng thuộc khu vực đó.
+  - Thảo luận và tư vấn kiến trúc: Có nên thiết kế riêng 1 page tìm kiếm kèm phân trang (`pagination`) với URL dạng `/tim-kiem/quan-10/phuong...` hay không?
+
+### 2. Chi tiết thực hiện
+
+1. **Kích hoạt liên kết Quận & Phường trên Breadcrumb (`src/app/rooms/[id]/page.tsx`):**
+   - Chuyển đổi nhãn Quận và Phường từ chữ tĩnh thành thẻ `<Link>` tương tác cao.
+   - Khi bấm vào Quận (ví dụ: *Quận 10*), URL sẽ chuyển về `/?district=Quận+10`.
+   - Khi bấm vào Phường (ví dụ: *Phường 14*), URL sẽ chuyển về `/?district=Quận+10&ward=Phường+14`.
+   - Có hiệu ứng hover gạch chân và đổi màu vàng hổ phách tinh tế.
+
+2. **Đồng bộ tự động bộ lọc từ URL tại Trang Chủ (`src/app/page.tsx`):**
+   - Đọc tham số URL thông qua `useSearchParams` (`districtParam`, `wardParam`).
+   - Tự động kích hoạt chip chọn Quận tương ứng trên thanh `FilterBar` và điền truy vấn tìm kiếm Phường mà không làm gián đoạn trải nghiệm người dùng.
+   - Bọc component bằng `<Suspense>` chuẩn Next.js 16 Partial Prerendering để đảm bảo tốc độ tải trang tĩnh tối đa.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` hoàn thành xuất sắc trong **1.5s** với Turbopack (0 lỗi TypeScript).
+- Cả hai route `/` và `/rooms/[id]` đều hỗ trợ dynamic streaming với Partial Prerender.
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.

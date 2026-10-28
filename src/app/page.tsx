@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Room, FilterOptions } from "@/lib/types";
 import { INITIAL_ROOMS } from "@/data/initialRooms";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -14,8 +14,11 @@ import { CreateRoomModal } from "@/components/CreateRoomModal";
 import { useToast } from "@/components/Toast";
 import { Sparkles, RefreshCw, AlertCircle, MapPin, Upload, Image as ImageIcon } from "lucide-react";
 
-export default function SalesRentedRoomPage() {
+function SalesRentedRoomContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const districtParam = searchParams.get("district");
+  const wardParam = searchParams.get("ward");
   const { showToast } = useToast();
 
   const [isMounted, setIsMounted] = useState(false);
@@ -115,6 +118,17 @@ export default function SalesRentedRoomPage() {
     hasElevator: false,
     sortBy: "newest",
   });
+
+  // Auto-apply district/ward from URL params (e.g. from breadcrumb click)
+  useEffect(() => {
+    if (districtParam) {
+      setFilters((prev) => ({
+        ...prev,
+        districts: [districtParam],
+        searchQuery: wardParam ? wardParam : prev.searchQuery,
+      }));
+    }
+  }, [districtParam, wardParam]);
 
   const handleUpdateFilters = (updates: Partial<FilterOptions>) => {
     setFilters((prev) => ({ ...prev, ...updates }));
@@ -448,5 +462,22 @@ export default function SalesRentedRoomPage() {
         onCreateRoom={handleCreateRoom}
       />
     </div>
+  );
+}
+
+export default function SalesRentedRoomPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Đang tải quỹ phòng...</p>
+          </div>
+        </div>
+      }
+    >
+      <SalesRentedRoomContent />
+    </Suspense>
   );
 }
