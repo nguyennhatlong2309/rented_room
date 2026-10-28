@@ -380,3 +380,21 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` thành công trong **1.14s** với Turbopack (0 lỗi TypeScript).
 - Khắc phục hoàn toàn cảnh báo `Hydration failed`, tải trang mượt mà không bị giật hay tái tạo cây DOM đột ngột.
+
+---
+## [Cập Nhật Liên Kết Chuyển Hướng Về Trang Chủ Tại Logo & Tên Thương Hiệu Header]
+**Thời gian:** 2026-10-28 15:51:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Phản hồi từ Agentation trên trang `/rooms/room-1793173726074`:
+  - Biểu tượng logo tòa nhà (`.w-11 rounded-2xl`) và tên thương hiệu `ESTATE.PORTAL` (`.font-serif`) trên thanh Header cần có tính năng chuyển hướng quay về trang chủ (`/`) khi người dùng nhấp chuột.
+
+### 2. Chi tiết thực hiện
+- **`src/components/Header.tsx`**:
+  - Bọc toàn bộ khối Brand Logo & Brand Name bằng component `next/link` (`<Link href="/">`).
+  - Tích hợp hiệu ứng hover chuyển động sang trọng (`group-hover:scale-105` cho logo icon và `group-hover:text-amber-600` cho tên thương hiệu).
+  - Giúp sale từ bất kỳ trang chi tiết phòng nào cũng có thể bấm 1-chạm vào Logo hoặc chữ ESTATE.PORTAL để quay trở lại bảng điều khiển và danh sách quỹ phòng ngay lập tức.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` thành công trong **1.18s** với Turbopack (0 lỗi TypeScript).
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.

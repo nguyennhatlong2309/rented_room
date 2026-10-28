@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Building2, Zap, UserCheck, Upload, Sparkles } from "lucide-react";
 
 interface HeaderProps {
@@ -24,13 +25,17 @@ export function Header({ saleUser, onUpdateSaleUser, onOpenCreateRoom }: HeaderP
     <header className="sticky top-0 z-30 w-full luxury-glass border-b transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
         {/* Brand Logo & Name */}
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-800 to-amber-950/70 dark:from-zinc-100 dark:via-zinc-200 dark:to-amber-200/80 flex items-center justify-center text-amber-400 dark:text-zinc-900 shadow-md shadow-black/10 border border-amber-500/20">
+        <Link
+          href="/"
+          className="flex items-center gap-3.5 group cursor-pointer transition-opacity hover:opacity-95"
+          title="Về trang chủ Quỹ phòng TP.HCM"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-800 to-amber-950/70 dark:from-zinc-100 dark:via-zinc-200 dark:to-amber-200/80 flex items-center justify-center text-amber-400 dark:text-zinc-900 shadow-md shadow-black/10 border border-amber-500/20 group-hover:scale-105 transition-transform duration-300">
             <Building2 className="w-5 h-5 stroke-[1.75]" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="font-serif font-bold text-lg text-zinc-950 dark:text-white tracking-widest uppercase">
+              <span className="font-serif font-bold text-lg text-zinc-950 dark:text-white tracking-widest uppercase group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                 ESTATE<span className="text-amber-600 dark:text-amber-400 font-extrabold">.PORTAL</span>
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30">
@@ -41,7 +46,7 @@ export function Header({ saleUser, onUpdateSaleUser, onOpenCreateRoom }: HeaderP
               Quỹ phòng TP.HCM Cao Cấp • Tra cứu SĐT Chủ Hộ • 1-Click Gửi Khách
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* Right Actions: Upload Button + Sale User Profile */}
         <div className="flex items-center gap-3">
