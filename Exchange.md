@@ -240,3 +240,35 @@
 ### 3. Kết Quả Kiểm Tra
 - Đã chạy `npm run build` hoàn thành trong **0.80s** với Turbopack.
 - Đảm bảo 0 lỗi TypeScript, 0 lỗi render, push mã nguồn thành công lên GitHub `main`.
+
+---
+## [Bổ Sung Đầy Đủ Chi Phí Dịch Vụ & Danh Mục Nội Thất Vào Modal Upload]
+**Thời gian:** 2026-10-28 14:56:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Kiểm tra lý do tại sao các trường tiền điện, tiền nước, gửi xe, wifi, và nội thất trước đó bị gắn giá trị mặc định (set cứng) mà không hiển thị trường nhập trong form Upload / Đăng quỹ phòng.
+- Bổ sung giao diện nhập liệu đầy đủ, trực quan và linh hoạt cho các trường này khi đăng phòng mới.
+
+### 2. Chi tiết thực hiện
+
+1. **Khắc phục phần cứng giá trị:**
+   - Trước đó, các state `electricity`, `water`, `parking`, `internet`, `serviceFee` và mảng `furniture` chỉ có giá trị khởi tạo mặc định trong code mà chưa có trường nhập liệu trong JSX của form.
+   - Đã liên kết động toàn bộ dữ liệu này với state và cho phép người dùng tùy chỉnh 100% trước khi lưu.
+
+2. **Tích hợp Phần 4: Chi phí dịch vụ hàng tháng (`serviceFees`):**
+   - **`src/components/CreateRoomModal.tsx`**:
+     - Thêm ô nhập liệu riêng biệt kèm các **nút chọn nhanh (preset pills)** phổ biến tại TP.HCM:
+       - **Tiền điện**: Ô nhập + nút chọn nhanh `[3.500đ/kWh]`, `[3.800đ/kWh]`, `[4.000đ/kWh]`, `[Giá nhà nước]`.
+       - **Tiền nước**: Ô nhập + nút chọn nhanh `[100.000đ/người]`, `[120.000đ/người]`, `[25.000đ/m³]`, `[Miễn phí]`.
+       - **Gửi xe máy**: Ô nhập + nút chọn nhanh `[100.000đ/xe]`, `[120.000đ/xe]`, `[150.000đ/xe]`, `[Miễn phí 1 xe]`, `[Miễn phí]`.
+       - **Wifi / Internet**: Ô nhập + nút chọn nhanh `[Miễn phí]`, `[50.000đ/người]`, `[100.000đ/phòng]`.
+       - **Phí quản lý / Dịch vụ chung**: Ô nhập + nút chọn nhanh `[150.000đ/phòng]`, `[200.000đ/phòng]`, `[100.000đ/người]`, `[Miễn phí]`.
+
+3. **Tích hợp Phần 5: Danh mục nội thất bàn giao (`furniture`):**
+   - Thêm cụm **14 chip chọn nhanh 1-chạm** cho các nội thất cao cấp thông dụng: Máy lạnh Inverter, Tủ lạnh, Giường nệm cao cấp, Tủ quần áo, Kệ bếp nấu ăn, Máy giặt riêng, Máy giặt chung, Máy nước nóng, Sofa & Bàn trà, Bàn làm việc, Smart Tivi, Bàn ăn, Ban công riêng, Khóa vân tay phòng.
+   - Thêm ô **Tự nhập nội thất khác** (nhập tên món + bấm Enter hoặc nút "+ Thêm") cho các tiện nghi đặc thù.
+   - Hiển thị danh sách các món nội thất đã chọn dưới dạng badge thẩm mỹ, có nút `x` để xóa nhanh.
+
+### 3. Kết Quả Kiểm Tra
+- Đã chạy `npm run build` hoàn thành trong **1.5s** với Turbopack (0 lỗi TypeScript).
+- Đồng bộ thành công lên GitHub branch `main`.

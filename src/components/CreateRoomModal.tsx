@@ -21,6 +21,11 @@ import {
   MapPin,
   Check,
   Compass,
+  Zap,
+  Droplets,
+  Wifi,
+  Car,
+  Armchair,
 } from "lucide-react";
 
 interface CreateRoomModalProps {
@@ -249,6 +254,23 @@ export const HCM_WARDS_BY_DISTRICT: Record<string, string[]> = {
   ],
 };
 
+export const POPULAR_FURNITURE = [
+  "Máy lạnh Inverter",
+  "Tủ lạnh",
+  "Giường nệm cao cấp",
+  "Tủ quần áo",
+  "Kệ bếp nấu ăn",
+  "Máy giặt riêng",
+  "Máy giặt chung",
+  "Máy nước nóng",
+  "Sofa & Bàn trà",
+  "Bàn ghế làm việc",
+  "Smart Tivi",
+  "Bàn ăn",
+  "Ban công riêng",
+  "Khóa vân tay phòng",
+];
+
 export function CreateRoomModal({
   isOpen,
   onClose,
@@ -288,6 +310,37 @@ export function CreateRoomModal({
   const [internet, setInternet] = useState("Miễn phí");
   const [parking, setParking] = useState("100.000đ/xe");
   const [serviceFee, setServiceFee] = useState("150.000đ/phòng");
+
+  // Furniture list state
+  const [furnitureList, setFurnitureList] = useState<string[]>([
+    "Máy lạnh Inverter",
+    "Tủ lạnh",
+    "Giường nệm cao cấp",
+    "Tủ quần áo",
+    "Kệ bếp nấu ăn",
+  ]);
+  const [customFurnitureInput, setCustomFurnitureInput] = useState("");
+
+  const toggleFurniture = (item: string) => {
+    if (furnitureList.includes(item)) {
+      setFurnitureList(furnitureList.filter((f) => f !== item));
+    } else {
+      setFurnitureList([...furnitureList, item]);
+    }
+  };
+
+  const handleAddCustomFurniture = () => {
+    const trimmed = customFurnitureInput.trim();
+    if (!trimmed) return;
+    if (!furnitureList.includes(trimmed)) {
+      setFurnitureList([...furnitureList, trimmed]);
+    }
+    setCustomFurnitureInput("");
+  };
+
+  const handleRemoveFurniture = (item: string) => {
+    setFurnitureList(furnitureList.filter((f) => f !== item));
+  };
 
   // Features
   const [allowPet, setAllowPet] = useState(false);
@@ -386,19 +439,13 @@ export function CreateRoomModal({
       commission: commission.trim() || "50% tháng đầu",
       status: "available",
       images: uploadedImages.length > 0 ? uploadedImages : defaultImages,
-      furniture: [
-        "Máy lạnh Inverter",
-        "Tủ lạnh",
-        "Giường nệm cao cấp",
-        "Tủ quần áo",
-        "Kệ bếp nấu ăn",
-      ],
+      furniture: furnitureList.length > 0 ? furnitureList : ["Nội thất cơ bản"],
       serviceFees: {
-        electricity,
-        water,
-        internet,
-        parking,
-        serviceFee,
+        electricity: electricity.trim() || "3.800đ/kWh",
+        water: water.trim() || "100.000đ/người",
+        internet: internet.trim() || "Miễn phí",
+        parking: parking.trim() || "100.000đ/xe",
+        serviceFee: serviceFee.trim() || "150.000đ/phòng",
       },
       landlord: {
         name: landlordName.trim() || "Chủ nhà / Quản lý",
@@ -808,8 +855,268 @@ export function CreateRoomModal({
             </div>
           </div>
 
-          {/* 4. TIỆN ÍCH & LƯU Ý CHIẾN LƯỢC CHO SALE */}
-          <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+          {/* 4. CHI PHÍ DỊCH VỤ HÀNG THÁNG */}
+          <div className="space-y-3 pt-2 border-t border-zinc-200/80 dark:border-zinc-800">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                <Zap className="w-3.5 h-3.5 text-amber-500" />
+                <span>4. Chi phí dịch vụ hàng tháng</span>
+              </label>
+              <span className="text-[11px] text-zinc-400 font-sans">Có thể chỉnh sửa giá hoặc bấm chọn nhanh mẫu</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {/* Tiền điện */}
+              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                  <Zap className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Tiền điện</span>
+                </label>
+                <input
+                  type="text"
+                  value={electricity}
+                  onChange={(e) => setElectricity(e.target.value)}
+                  placeholder="VD: 3.800đ/kWh"
+                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
+                />
+                <div className="flex flex-wrap gap-1 pt-0.5">
+                  {["3.500đ/kWh", "3.800đ/kWh", "4.000đ/kWh", "Giá nhà nước"].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setElectricity(preset)}
+                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                        electricity === preset
+                          ? "bg-amber-500 text-zinc-950 font-bold border-amber-500"
+                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tiền nước */}
+              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                  <Droplets className="w-3.5 h-3.5 text-sky-500" />
+                  <span>Tiền nước</span>
+                </label>
+                <input
+                  type="text"
+                  value={water}
+                  onChange={(e) => setWater(e.target.value)}
+                  placeholder="VD: 100.000đ/người hoặc 25.000đ/m³"
+                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
+                />
+                <div className="flex flex-wrap gap-1 pt-0.5">
+                  {["100.000đ/người", "120.000đ/người", "25.000đ/m³", "Miễn phí"].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setWater(preset)}
+                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                        water === preset
+                          ? "bg-sky-500 text-white font-bold border-sky-500"
+                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tiền gửi xe */}
+              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                  <Car className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Gửi xe máy</span>
+                </label>
+                <input
+                  type="text"
+                  value={parking}
+                  onChange={(e) => setParking(e.target.value)}
+                  placeholder="VD: 100.000đ/xe"
+                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
+                />
+                <div className="flex flex-wrap gap-1 pt-0.5">
+                  {["100.000đ/xe", "120.000đ/xe", "150.000đ/xe", "Miễn phí 1 xe", "Miễn phí"].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setParking(preset)}
+                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                        parking === preset
+                          ? "bg-indigo-500 text-white font-bold border-indigo-500"
+                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Wifi / Internet */}
+              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                  <Wifi className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Wifi / Internet</span>
+                </label>
+                <input
+                  type="text"
+                  value={internet}
+                  onChange={(e) => setInternet(e.target.value)}
+                  placeholder="VD: Miễn phí"
+                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
+                />
+                <div className="flex flex-wrap gap-1 pt-0.5">
+                  {["Miễn phí", "50.000đ/người", "100.000đ/phòng"].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setInternet(preset)}
+                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                        internet === preset
+                          ? "bg-emerald-600 text-white font-bold border-emerald-600"
+                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Phí quản lý / Dịch vụ chung */}
+              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5 sm:col-span-2">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                  <span>Phí dịch vụ chung (Rác, hành lang, máy giặt chung, thang máy...)</span>
+                </label>
+                <input
+                  type="text"
+                  value={serviceFee}
+                  onChange={(e) => setServiceFee(e.target.value)}
+                  placeholder="VD: 150.000đ/phòng"
+                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
+                />
+                <div className="flex flex-wrap gap-1 pt-0.5">
+                  {["150.000đ/phòng", "200.000đ/phòng", "100.000đ/người", "Miễn phí"].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setServiceFee(preset)}
+                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                        serviceFee === preset
+                          ? "bg-purple-600 text-white font-bold border-purple-600"
+                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 5. DANH MỤC NỘI THẤT BÀN GIAO */}
+          <div className="space-y-3 pt-2 border-t border-zinc-200/80 dark:border-zinc-800">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                <Armchair className="w-3.5 h-3.5 text-amber-500" />
+                <span>5. Danh mục nội thất bàn giao</span>
+              </label>
+              <span className="text-[11px] text-zinc-400 font-sans">
+                Đã chọn: <strong className="text-amber-600 dark:text-amber-400">{furnitureList.length}</strong> món
+              </span>
+            </div>
+
+            {/* Chip chọn nhanh nội thất */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {POPULAR_FURNITURE.map((item) => {
+                const isChecked = furnitureList.includes(item);
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => toggleFurniture(item)}
+                    className={`px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                      isChecked
+                        ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 font-semibold shadow-xs"
+                        : "bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-transparent"
+                    }`}
+                  >
+                    {isChecked ? (
+                      <Check className="w-3.5 h-3.5 text-amber-400 dark:text-amber-600 stroke-[2.5]" />
+                    ) : (
+                      <Plus className="w-3.5 h-3.5 text-zinc-400" />
+                    )}
+                    <span>{item}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Ô thêm nội thất tuỳ chỉnh */}
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="text"
+                value={customFurnitureInput}
+                onChange={(e) => setCustomFurnitureInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddCustomFurniture();
+                  }
+                }}
+                placeholder="Nhập nội thất khác (VD: Bếp từ âm, Máy sấy, Lò vi sóng, Kệ giày...)"
+                className="flex-1 px-3 py-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+              />
+              <button
+                type="button"
+                onClick={handleAddCustomFurniture}
+                className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Thêm</span>
+              </button>
+            </div>
+
+            {/* Danh sách đã chọn hiển thị dạng pill có nút xoá */}
+            {furnitureList.length > 0 && (
+              <div className="p-3 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-500/20 flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-semibold text-amber-900 dark:text-amber-300 mr-1">
+                  Nội thất kèm theo:
+                </span>
+                {furnitureList.map((item) => (
+                  <span
+                    key={item}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border border-amber-500/20 shadow-2xs"
+                  >
+                    <span>{item}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFurniture(item)}
+                      className="text-zinc-400 hover:text-rose-500 ml-0.5 cursor-pointer"
+                      title="Xóa món này"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 6. TIỆN ÍCH & LƯU Ý CHIẾN LƯỢC CHO SALE */}
+          <div className="space-y-3 pt-2 border-t border-zinc-200/80 dark:border-zinc-800">
+            <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider font-sans">
+              6. Tiện ích & Lưu ý chiến lược cho Sale
+            </label>
             <div className="flex flex-wrap items-center gap-4">
               <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                 <input
