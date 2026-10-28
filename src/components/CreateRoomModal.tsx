@@ -428,23 +428,23 @@ export function CreateRoomModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between shrink-0 bg-zinc-50 dark:bg-zinc-950/50">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
-              <Upload className="w-5 h-5" />
+        <div className="px-6 py-4 border-b border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between shrink-0 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-zinc-900 text-amber-400 dark:bg-white dark:text-zinc-950 flex items-center justify-center shadow-sm">
+              <Upload className="w-5 h-5 stroke-[2]" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-zinc-900 dark:text-white">
-                Upload & Đăng Quỹ Phòng Mới (Dành Cho Sale)
+              <h2 className="font-serif text-base sm:text-lg font-bold text-zinc-950 dark:text-white tracking-wide">
+                Đăng Quỹ Phòng Mới (Dành Cho Sale)
               </h2>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-zinc-500 font-sans">
                 Thêm thông tin phòng, chọn Quận và Phường tại TP.HCM, ảnh thực tế và SĐT chủ hộ
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition-colors"
+            className="p-2 rounded-xl text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

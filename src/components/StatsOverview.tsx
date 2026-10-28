@@ -25,7 +25,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Toàn bộ quỹ phòng",
       icon: Building,
       color: "zinc",
-      activeClass: "ring-2 ring-zinc-900 dark:ring-zinc-100 bg-zinc-50 dark:bg-zinc-900",
+      activeClass: "ring-1.5 ring-zinc-950 dark:ring-zinc-100 bg-white dark:bg-zinc-900 shadow-md",
     },
     {
       id: "available" as const,
@@ -34,7 +34,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Sẵn sàng dắt khách",
       icon: CheckCircle2,
       color: "emerald",
-      activeClass: "ring-2 ring-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20",
+      activeClass: "ring-1.5 ring-emerald-600 dark:ring-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30 shadow-md",
     },
     {
       id: "holding" as const,
@@ -43,7 +43,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Sale đang hẹn khách",
       icon: Clock,
       color: "amber",
-      activeClass: "ring-2 ring-amber-500 bg-amber-50/50 dark:bg-amber-950/20",
+      activeClass: "ring-1.5 ring-amber-600 dark:ring-amber-400 bg-amber-50/50 dark:bg-amber-950/30 shadow-md",
     },
     {
       id: "soon_available" as const,
@@ -52,7 +52,7 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Trong vòng 15 ngày",
       icon: CalendarClock,
       color: "blue",
-      activeClass: "ring-2 ring-blue-500 bg-blue-50/50 dark:bg-blue-950/20",
+      activeClass: "ring-1.5 ring-sky-600 dark:ring-sky-400 bg-sky-50/50 dark:bg-sky-950/30 shadow-md",
     },
     {
       id: "deposited" as const,
@@ -61,12 +61,12 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
       subText: "Tạm dừng dẫn khách",
       icon: BookmarkCheck,
       color: "purple",
-      activeClass: "ring-2 ring-purple-500 bg-purple-50/50 dark:bg-purple-950/20",
+      activeClass: "ring-1.5 ring-purple-600 dark:ring-purple-400 bg-purple-50/50 dark:bg-purple-950/30 shadow-md",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
       {cards.map((c) => {
         const Icon = c.icon;
         const isSelected = selectedStatus === c.id;
@@ -75,35 +75,35 @@ export function StatsOverview({ rooms, selectedStatus, onSelectStatus }: StatsOv
           <button
             key={c.id}
             onClick={() => onSelectStatus(c.id)}
-            className={`text-left p-3.5 rounded-2xl border transition-all duration-150 cursor-pointer ${
+            className={`text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer luxury-card-hover ${
               isSelected
                 ? c.activeClass
-                : "bg-white border-zinc-200 hover:border-zinc-300 dark:bg-zinc-900/60 dark:border-zinc-800 dark:hover:border-zinc-700 shadow-sm"
+                : "bg-white/80 dark:bg-zinc-900/60 border-zinc-200/80 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700 shadow-xs"
             }`}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                 {c.label}
               </span>
               <Icon
                 className={`w-4 h-4 ${
                   c.color === "emerald"
-                    ? "text-emerald-500"
+                    ? "text-emerald-600 dark:text-emerald-400"
                     : c.color === "amber"
-                    ? "text-amber-500"
+                    ? "text-amber-600 dark:text-amber-400"
                     : c.color === "blue"
-                    ? "text-blue-500"
+                    ? "text-sky-600 dark:text-sky-400"
                     : c.color === "purple"
-                    ? "text-purple-500"
+                    ? "text-purple-600 dark:text-purple-400"
                     : "text-zinc-400"
                 }`}
               />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
+              <span className="font-serif text-3xl font-bold text-zinc-950 dark:text-white tracking-tight">
                 {c.count}
               </span>
-              <span className="text-[11px] text-zinc-400 truncate">
+              <span className="text-[11px] text-zinc-400 truncate font-sans">
                 {c.subText}
               </span>
             </div>

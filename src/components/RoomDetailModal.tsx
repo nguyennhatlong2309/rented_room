@@ -70,14 +70,14 @@ export function RoomDetailModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Bar */}
-        <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between shrink-0 bg-zinc-50 dark:bg-zinc-950/50">
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 rounded-xl text-base font-extrabold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 tracking-wider">
+        <div className="px-6 py-4 border-b border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between shrink-0 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md">
+          <div className="flex items-center gap-3.5">
+            <span className="font-serif px-3 py-1 rounded-xl text-sm font-bold bg-black/85 text-amber-300 border border-amber-500/30 tracking-widest uppercase shadow-xs">
               {room.roomCode}
             </span>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-zinc-900 dark:text-white">
+              <div className="flex items-center gap-2.5">
+                <h2 className="font-serif text-lg sm:text-xl font-bold text-zinc-950 dark:text-white tracking-wide">
                   {room.buildingName}
                 </h2>
                 <span
@@ -87,8 +87,8 @@ export function RoomDetailModal({
                   {statusInfo.label}
                 </span>
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 font-sans">
+                <MapPin className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 {room.address}, {room.ward ? room.ward + ", " : ""}{room.district} (Tầng {room.floor})
               </p>
             </div>
@@ -192,25 +192,25 @@ export function RoomDetailModal({
           </div>
 
           {/* Pricing & Commission Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60">
-              <span className="text-xs font-medium text-emerald-800 dark:text-emerald-300 block mb-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-1">
                 Giá thuê niêm yết
               </span>
-              <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400">
+              <span className="font-serif text-2xl sm:text-3xl font-bold text-zinc-950 dark:text-white">
                 {formatVND(room.price)}
               </span>
-              <span className="text-xs text-emerald-600 dark:text-emerald-500 block mt-0.5">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 block mt-0.5">
                 Cọc {formatVND(room.deposit)}
               </span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-300 mb-1">
+            <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/30">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300 mb-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 <span>Hoa hồng Sale</span>
               </div>
-              <span className="text-lg font-black text-amber-700 dark:text-amber-300 block">
+              <span className="font-serif text-xl sm:text-2xl font-bold text-amber-800 dark:text-amber-300 block">
                 {room.commission}
               </span>
               <span className="text-xs text-amber-600 dark:text-amber-400 block mt-0.5">
@@ -218,8 +218,8 @@ export function RoomDetailModal({
               </span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60">
-              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
+            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-1">
                 Quy mô & Loại phòng
               </span>
               <span className="text-base font-bold text-zinc-900 dark:text-white block">

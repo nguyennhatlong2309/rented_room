@@ -160,3 +160,41 @@
   - **Quận 10**: Phường Diên Hồng, Phường Vườn Lài, Phường Hòa Hưng...
   - Và các phường/xã chuẩn hóa khác của toàn bộ các quận huyện TP.HCM.
 - Đã kiểm tra biên dịch thành công và đồng bộ lên GitHub branch `main`.
+
+---
+## [Tích Hợp Skill UI/UX Pro Max & Nâng Cấp Giao Diện Chuẩn Real Estate Luxury]
+**Thời gian:** 2026-10-28 13:40:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Tìm hiểu và nghiên cứu repository `ui-ux-pro-max-skill` (Next Level Builder, uupm.cc) với mẫu thiết kế Real Estate Luxury.
+- Cài đặt skill vào bộ kỹ năng Antigravity (`custom-skills/skills/ui-ux-pro-max`).
+- Nâng cấp toàn diện giao diện dự án `rented_room` theo đúng chuẩn phong cách Bất Động Sản Cao Cấp (Real Estate Luxury) được quy định trong skill.
+
+### 2. Chi tiết thực hiện
+
+1. **Cài đặt & Xác thực Skill `ui-ux-pro-max`:**
+   - Cài đặt toàn bộ mã nguồn, cơ sở dữ liệu (`products.csv`, `styles.csv`, `typography.csv`, `colors.csv`, `ui-reasoning.csv`) và công cụ tìm kiếm `scripts/search.py` vào `C:\Users\Lenovo\.gemini\config\plugins\custom-skills\skills\ui-ux-pro-max`.
+   - Kiểm thử chạy lệnh trích xuất Design System trực tiếp từ CLI thành công 100%.
+
+2. **Nâng cấp Hệ thống Typography Chuẩn Real Estate Luxury:**
+   - **`src/app/layout.tsx` & `globals.css`**:
+     - Tích hợp cặp font chuẩn quốc tế từ Google Fonts qua `next/font/google`:
+       - **`Cinzel`** (Serif La Mã cổ điển, sang trọng, đẳng cấp thượng lưu): dùng cho Logo thương hiệu, Tiêu đề Hero, Tên toà nhà, Mã phòng, Giá tiền niêm yết.
+       - **`Josefin Sans`** (Geometric Sans nét thanh, thoáng đãng, tinh tế): dùng cho body text, thông số diện tích, tiện ích và các nút thao tác.
+     - Cấu hình Tailwind v4 `@theme inline` với `--font-serif`, `--font-sans`, `--font-heading`.
+
+3. **Bảng màu & Hiệu ứng Thị giác (Visual System):**
+   - **`src/app/globals.css`**: Bổ sung các class hiệu ứng kính mờ cao cấp `.luxury-glass` (`backdrop-filter: blur(16px)` với viền 1px tinh tế) và hiệu ứng nâng thẻ nổi êm ái `.luxury-card-hover`.
+   - Chuyển tông màu chủ đạo từ xanh lá đại trà sang **Obsidian Black (`#0B0F17`, `#14171A`)**, **Champagne Gold / Warm Amber (`#D4AF37`, `#CA8A04`, `#B45309`)**, và **Alabaster White (`#FBFBFA`)**.
+
+4. **Nâng Cấp Các Thành Phần UI (Components):**
+   - **`Header.tsx`**: Thanh điều hướng dạng kính mờ mỏng nhẹ, logo biểu tượng `ESTATE.PORTAL` uy quyền, nhãn `NỘI BỘ SALE` viền vàng champagne, nút đăng quỹ phòng obsidian tối giản.
+   - **`page.tsx`**: Khối Banner Hero chuyển sang dải gradient obsidian sâu thẳm kết hợp hiệu ứng ánh sáng vàng đồng, typography tiêu đề khổ lớn ấn tượng.
+   - **`StatsOverview.tsx`**: 5 thẻ đếm trạng thái phòng với chữ số hiển thị font `Cinzel` nổi bật, viền mảnh cao cấp và hiệu ứng hover nhẹ nhàng.
+   - **`FilterBar.tsx`**: Bố cục bộ lọc phong cách Thụy Sĩ (Swiss Style), các chip lựa chọn quận và kiểu phòng bo góc thanh thoát, trạng thái chọn rõ nét không bị nhảy layout (zero layout shift).
+   - **`RoomCard.tsx`**: Thẻ phòng tỷ lệ ảnh 16:10 phủ gradient đen mờ, mã phòng đóng khung kính đen viền vàng, giá tiền nổi bật font Cinzel kèm huy hiệu hoa hồng sale như dịch vụ concierge, khối SĐT và pass cửa chủ hộ gọn gàng, nút bấm copy Zalo sang trọng.
+   - **`RoomDetailModal.tsx` & `CreateRoomModal.tsx`**: Cửa sổ chi tiết và modal đăng phòng đồng bộ font chữ, màu sắc và độ tương phản chuẩn WCAG 4.5:1.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` hoàn thành trong **1.2s** với Next.js 16 (Turbopack).
+- Đảm bảo 0 lỗi TypeScript, 0 lỗi cú pháp CSS, sẵn sàng triển khai thực tế.

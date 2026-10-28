@@ -89,23 +89,23 @@ export function FilterBar({
     filters.hasElevator;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm space-y-4 transition-all">
+    <div className="luxury-glass rounded-3xl p-6 shadow-xs space-y-4 transition-all">
       {/* HÀNG 1: Ô TÌM KIẾM NHANH + SẮP XẾP */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
         {/* Search Input */}
         <div className="relative md:col-span-8">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
           <input
             type="text"
             value={filters.searchQuery}
             onChange={(e) => onUpdateFilters({ searchQuery: e.target.value })}
             placeholder="Tìm nhanh theo mã phòng (P.302), tên toà nhà, đường, tiện ích..."
-            className="w-full pl-10 pr-9 py-2.5 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+            className="w-full pl-11 pr-10 py-3 bg-white/80 dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-1.5 focus:ring-amber-500/60 transition-all font-sans"
           />
           {filters.searchQuery && (
             <button
               onClick={() => onUpdateFilters({ searchQuery: "" })}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -117,7 +117,7 @@ export function FilterBar({
           <select
             value={filters.sortBy}
             onChange={(e) => onUpdateFilters({ sortBy: e.target.value as any })}
-            className="w-full px-3.5 py-2.5 appearance-none bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 pr-8 cursor-pointer font-medium"
+            className="w-full px-4 py-3 appearance-none bg-white/80 dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-1.5 focus:ring-amber-500/60 pr-9 cursor-pointer font-medium font-sans"
           >
             <option value="newest">⚡ Mới cập nhật</option>
             <option value="price_asc">💰 Giá thuê: Thấp đến Cao</option>
@@ -129,16 +129,16 @@ export function FilterBar({
       </div>
 
       {/* HÀNG 2: CHỌN NHIỀU QUẬN TẠI TP.HCM */}
-      <div className="space-y-1.5 pt-1 border-t border-zinc-100 dark:border-zinc-800/60">
+      <div className="space-y-2 pt-2 border-t border-zinc-200/60 dark:border-zinc-800/60">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Building className="w-3.5 h-3.5 text-emerald-500" />
+          <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 font-sans">
+            <Building className="w-3.5 h-3.5 text-amber-500" />
             <span>Khu vực tại TP.HCM (Chọn một hoặc nhiều quận)</span>
           </span>
           {filters.districts.length > 0 && (
             <button
               onClick={() => onUpdateFilters({ districts: [] })}
-              className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
+              className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-medium cursor-pointer"
             >
               Chọn tất cả TP.HCM
             </button>
@@ -148,10 +148,10 @@ export function FilterBar({
         <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => onUpdateFilters({ districts: [] })}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
               filters.districts.length === 0
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-sm"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-zinc-950 shadow-sm"
+                : "bg-white/60 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-800"
             }`}
           >
             Toàn bộ TP.HCM
@@ -162,13 +162,13 @@ export function FilterBar({
               <button
                 key={d}
                 onClick={() => toggleDistrict(d)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                   isSelected
-                    ? "bg-emerald-600 text-white font-semibold shadow-sm shadow-emerald-600/20"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-semibold shadow-sm"
+                    : "bg-white/60 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800"
                 }`}
               >
-                {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
+                {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5] text-amber-400 dark:text-amber-600" />}
                 <span>{d}</span>
               </button>
             );
@@ -177,17 +177,17 @@ export function FilterBar({
       </div>
 
       {/* HÀNG 3: BỘ LỌC ĐA TIÊU CHÍ (LOẠI PHÒNG + KHOẢNG GIÁ) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800/60">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2 border-t border-zinc-200/60 dark:border-zinc-800/60">
         {/* Cột Trái: Loại phòng (Chọn nhiều option cùng lúc) */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest font-sans">
               Kiểu phòng (Chọn nhiều loại)
             </span>
             {filters.roomTypes.length > 0 && (
               <button
                 onClick={() => onUpdateFilters({ roomTypes: [] })}
-                className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
               >
                 Tất cả kiểu
               </button>
@@ -200,14 +200,14 @@ export function FilterBar({
                 <button
                   key={opt.id}
                   onClick={() => toggleRoomType(opt.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
                     isSelected
-                      ? "bg-emerald-600 text-white font-semibold shadow-sm shadow-emerald-600/20"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-semibold shadow-sm"
+                      : "bg-white/60 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800"
                   }`}
                 >
                   {isSelected ? (
-                    <CheckSquare className="w-3.5 h-3.5 text-white" />
+                    <CheckSquare className="w-3.5 h-3.5 text-amber-400 dark:text-amber-600" />
                   ) : (
                     <Square className="w-3.5 h-3.5 text-zinc-400" />
                   )}
@@ -219,15 +219,15 @@ export function FilterBar({
         </div>
 
         {/* Cột Phải: Khoảng giá (Chọn nhiều khoảng cùng lúc: vừa <6tr vừa 6-9tr) */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest font-sans">
               Khoảng giá thuê (Chọn nhiều mức)
             </span>
             {filters.priceBrackets.length > 0 && (
               <button
                 onClick={() => onUpdateFilters({ priceBrackets: [] })}
-                className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
               >
                 Mọi mức giá
               </button>
@@ -240,10 +240,10 @@ export function FilterBar({
                 <button
                   key={opt.id}
                   onClick={() => togglePriceBracket(opt.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
                     isSelected
-                      ? "bg-emerald-600 text-white font-semibold shadow-sm shadow-emerald-600/20"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      ? "bg-amber-600 text-white font-semibold shadow-sm"
+                      : "bg-white/60 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800"
                   }`}
                 >
                   {isSelected ? (
@@ -259,21 +259,21 @@ export function FilterBar({
         </div>
       </div>
 
-      {/* HÀNG 4: TIỆN ÍCH BỔ SUNG CỐ ĐỊNH (KHÔNG BAO GIỜ BỊ NHẢY DÒNG) + KẾT QUẢ */}
-      <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/60 flex flex-wrap items-center justify-between gap-3">
+      {/* HÀNG 4: TIỆN ÍCH BỔ SUNG CỐ ĐỊNH + KẾT QUẢ */}
+      <div className="pt-3 border-t border-zinc-200/60 dark:border-zinc-800/60 flex flex-wrap items-center justify-between gap-3">
         {/* Các toggle tiện ích đặc thù */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider mr-1 hidden sm:inline">
-            Yêu cầu:
+          <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mr-1 hidden sm:inline font-sans">
+            Tiêu chuẩn:
           </span>
 
           {/* Nuôi thú cưng */}
           <button
             onClick={() => onUpdateFilters({ allowPet: !filters.allowPet })}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
               filters.allowPet
-                ? "bg-amber-500/15 border-amber-500/40 text-amber-700 dark:text-amber-300 shadow-sm"
-                : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                ? "bg-amber-500/15 border-amber-500/40 text-amber-800 dark:text-amber-300 shadow-xs"
+                : "border-zinc-200/70 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-800"
             }`}
           >
             <Dog className="w-3.5 h-3.5 text-amber-500" />
@@ -284,10 +284,10 @@ export function FilterBar({
           {/* Ban công thoáng mát */}
           <button
             onClick={() => onUpdateFilters({ hasBalcony: !filters.hasBalcony })}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
               filters.hasBalcony
-                ? "bg-sky-500/15 border-sky-500/40 text-sky-700 dark:text-sky-300 shadow-sm"
-                : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                ? "bg-sky-500/15 border-sky-500/40 text-sky-800 dark:text-sky-300 shadow-xs"
+                : "border-zinc-200/70 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-800"
             }`}
           >
             <Sun className="w-3.5 h-3.5 text-sky-500" />
@@ -298,10 +298,10 @@ export function FilterBar({
           {/* Thang máy */}
           <button
             onClick={() => onUpdateFilters({ hasElevator: !filters.hasElevator })}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
               filters.hasElevator
-                ? "bg-purple-500/15 border-purple-500/40 text-purple-700 dark:text-purple-300 shadow-sm"
-                : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                ? "bg-purple-500/15 border-purple-500/40 text-purple-800 dark:text-purple-300 shadow-xs"
+                : "border-zinc-200/70 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-800"
             }`}
           >
             <Building className="w-3.5 h-3.5 text-purple-500" />
@@ -310,21 +310,21 @@ export function FilterBar({
           </button>
         </div>
 
-        {/* Cụm đếm kết quả và Xóa lọc cố định */}
+        {/* Cụm đếm kết quả và Xóa lọc */}
         <div className="flex items-center gap-3">
           {hasActiveFilters && (
             <button
               onClick={onResetFilters}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Xóa lọc</span>
             </button>
           )}
 
-          <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400 pl-3 border-l border-zinc-200 dark:border-zinc-700">
-            Khớp{" "}
-            <strong className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">
+          <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400 pl-3 border-l border-zinc-200 dark:border-zinc-800">
+            Hiển thị{" "}
+            <strong className="font-serif text-base text-amber-600 dark:text-amber-400 font-bold">
               {totalResults}
             </strong>{" "}
             / {totalRooms} phòng

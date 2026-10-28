@@ -1,21 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cinzel, Josefin_Sans } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/Toast";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const cinzel = Cinzel({
+  variable: "--font-cinzel",
   subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const josefin = Josefin_Sans({
+  variable: "--font-josefin",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "RoomSales Pro - Hệ Thống Tra Cứu Phòng Cho Thuê Đội Sale",
-  description: "Web tra cứu phòng trống, bảng giá, hoa hồng và giữ chỗ dẫn khách tức thì cho đội ngũ Sale.",
+  title: "RoomSales Pro • Quỹ Phòng TP.HCM Cao Cấp",
+  description: "Cổng thông tin quỹ phòng cho thuê TP.HCM chuẩn Real Estate Luxury dành riêng cho đội ngũ Sale.",
 };
 
 export default function RootLayout({
@@ -26,9 +30,9 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${cinzel.variable} ${josefin.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-emerald-500 selection:text-white">
+      <body className="min-h-full flex flex-col bg-[#FBFBFA] dark:bg-[#0B0F17] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500 selection:text-white">
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

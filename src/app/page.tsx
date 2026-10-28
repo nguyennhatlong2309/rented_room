@@ -299,21 +299,21 @@ export default function SalesRentedRoomPage() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner Hero */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-teal-900 to-zinc-900 text-white p-6 sm:p-8 shadow-xl">
-          <div className="relative z-10 max-w-3xl space-y-2.5">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Hệ Thống Quỹ Phòng Nội Bộ Dành Cho Đội Sale • TP. Hồ Chí Minh</span>
+        {/* Banner Hero - Real Estate Luxury Standard */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-950 via-zinc-900 to-amber-950/40 text-white p-7 sm:p-10 shadow-xl border border-amber-500/20">
+          <div className="relative z-10 max-w-3xl space-y-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-widest bg-amber-500/15 text-amber-300 border border-amber-500/30 font-sans">
+              <MapPin className="w-3.5 h-3.5 text-amber-400" />
+              <span>Hệ Thống Quỹ Phòng Đội Sale • TP. Hồ Chí Minh</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+            <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
               Tra Cứu SĐT Chủ Hộ & Quỹ Phòng Tức Thì
             </h1>
-            <p className="text-zinc-300 text-sm sm:text-base leading-relaxed">
+            <p className="text-zinc-300 text-sm sm:text-base leading-relaxed font-sans max-w-2xl">
               Hiển thị số điện thoại chủ nhà, pass cửa vân tay và hoa hồng sale. Nút bấm 1-chạm gọi trực tiếp cho chủ hộ hoặc tải ảnh và đăng quỹ phòng mới bất kỳ lúc nào.
             </p>
           </div>
-          <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-emerald-500/20 to-transparent pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-radial from-amber-500/15 via-transparent to-transparent pointer-events-none" />
         </div>
 
         {/* Stats Overview */}
