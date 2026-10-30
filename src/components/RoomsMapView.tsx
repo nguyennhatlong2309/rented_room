@@ -95,6 +95,9 @@ const MAP_STYLES = {
   },
 };
 
+// Mức zoom khi click chọn 1 phòng trọ (16.5: Vừa tầm thấy rõ trục đường, hẻm và các khu vực lân cận)
+const ROOM_DETAIL_ZOOM = 16.5;
+
 interface SearchResultItem {
   id: string;
   place_name: string;
@@ -363,7 +366,7 @@ export function RoomsMapView({
         setHoveredRoomId(null);
         map.flyTo({
           center: coords,
-          zoom: 17.8, // Mức zoom cận cảnh toà nhà & ngõ hẻm
+          zoom: ROOM_DETAIL_ZOOM, // 16.5: Chuẩn tầm nhìn phường/khu phố & các hẻm xung quanh
           pitch: 0,   // Thẳng đứng 90 độ, không nghiêng bản đồ
           duration: 1200,
         });
@@ -905,7 +908,7 @@ export function RoomsMapView({
                     if (mapRef.current) {
                       mapRef.current.flyTo({
                         center: coords,
-                        zoom: 17.8, // Mức zoom cận cảnh toà nhà & ngõ hẻm
+                        zoom: ROOM_DETAIL_ZOOM, // 16.5: Chuẩn tầm nhìn phường/khu phố & các hẻm xung quanh
                         pitch: 0,   // Thẳng đứng 90 độ, không nghiêng bản đồ
                         duration: 1200,
                       });

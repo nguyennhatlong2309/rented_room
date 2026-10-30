@@ -866,3 +866,21 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành trong **1.53s** với Turbopack (0 lỗi TypeScript).
 - Bản đồ giữ thẳng đứng 100%, không bị nghiêng khi click chọn phòng, chuyển động mượt mà.
+
+---
+## [Cập Nhật Mức Zoom Khi Click Chọn Phòng Xuống 16.5]
+**Thời gian:** 2026-10-30 22:42:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Điều chỉnh mức zoom camera khi click vào một phòng trọ thành chuẩn **16.5**.
+
+### 2. Chi tiết thực hiện
+- Khai báo hằng số tập trung `ROOM_DETAIL_ZOOM = 16.5` trong [`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx).
+- Cập nhật cả 2 luồng click:
+  1. Khi click vào ghim trên bản đồ (`el.addEventListener("click")`).
+  2. Khi click vào thẻ phòng trong danh sách Drawer bên trái (`onClick`).
+- Cả hai thao tác đều bay camera tới vị trí phòng với `zoom: 16.5` và `pitch: 0` (thẳng đứng 2D). Mức zoom 16.5 mang lại tầm nhìn lý tưởng: bao quát toàn bộ khu phố, các trục đường huyết mạch lân cận và các lối hẻm dẫn vào toà nhà mà không bị phóng quá sát mặt đất.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành thành công trong **1.31s** với Turbopack (0 lỗi TypeScript).
+- Camera zoom chuẩn xác 16.5, góc nhìn thẳng đứng trực quan.
