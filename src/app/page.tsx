@@ -64,9 +64,23 @@ function SalesRentedRoomContent() {
   // Load client-side cached rooms & sale user after mounting to prevent SSR hydration mismatch
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("roomsales_rooms_cache_hcm_v4");
+      const saved =
+        localStorage.getItem("roomsales_rooms_cache_hcm_v5") ||
+        localStorage.getItem("roomsales_rooms_cache_hcm_v4");
       if (saved) {
-        setRooms(JSON.parse(saved));
+        const parsed: Room[] = JSON.parse(saved);
+        // Tự động bù đắp tọa độ GPS chính xác nếu cache cũ bị thiếu lat/lng
+        const merged = parsed.map((r) => {
+          const init = INITIAL_ROOMS.find((i) => i.id === r.id);
+          if (init && (!r.lat || !r.lng || r.lat !== init.lat || r.lng !== init.lng)) {
+            return { ...r, lat: init.lat, lng: init.lng };
+          }
+          return r;
+        });
+        setRooms(merged);
+        localStorage.setItem("roomsales_rooms_cache_hcm_v5", JSON.stringify(merged));
+      } else {
+        localStorage.setItem("roomsales_rooms_cache_hcm_v5", JSON.stringify(INITIAL_ROOMS));
       }
       const savedUser = localStorage.getItem("roomsales_current_user");
       if (savedUser) {
@@ -90,7 +104,7 @@ function SalesRentedRoomContent() {
   useEffect(() => {
     if (!isMounted) return;
     try {
-      localStorage.setItem("roomsales_rooms_cache_hcm_v4", JSON.stringify(rooms));
+      localStorage.setItem("roomsales_rooms_cache_hcm_v5", JSON.stringify(rooms));
     } catch (e) {
       console.error("Error saving to localStorage:", e);
     }

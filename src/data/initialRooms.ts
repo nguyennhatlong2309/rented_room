@@ -49,8 +49,8 @@ export const INITIAL_ROOMS: Room[] = [
     hasElevator: true,
     hasBalcony: true,
     maxTenants: 2,
-    lat: 10.7485,
-    lng: 106.7025,
+    lat: 10.746879,
+    lng: 106.708656,
     createdAt: "2026-10-20T08:00:00Z"
   },
   {
@@ -101,8 +101,8 @@ export const INITIAL_ROOMS: Room[] = [
     hasElevator: true,
     hasBalcony: true,
     maxTenants: 3,
-    lat: 10.7490,
-    lng: 106.7030,
+    lat: 10.746950,
+    lng: 106.708700,
     createdAt: "2026-10-21T09:30:00Z"
   },
   {
@@ -152,8 +152,8 @@ export const INITIAL_ROOMS: Room[] = [
     hasElevator: true,
     hasBalcony: true,
     maxTenants: 3,
-    lat: 10.8035,
-    lng: 106.7090,
+    lat: 10.804191,
+    lng: 106.706449,
     createdAt: "2026-10-22T10:00:00Z"
   },
   {
@@ -202,8 +202,8 @@ export const INITIAL_ROOMS: Room[] = [
     hasElevator: true,
     hasBalcony: false,
     maxTenants: 2,
-    lat: 10.8038,
-    lng: 106.7095,
+    lat: 10.804250,
+    lng: 106.706500,
     createdAt: "2026-10-23T11:00:00Z"
   },
   {
@@ -254,8 +254,8 @@ export const INITIAL_ROOMS: Room[] = [
     hasElevator: true,
     hasBalcony: true,
     maxTenants: 4,
-    lat: 10.7985,
-    lng: 106.6850,
+    lat: 10.798727,
+    lng: 106.687633,
     createdAt: "2026-10-24T14:20:00Z"
   },
   {
@@ -304,8 +304,8 @@ export const INITIAL_ROOMS: Room[] = [
     hasElevator: true,
     hasBalcony: true,
     maxTenants: 2,
-    lat: 10.7710,
-    lng: 106.6675,
+    lat: 10.772198,
+    lng: 106.669405,
     createdAt: "2026-10-25T08:15:00Z"
   },
   {
@@ -353,8 +353,8 @@ export const INITIAL_ROOMS: Room[] = [
     hasElevator: true,
     hasBalcony: true,
     maxTenants: 2,
-    lat: 10.7875,
-    lng: 106.7005,
+    lat: 10.786110,
+    lng: 106.700575,
     createdAt: "2026-10-20T11:00:00Z"
   },
   {

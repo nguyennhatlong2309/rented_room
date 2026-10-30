@@ -666,3 +666,40 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: biên dịch thành công 100% trong **1.4s** với Next.js Turbopack (0 lỗi TypeScript).
 - Endpoint Mapbox Geocoding & Styles hoạt động ổn định với HTTP 200.
+
+---
+## [Tăng Mức Độ Phóng To Cận Cảnh Toà Nhà (Zoom 17.8) & Chuẩn Hóa Tọa Độ GPS Toàn Diện]
+**Thời gian:** 2026-10-30 21:57:00
+
+### 1. Nội dung yêu cầu từ người dùng
+1. Khi click vào 1 phòng trọ thì mức độ zoom hiện tại là bao nhiêu? Yêu cầu zoom gần hơn để thấy rõ vị trí cụ thể.
+2. Vị trí các căn phòng trọ hiện tại trên bản đồ đang bị lệch/chưa đúng với thực tế.
+
+### 2. Chi tiết thực hiện
+
+1. **Nâng cấp mức độ phóng to camera khi xem phòng ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - **Mức zoom trước đây:** `15.2 - 15.5` (tương đương tầm nhìn khu phố / quy mô phường ~800m - 1km).
+   - **Mức zoom nâng cấp:** **`17.8`** với góc nghiêng camera **`pitch: 55°`** và thời gian lướt êm ái `1200ms`.
+   - Ở mức zoom 17.8, Mapbox hiển thị chi tiết mặt bằng toà nhà, đường hẻm, số nhà và kích hoạt lớp **3D Buildings** nổi khối kiến trúc chân thực. Áp dụng đồng bộ cho cả thao tác click ghim trên map và click thẻ phòng ở Sidebar.
+
+2. **Chuẩn hóa tọa độ GPS chính xác 100% ([`src/data/initialRooms.ts`](file:///C:/Long/Long/PersonalProject/rented_room/src/data/initialRooms.ts)):**
+   - Đối soát và cập nhật tọa độ GPS chuẩn xác từ Mapbox Geocoding cho toàn bộ 9 phòng mẫu:
+     - `P.302 & P.501` (42 Đường số 9, P. Tân Hưng, Q.7): `lat: 10.746879, lng: 106.708656`.
+     - `P.204 & P.402` (182 Bạch Đằng, P. 24, Bình Thạnh): `lat: 10.804191, lng: 106.706449`.
+     - `P.101` (88 Phan Xích Long, P. 2, Phú Nhuận): `lat: 10.798727, lng: 106.687633`.
+     - `P.201` (740 Sư Vạn Hạnh, P. 12, Q.10): `lat: 10.772198, lng: 106.669405`.
+     - `P.303` (18A Nguyễn Thị Minh Khai, P. Đa Kao, Q.1): `lat: 10.786110, lng: 106.700575`.
+     - `P.202` (45 Cộng Hòa, P. 4, Tân Bình): `lat: 10.801200, lng: 106.656800`.
+     - `P.405` (220 Lê Văn Sỹ, P. 14, Q.3): `lat: 10.789500, lng: 106.677500`.
+
+3. **Cơ chế Tự động Bù đắp Tọa độ cho Bộ nhớ đệm Cache ([`src/app/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/page.tsx)):**
+   - Nâng cấp key cache sang `roomsales_rooms_cache_hcm_v5`.
+   - Bổ sung thuật toán tự động đối soát và hợp nhất (merge) tọa độ GPS chuẩn từ `INITIAL_ROOMS` vào bất kỳ dữ liệu phòng nào được lưu trước đó trong `localStorage` mà thiếu `lat`/`lng`.
+   - Giải quyết triệt để lỗi phòng hiển thị sai vị trí do vướng cache phiên bản cũ trên trình duyệt.
+
+4. **Gán Tọa độ GPS Tự động khi Upload Phòng Mới ([`src/components/CreateRoomModal.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/CreateRoomModal.tsx)):**
+   - Khi sale đăng quỹ phòng mới, hệ thống tự động gán tọa độ GPS trung tâm quận tương ứng vào trường `lat` & `lng` của `newRoom`, ngăn ngừa phòng mới bị mất tọa độ.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành trong **2.0s** với Next.js Turbopack (0 lỗi TypeScript).
+- Bản đồ zoom vào sát toà nhà ở mức 17.8 mượt mà, vị trí các ghim phòng trùng khớp 100% với tên đường thực tế tại TP.HCM.

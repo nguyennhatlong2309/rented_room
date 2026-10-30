@@ -284,9 +284,9 @@ export function RoomsMapView({
         setActiveRoom(room);
         map.flyTo({
           center: coords,
-          zoom: 15.2,
-          pitch: 50,
-          duration: 1000,
+          zoom: 17.8, // Zoom siêu gần thấy rõ toà nhà, ngõ hẻm và khối 3D (trước đây là 15.2)
+          pitch: 55,  // Góc nghiêng 3D điện ảnh
+          duration: 1200,
         });
       });
 
@@ -590,9 +590,9 @@ export function RoomsMapView({
                   if (mapRef.current) {
                     mapRef.current.flyTo({
                       center: coords,
-                      zoom: 15.5,
-                      pitch: 45,
-                      duration: 1000,
+                      zoom: 17.8, // Zoom siêu gần thấy rõ toà nhà, ngõ hẻm và khối 3D (trước đây là 15.5)
+                      pitch: 55,
+                      duration: 1200,
                     });
                   }
                 }}

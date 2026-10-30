@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Room, RoomType } from "@/lib/types";
+import { DISTRICT_COORDINATES, HCMC_CENTER } from "@/lib/geoUtils";
 import { useToast } from "./Toast";
 import {
   X,
@@ -474,6 +475,8 @@ export function CreateRoomModal({
       hasElevator,
       hasBalcony,
       maxTenants: 2,
+      lat: (DISTRICT_COORDINATES[selectedFinalDistrict] || { lat: HCMC_CENTER[1], lng: HCMC_CENTER[0] }).lat,
+      lng: (DISTRICT_COORDINATES[selectedFinalDistrict] || { lat: HCMC_CENTER[1], lng: HCMC_CENTER[0] }).lng,
       createdAt: new Date().toISOString(),
     };
 
