@@ -119,6 +119,7 @@ export function RoomsMapView({
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<{ [roomId: string]: mapboxgl.Marker }>({});
   const searchMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const hasInitialFitRef = useRef(false);
 
   // Danh sách phòng sử dụng để hiển thị
   const activeRoomsList = filteredRooms || rooms;
@@ -267,6 +268,7 @@ export function RoomsMapView({
   };
 
   // 3. Cập nhật các Marker trên bản đồ khi danh sách phòng thay đổi
+  // LƯU Ý: KHÔNG ĐƯA hoveredRoomId hay activeRoom vào dependency array để TRÁNH LÀM RESET ZOOM khi hover!
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -284,29 +286,71 @@ export function RoomsMapView({
       bounds.extend(coords);
 
       const el = document.createElement("div");
-      el.className = "room-map-marker-container cursor-pointer transition-transform duration-300";
-
-      const isSelected = activeRoom?.id === room.id;
-      const isHovered = hoveredRoomId === room.id;
+      el.className = "room-map-marker-container cursor-pointer transition-transform duration-300 relative";
 
       const priceText = formatPricePill(room.price);
       const isHolding = room.status === "holding";
       const isSoon = room.status === "soon_available";
 
       el.innerHTML = `
-        <div class="group relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 shadow-xl ${
-          isSelected || isHovered
-            ? "bg-amber-500 text-zinc-950 scale-110 ring-4 ring-amber-500/40 z-30"
-            : isHolding
-            ? "bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/90 dark:text-amber-200"
-            : isSoon
-            ? "bg-sky-100 text-sky-900 border border-sky-300 dark:bg-sky-950/90 dark:text-sky-200"
-            : "bg-zinc-950/90 text-white dark:bg-zinc-900 dark:text-amber-300 border border-amber-500/40 hover:scale-105"
-        }">
-          <span class="w-2 h-2 rounded-full ${
-            isHolding ? "bg-amber-600 animate-pulse" : isSoon ? "bg-sky-500" : "bg-emerald-500"
-          }"></span>
-          <span class="font-sans font-bold tracking-tight">${priceText}</span>
+        <div class="relative group select-none flex flex-col items-center">
+          <!-- CARD XEM NHANH ẢNH PHÒNG KHI HOVER TRỰC TIẾP TRÊN MARKER -->
+          <div class="room-hover-card absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-60 rounded-2xl bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md border border-zinc-200/90 dark:border-zinc-700/80 shadow-2xl p-2 z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+            <!-- Hình ảnh phòng sắc nét -->
+            <div class="relative w-full h-32 rounded-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+              <img src="${room.images[0]}" alt="${room.roomCode}" class="w-full h-full object-cover" />
+              <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/85 text-amber-300 font-serif shadow-xs">
+                ${room.roomCode}
+              </span>
+              <span class="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-md text-[9px] font-bold ${
+                isHolding
+                  ? "bg-amber-500 text-zinc-950"
+                  : isSoon
+                  ? "bg-sky-500 text-white"
+                  : "bg-emerald-600 text-white"
+              }">
+                ${isHolding ? "Đang giữ chỗ" : isSoon ? "Sắp trống" : "Trống sẵn"}
+              </span>
+              <span class="absolute bottom-1.5 right-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold bg-black/75 text-white backdrop-blur-xs">
+                ${room.area}m² • Tầng ${room.floor}
+              </span>
+            </div>
+
+            <!-- Chi tiết toà nhà & Giá -->
+            <div class="p-2 space-y-1 text-left">
+              <h4 class="font-serif font-bold text-xs text-zinc-900 dark:text-white truncate">
+                ${room.buildingName}
+              </h4>
+              <p class="text-[10px] text-zinc-500 truncate flex items-center gap-1">
+                <span>📍 ${room.address}, ${room.district}</span>
+              </p>
+              <div class="flex items-baseline justify-between pt-1 border-t border-zinc-100 dark:border-zinc-800/80">
+                <span class="font-serif font-bold text-sm text-zinc-950 dark:text-amber-300">
+                  ${formatVND(room.price)}
+                </span>
+                <span class="text-[10px] text-amber-700 dark:text-amber-400 font-semibold truncate max-w-[100px]">
+                  ${room.commission}
+                </span>
+              </div>
+            </div>
+
+            <!-- Mũi tên trỏ nhọn xuống Ghim -->
+            <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white dark:border-t-zinc-900"></div>
+          </div>
+
+          <!-- Ghim giá tiền (Pill Marker) -->
+          <div class="room-marker-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 shadow-xl ${
+            isHolding
+              ? "bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/90 dark:text-amber-200"
+              : isSoon
+              ? "bg-sky-100 text-sky-900 border border-sky-300 dark:bg-sky-950/90 dark:text-sky-200"
+              : "bg-zinc-950/90 text-white dark:bg-zinc-900 dark:text-amber-300 border border-amber-500/40 hover:scale-105"
+          }">
+            <span class="w-2 h-2 rounded-full ${
+              isHolding ? "bg-amber-600 animate-pulse" : isSoon ? "bg-sky-500" : "bg-emerald-500"
+            }"></span>
+            <span class="font-sans font-bold tracking-tight">${priceText}</span>
+          </div>
         </div>
       `;
 
@@ -336,15 +380,43 @@ export function RoomsMapView({
       markersRef.current[room.id] = marker;
     });
 
-    // Tự động căn chỉnh vừa khung nhìn tất cả các phòng nếu chưa chọn địa điểm tìm kiếm cụ thể
-    if (!bounds.isEmpty() && !selectedLocation) {
+    // Chỉ tự động fitBounds DUY NHẤT LẦN ĐẦU KHI MỞ BẢN ĐỒ
+    // TUYỆT ĐỐI KHÔNG CHẠY LẠI KHI HOVER ĐỂ GIỮ NGUYÊN 100% MỨC ZOOM CỦA NGƯỜI DÙNG
+    if (!hasInitialFitRef.current && !bounds.isEmpty() && !selectedLocation) {
       map.fitBounds(bounds, {
         padding: { top: 100, bottom: 80, left: isSidebarOpen ? 420 : 80, right: 80 },
         maxZoom: 15,
         duration: 1200,
       });
+      hasInitialFitRef.current = true;
     }
-  }, [activeRoomsList, isMapLoaded, activeRoom?.id, hoveredRoomId, isSidebarOpen, selectedLocation]);
+  }, [activeRoomsList, isMapLoaded, selectedLocation]);
+
+  // 4. Đồng bộ hiệu ứng Hover/Active lên Marker độc lập mà KHÔNG ĐẶT LẠI ZOOM
+  useEffect(() => {
+    Object.entries(markersRef.current).forEach(([roomId, marker]) => {
+      const el = marker.getElement();
+      const hoverCard = el.querySelector(".room-hover-card");
+      const pill = el.querySelector(".room-marker-pill");
+
+      const isHovered = hoveredRoomId === roomId;
+      const isSelected = activeRoom?.id === roomId;
+
+      if (isHovered || isSelected) {
+        el.style.zIndex = "1000";
+        if (isHovered) {
+          hoverCard?.classList.add("opacity-100", "translate-y-0", "pointer-events-auto");
+          hoverCard?.classList.remove("opacity-0", "translate-y-1", "pointer-events-none");
+        }
+        pill?.classList.add("scale-110", "ring-4", "ring-amber-500/40", "bg-amber-500", "text-zinc-950");
+      } else {
+        el.style.zIndex = "";
+        hoverCard?.classList.remove("opacity-100", "translate-y-0", "pointer-events-auto");
+        hoverCard?.classList.add("opacity-0", "translate-y-1", "pointer-events-none");
+        pill?.classList.remove("scale-110", "ring-4", "ring-amber-500/40", "bg-amber-500", "text-zinc-950");
+      }
+    });
+  }, [hoveredRoomId, activeRoom?.id]);
 
   // 4. Tìm kiếm địa chỉ qua Mapbox Geocoding API (Debounced 350ms)
   const handleSearchChange = (value: string) => {

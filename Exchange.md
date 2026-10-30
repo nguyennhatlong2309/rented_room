@@ -775,3 +775,34 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành trong **1.08s** với Turbopack (0 lỗi TypeScript).
 - Không còn phát sinh lỗi `QuotaExceededError`. Bộ nhớ cache được tự động dọn dẹp sạch sẽ và an toàn tuyệt đối.
+
+---
+## [Hiển Thị Ảnh Xem Nhanh Trực Tiếp Trên Ghim Marker & Cố Định Mức Zoom Khi Hover]
+**Thời gian:** 2026-10-30 22:19:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Khi rê chuột (hover) vào địa điểm phòng trọ trên bản đồ (hoặc thẻ phòng ở Sidebar), hiển thị ngay thẻ ảnh xem nhanh của căn phòng đó trực tiếp trên đầu ghim (mark).
+- Giữ nguyên góc nhìn và mức zoom hiện tại của người dùng, tuyệt đối không được tự động đặt lại (reset) zoom khi hover.
+
+### 2. Chi tiết thực hiện
+
+1. **Thẻ Ảnh Xem Nhanh Nổi Trực Tiếp Trên Ghim ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - Tích hợp thành phần `.room-hover-card` nằm ngay phía trên mỗi ghim giá tiền (`room-marker-pill`).
+   - Thẻ nổi gồm:
+     - Ảnh phòng sắc nét (chiều cao 128px, bo góc hiện đại, tỷ lệ chuẩn).
+     - Huy hiệu mã phòng (`P.302`), nhãn trạng thái (`Trống sẵn`, `Đang giữ chỗ`, `Sắp trống`), diện tích và số tầng.
+     - Tên toà nhà, địa chỉ quận huyện tại TP.HCM.
+     - Giá thuê niêm yết và hoa hồng sale nổi bật.
+     - Mũi tên nhọn trỏ chính xác xuống ghim bản đồ.
+   - Hiệu ứng chuyển động mượt mà 60fps qua CSS transitions (`opacity`, `translate-y`), độ trễ 0ms.
+
+2. **Khắc Phục Triệt Để Hiện Tượng Bị Đặt Lại Zoom Khi Hover:**
+   - **Nguyên nhân trước đây:** Biến `hoveredRoomId` và `activeRoom?.id` nằm trong dependency array của `useEffect` tạo marker. Mỗi lần rê chuột vào ghim hoặc thẻ, effect bị kích hoạt lại $\rightarrow$ xóa toàn bộ marker cũ và gọi lại `map.fitBounds()` làm camera tự động nhảy zoom về mức ban đầu.
+   - **Giải pháp:**
+     - Sử dụng `hasInitialFitRef = useRef(false)` đảm bảo `fitBounds` **chỉ chạy đúng 1 lần duy nhất** khi bản đồ vừa khởi tạo.
+     - Tách riêng logic hover và active sang một `useEffect` độc lập chuyên biệt chỉ thao tác bật/tắt class CSS trên phần tử DOM của marker mà **hoàn toàn không chạm vào camera, zoom, pitch hay center của Mapbox**.
+     - Khi người dùng đang zoom cận cảnh 17.8 hoặc bất kỳ mức zoom nào, việc hover qua lại giữa các phòng được giữ nguyên 100% tọa độ và góc nhìn.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành trong **1.35s** với Next.js Turbopack (0 lỗi TypeScript).
+- Hover mượt mà, ảnh phòng hiện tức thì trên đầu ghim, mức zoom giữ cố định chuẩn xác.
