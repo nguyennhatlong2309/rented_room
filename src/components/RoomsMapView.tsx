@@ -45,6 +45,15 @@ const MAP_STYLES = {
   },
 };
 
+// Cấu hình Web Worker tĩnh cho MapLibre tương thích Next.js Turbopack & tránh lỗi MIME text/html
+if (typeof window !== "undefined") {
+  try {
+    maplibregl.setWorkerUrl(`${window.location.origin}/maplibre-gl-worker.mjs`);
+  } catch {
+    // Dự phòng an toàn
+  }
+}
+
 export function RoomsMapView({
   rooms,
   saleUser,
@@ -80,6 +89,13 @@ export function RoomsMapView({
       ? "obsidian_dark"
       : "luxury_light";
     setCurrentStyle(initialStyleKey);
+
+    // Đảm bảo URL Worker luôn trỏ chính xác vào file tĩnh public/
+    try {
+      maplibregl.setWorkerUrl(`${window.location.origin}/maplibre-gl-worker.mjs`);
+    } catch {
+      // Bỏ qua nếu đã cấu hình
+    }
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,

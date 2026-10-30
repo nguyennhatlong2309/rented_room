@@ -600,3 +600,31 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build` thành công trong **2.4s** với Turbopack (0 lỗi TypeScript).
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Khắc Phục Lỗi Web Worker & Hiển Thị Bản Đồ MapLibre / WebGL Trên Next.js Turbopack]
+**Thời gian:** 2026-10-30 21:42:00
+
+### 1. Vấn đề phát sinh
+- Trình duyệt báo lỗi khi nạp bản đồ:
+  ```
+  Failed to load module script: The server responded with a non-JavaScript MIME type of "text/html". Strict MIME type checking is enforced for module scripts per HTML spec.
+  Error: Worker failed to load. Check that the worker URL is correct.
+  không hiển thị bản đồ
+  ```
+- **Nguyên nhân gốc rễ:** 
+  MapLibre GL v6 theo mặc định tải web worker thông qua URL tương đối (`./maplibre-gl-worker.mjs`) dựa vào `import.meta.url`. Khi chạy trong môi trường Next.js App Router với Turbopack bundler, `import.meta.url` trỏ vào đường dẫn nội bộ `_next/static/chunks/...`. Trình duyệt gửi request lấy file worker từ đường dẫn đó nhưng Next.js không tìm thấy file nên trả về trang HTML 404 (`text/html`), kích hoạt cơ chế Strict MIME type checking của HTML spec và chặn worker.
+
+### 2. Chi tiết giải pháp kỹ thuật
+1. **Đặt file Worker tĩnh vào thư mục `public/`:**
+   - Trích xuất file worker chính thức `maplibre-gl-worker.mjs` và `maplibre-gl-worker.js` từ `node_modules/maplibre-gl/dist/` và đưa vào thư mục `public/`.
+   - Nhờ đó, Next.js phục vụ trực tiếp file này tại URL gốc `/maplibre-gl-worker.mjs` với HTTP Status 200 và header `content-type: application/javascript; charset=UTF-8`.
+
+2. **Cấu hình `setWorkerUrl` trong `src/components/RoomsMapView.tsx`:**
+   - Khai báo thiết lập `maplibregl.setWorkerUrl(`${window.location.origin}/maplibre-gl-worker.mjs`)` cả ở cấp module và ngay trước thời điểm khởi tạo `new maplibregl.Map(...)`.
+   - Đảm bảo động cơ WebGL của MapLibre luôn nạp đúng worker trực tiếp từ máy chủ web mà không phụ thuộc vào bundler chunks.
+
+### 3. Kết Quả Kiểm Tra
+- Kiểm tra trực tiếp endpoint `GET http://localhost:3000/maplibre-gl-worker.mjs`: trả về **Status 200**, `content-type: application/javascript; charset=UTF-8`.
+- Chạy `npm run build`: hoàn thành xuất sắc trong **1.5s**, không phát sinh cảnh báo hay lỗi worker.
+- Bản đồ WebGL hiển thị 60fps mượt mà, ghim phòng và các chức năng tương tác hoạt động trơn tru.
