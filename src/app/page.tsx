@@ -14,6 +14,11 @@ import { HoldRoomModal } from "@/components/HoldRoomModal";
 import { CreateRoomModal } from "@/components/CreateRoomModal";
 import { useToast } from "@/components/Toast";
 import {
+  safeSetLocalStorage,
+  cleanupOldStorageCaches,
+  CURRENT_ROOMS_CACHE_KEY,
+} from "@/lib/storageUtils";
+import {
   Sparkles,
   RefreshCw,
   AlertCircle,
@@ -63,10 +68,14 @@ function SalesRentedRoomContent() {
 
   // Load client-side cached rooms & sale user after mounting to prevent SSR hydration mismatch
   useEffect(() => {
+    // Dọn dẹp các cache key cũ để giải phóng bộ nhớ 5MB
+    cleanupOldStorageCaches();
+
     try {
       const saved =
-        localStorage.getItem("roomsales_rooms_cache_hcm_v5") ||
+        localStorage.getItem(CURRENT_ROOMS_CACHE_KEY) ||
         localStorage.getItem("roomsales_rooms_cache_hcm_v4");
+
       if (saved) {
         const parsed: Room[] = JSON.parse(saved);
         // Tự động bù đắp tọa độ GPS chính xác nếu cache cũ bị thiếu lat/lng
@@ -78,36 +87,31 @@ function SalesRentedRoomContent() {
           return r;
         });
         setRooms(merged);
-        localStorage.setItem("roomsales_rooms_cache_hcm_v5", JSON.stringify(merged));
+        safeSetLocalStorage(CURRENT_ROOMS_CACHE_KEY, merged);
       } else {
-        localStorage.setItem("roomsales_rooms_cache_hcm_v5", JSON.stringify(INITIAL_ROOMS));
+        safeSetLocalStorage(CURRENT_ROOMS_CACHE_KEY, INITIAL_ROOMS);
       }
+
       const savedUser = localStorage.getItem("roomsales_current_user");
       if (savedUser) {
         setSaleUser(JSON.parse(savedUser));
       }
     } catch (e) {
-      console.error("Error reading localStorage:", e);
+      console.warn("Storage warning:", e);
     }
     setIsMounted(true);
   }, []);
 
   const handleUpdateSaleUser = (user: { name: string; phone: string }) => {
     setSaleUser(user);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("roomsales_current_user", JSON.stringify(user));
-    }
+    safeSetLocalStorage("roomsales_current_user", user);
     showToast("Đã cập nhật thông tin cá nhân của bạn!", "success");
   };
 
   // Sync rooms state to local cache for persistence (only after initial load)
   useEffect(() => {
     if (!isMounted) return;
-    try {
-      localStorage.setItem("roomsales_rooms_cache_hcm_v5", JSON.stringify(rooms));
-    } catch (e) {
-      console.error("Error saving to localStorage:", e);
-    }
+    safeSetLocalStorage(CURRENT_ROOMS_CACHE_KEY, rooms);
   }, [rooms, isMounted]);
 
   // 3. Optional Supabase Realtime Subscription
@@ -342,10 +346,9 @@ function SalesRentedRoomContent() {
   // 11. Reset to default demo data action
   const handleResetData = () => {
     if (confirm("Bạn có muốn tải lại danh sách phòng TP.HCM mặc định không?")) {
+      cleanupOldStorageCaches();
       setRooms(INITIAL_ROOMS);
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("roomsales_rooms_cache_hcm_v4");
-      }
+      safeSetLocalStorage(CURRENT_ROOMS_CACHE_KEY, INITIAL_ROOMS);
       showToast("Đã khôi phục danh sách phòng TP.HCM thành công!", "success");
     }
   };

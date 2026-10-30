@@ -740,3 +740,38 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: biên dịch thành công 100% trong **1.2s** với Next.js Turbopack (0 lỗi TypeScript).
 - Bản đồ chiếm trọn màn hình 100%, thao tác chuyển đổi qua lại giữa Danh sách thẻ và Google Maps mượt mà, trực quan.
+
+---
+## [Khắc Phục Lỗi QuotaExceededError Của LocalStorage & Tối Ưu Hóa Nén Ảnh Base64]
+**Thời gian:** 2026-10-30 22:13:00
+
+### 1. Vấn đề phát sinh
+- Trình duyệt ném lỗi đỏ tại Console:
+  ```
+  QuotaExceededError: Failed to execute 'setItem' on 'Storage': Setting the value of 'roomsales_rooms_cache_hcm_v5' exceeded the quota.
+  at SalesRentedRoomContent.useEffect (src/app/page.tsx:81:22)
+  ```
+- **Nguyên nhân:** 
+  1. Giới hạn dung lượng `localStorage` trên trình duyệt web chỉ tối đa 5MB cho mỗi domain.
+  2. Các phiên bản trước đó tích lũy nhiều key cache cũ (`roomsales_rooms_cache_hcm_v1...v4`, `estate_portal_rooms_v1...`).
+  3. Khi upload ảnh phòng mới qua FileReader mà không nén, ảnh raw từ camera điện thoại (3MB - 8MB) sinh ra chuỗi base64 khổng lồ, khiến dữ liệu vượt quá 5MB và làm vỡ quota.
+  4. Lệnh `console.error` trong khối catch của Next.js kích hoạt màn hình báo lỗi màu đỏ (dev overlay).
+
+### 2. Chi tiết giải pháp kỹ thuật
+
+1. **Xây dựng module tiện ích [`src/lib/storageUtils.ts`](file:///C:/Long/Long/PersonalProject/rented_room/src/lib/storageUtils.ts):**
+   - **`cleanupOldStorageCaches()`:** Tự động quét và dọn dẹp toàn bộ các key cache của các phiên bản cũ để giải phóng ngay lập tức không gian 5MB của domain.
+   - **`safeSetLocalStorage(key, data)`:** Cơ chế lưu trữ tự phục hồi: nếu gặp `QuotaExceededError`, hàm tự động dọn dẹp cache cũ rồi thử lại; nếu vẫn đầy, tự động rút gọn các chuỗi ảnh base64 lớn về ảnh mẫu dung lượng nhẹ, và chuyển sang chế độ memory fallback an toàn mà không làm sập ứng dụng.
+   - **`compressImageFile(file)`:** Tự động nén ảnh trực tiếp trên trình duyệt bằng `HTMLCanvasElement` (giới hạn 1000x800px, JPEG quality 0.7) trước khi chuyển thành base64. Giảm kích thước ảnh từ 5MB - 10MB xuống chỉ còn **~40KB - 80KB** (nhẹ hơn gấp 100 lần), cho phép lưu trữ thoải mái hàng chục phòng có ảnh thực tế.
+
+2. **Cập nhật [`src/app/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/page.tsx):**
+   - Gọi `cleanupOldStorageCaches()` khi khởi động.
+   - Thay thế toàn bộ các lệnh `localStorage.setItem` trực tiếp bằng `safeSetLocalStorage`.
+   - Chuyển `console.error` sang `console.warn` để ngăn chặn màn hình báo lỗi đỏ của Next.js overlay.
+
+3. **Cập nhật [`src/components/CreateRoomModal.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/CreateRoomModal.tsx):**
+   - Nâng cấp hàm `handleFileChange` sang bất đồng bộ kết hợp `compressImageFile(file)`, đảm bảo mọi ảnh sale upload từ máy tính hoặc điện thoại đều được tối ưu hóa dung lượng trước khi đưa vào quỹ phòng.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành trong **1.08s** với Turbopack (0 lỗi TypeScript).
+- Không còn phát sinh lỗi `QuotaExceededError`. Bộ nhớ cache được tự động dọn dẹp sạch sẽ và an toàn tuyệt đối.

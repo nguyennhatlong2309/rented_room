@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Room, RoomType } from "@/lib/types";
 import { DISTRICT_COORDINATES, HCMC_CENTER } from "@/lib/geoUtils";
+import { compressImageFile } from "@/lib/storageUtils";
 import { useToast } from "./Toast";
 import {
   X,
@@ -369,22 +370,22 @@ export function CreateRoomModal({
 
   if (!isOpen) return null;
 
-  // Handle local file uploads (multiple images)
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle local file uploads with client-side canvas compression to prevent QuotaExceededError
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setUploadedImages((prev) => [...prev, event.target!.result as string]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      showToast(`Đang tối ưu hóa ${files.length} ảnh phòng...`, "info");
+      const compressedPromises = Array.from(files).map((file) => compressImageFile(file));
+      const compressedResults = await Promise.all(compressedPromises);
+      const validImages = compressedResults.filter((img) => Boolean(img));
 
-    showToast(`Đã tải lên ${files.length} ảnh phòng!`, "info");
+      setUploadedImages((prev) => [...prev, ...validImages]);
+      showToast(`Đã tải lên & nén thành công ${validImages.length} ảnh phòng!`, "success");
+    } catch {
+      showToast("Có lỗi xảy ra khi đọc tệp ảnh!", "error");
+    }
   };
 
   const handleAddImageUrl = () => {
