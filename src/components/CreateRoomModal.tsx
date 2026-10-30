@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Room, RoomType } from "@/lib/types";
 import { DISTRICT_COORDINATES, HCMC_CENTER } from "@/lib/geoUtils";
 import { compressImageFile } from "@/lib/storageUtils";
+import { MapLocationPicker } from "./MapLocationPicker";
 import { useToast } from "./Toast";
 import {
   X,
@@ -300,6 +301,11 @@ export function CreateRoomModal({
   const [deposit, setDeposit] = useState(6000000);
   const [commission, setCommission] = useState("50% tháng đầu");
 
+  // Map Location / GPS Coordinates
+  const [customLat, setCustomLat] = useState<number>(DISTRICT_COORDINATES["Quận 7"]?.lat || HCMC_CENTER[1]);
+  const [customLng, setCustomLng] = useState<number>(DISTRICT_COORDINATES["Quận 7"]?.lng || HCMC_CENTER[0]);
+  const [googleMapsUrl, setGoogleMapsUrl] = useState<string>("");
+
   // Landlord states
   const [landlordName, setLandlordName] = useState("");
   const [landlordPhone, setLandlordPhone] = useState("");
@@ -375,6 +381,9 @@ export function CreateRoomModal({
       setWard("");
     }
     setIsCustomWard(false);
+    const coords = DISTRICT_COORDINATES[newDistrict] || { lat: HCMC_CENTER[1], lng: HCMC_CENTER[0] };
+    setCustomLat(coords.lat);
+    setCustomLng(coords.lng);
   };
 
   if (!isOpen) return null;
@@ -527,8 +536,9 @@ export function CreateRoomModal({
       hasElevator,
       hasBalcony,
       maxTenants: 2,
-      lat: (DISTRICT_COORDINATES[selectedFinalDistrict] || { lat: HCMC_CENTER[1], lng: HCMC_CENTER[0] }).lat,
-      lng: (DISTRICT_COORDINATES[selectedFinalDistrict] || { lat: HCMC_CENTER[1], lng: HCMC_CENTER[0] }).lng,
+      lat: customLat,
+      lng: customLng,
+      googleMapsUrl: googleMapsUrl.trim() || undefined,
       createdAt: new Date().toISOString(),
     };
 
@@ -879,6 +889,23 @@ export function CreateRoomModal({
                 </select>
               </div>
             </div>
+
+            {/* 4. CHỌN VỊ TRÍ CHÍNH XÁC TRÊN BẢN ĐỒ (GPS, TỰ ĐỘNG, TÍCH CHỌN, HOẶC LINK GG MAPS) */}
+            <MapLocationPicker
+              lat={customLat}
+              lng={customLng}
+              address={address}
+              district={selectedFinalDistrict}
+              googleMapsUrl={googleMapsUrl}
+              onChangeLocation={({ lat, lng, googleMapsUrl: gUrl, resolvedAddress }) => {
+                setCustomLat(lat);
+                setCustomLng(lng);
+                if (gUrl) setGoogleMapsUrl(gUrl);
+                if (resolvedAddress && !address.trim()) {
+                  setAddress(resolvedAddress.split(",")[0] || resolvedAddress);
+                }
+              }}
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>

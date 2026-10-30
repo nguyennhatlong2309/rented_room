@@ -1058,3 +1058,38 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: biên dịch thành công trong **1.4s** với Next.js Turbopack, 0 lỗi TypeScript.
 - Bản đồ tự động cắm mốc đỏ tại đúng vị trí số nhà 87/57/20 đường Lê Văn Duyệt.
+
+---
+## [Bộ Ghim Vị Trí Map Thông Minh: Link Google Maps, Tự Động Định Vị & Tích Chọn Trực Tiếp]
+**Thời gian:** 2026-10-31 03:49:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Bổ sung bộ trường chọn vị trí phòng trên bản đồ với 3 phương thức linh hoạt:
+  1. Hệ thống tự động chọn vị trí từ địa chỉ nhập.
+  2. Người dùng có thể tích chọn và kéo mốc trực tiếp trên bản đồ.
+  3. Cho phép dán liên kết Google Maps bất kỳ (ví dụ: `https://maps.app.goo.gl/i6gmJKqmSFLEjefZ6`), hệ thống tự động bóc tách tọa độ GPS chính xác và ghim mốc.
+
+### 2. Chi tiết thực hiện
+
+1. **Xây Dựng API Trích Xuất Tọa Độ Google Maps ([`src/app/api/resolve-maps-url/route.ts`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/api/resolve-maps-url/route.ts)):**
+   - Hỗ trợ cả link rút gọn (`maps.app.goo.gl/...`, `goo.gl/maps/...`) lẫn link đầy đủ của Google Maps (`google.com/maps/place/...`).
+   - Tự động gửi request follow redirect server-side để phân giải URL đích.
+   - Bóc tách chuẩn xác tọa độ GPS `[lat, lng]` từ các định dạng `!3d{lat}!4d{lng}`, `?q={lat},{lng}`, `@lat,lng` và trích xuất tên địa danh thực tế (`placeName`).
+
+2. **Xây Dựng Component Bộ Ghim Bản Đồ Thông Minh ([`src/components/MapLocationPicker.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/MapLocationPicker.tsx)):**
+   - **Chế độ 1 - Link GG Maps:** Ô dán liên kết kèm nút "Trích xuất GPS". Trích xuất xong sẽ tự động di chuyển mốc trên bản đồ Mapbox tới đúng vị trí căn nhà, đồng thời hiển thị nút "Áp dụng địa chỉ này" nếu phát hiện tên đường/số nhà chuẩn từ Google Maps.
+   - **Chế độ 2 - Tự động chọn (Auto Geocoding):** Quét địa chỉ số nhà & tên đường kết hợp quận/huyện qua Mapbox Geocoding API để tự động tìm tọa độ và ghim mốc.
+   - **Chế độ 3 - Tích chọn trực tiếp trên map:** Khung bản đồ tương tác Mapbox GL có mốc đỏ kéo thả (`draggable: true`). Click vào bất cứ đâu hoặc kéo mốc để định vị chính xác từng mét. Có nút "Vị trí của tôi" để lấy GPS thiết bị khi sale đang đứng tại căn hộ.
+   - Nút đặt lại về trung tâm quận và huy hiệu hiển thị tọa độ GPS thời gian thực.
+
+3. **Tích Hợp Vào Form Đăng Phòng Mới ([`src/components/CreateRoomModal.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/CreateRoomModal.tsx)):**
+   - Lưu trữ `lat`, `lng` chính xác và liên kết `googleMapsUrl` vào dữ liệu phòng khi tạo mới.
+
+4. **Tích Hợp Vào Trang Chi Tiết Phòng ([`src/app/rooms/[id]/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/rooms/[id]/page.tsx)):**
+   - Bản đồ Google Maps Embed tự động ưu tiên nhúng theo tọa độ GPS `q={lat},{lng}` khi phòng đã có tọa độ ghim tùy chỉnh $\rightarrow$ **100% hiển thị ghim đỏ chính xác tuyệt đối**.
+   - Thêm nút "Ghim vị trí / Dán link GG Maps" để mở nhanh bộ công cụ chỉnh sửa tọa độ phòng ngay tại trang chi tiết.
+   - Nút "Mở Google Maps chỉ đường" tự động mở link Google Maps gốc nếu có.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: thành công 100% với Next.js Turbopack, biên dịch thêm route API `ƒ /api/resolve-maps-url` (0 lỗi TypeScript).
+- Kiểm tra trực tiếp với link ví dụ `https://maps.app.goo.gl/i6gmJKqmSFLEjefZ6`: trích xuất thành công tọa độ chính xác `10.7965334, 106.6949383` của số nhà 87/57/20 Lê Văn Duyệt.

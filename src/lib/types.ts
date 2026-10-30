@@ -66,6 +66,7 @@ export interface Room {
   maxTenants: number;
   lat?: number;          // Tọa độ Vĩ độ để hiển thị trên bản đồ (VD: 10.7485)
   lng?: number;          // Tọa độ Kinh độ để hiển thị trên bản đồ (VD: 106.7025)
+  googleMapsUrl?: string;// Liên kết Google Maps trực tiếp (VD: https://maps.app.goo.gl/...)
   createdAt: string;
 }
 

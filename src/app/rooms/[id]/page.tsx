@@ -21,6 +21,8 @@ import { Header } from "@/components/Header";
 import { RoomCard } from "@/components/RoomCard";
 import { HoldRoomModal } from "@/components/HoldRoomModal";
 import { CreateRoomModal } from "@/components/CreateRoomModal";
+import { MapLocationPicker } from "@/components/MapLocationPicker";
+import { DISTRICT_COORDINATES, HCMC_CENTER } from "@/lib/geoUtils";
 import { useToast } from "@/components/Toast";
 import {
   Home,
@@ -73,6 +75,7 @@ function RoomDetailContent() {
   const [copied, setCopied] = useState(false);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [editedAddressInput, setEditedAddressInput] = useState("");
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
 
   // Load client-side cached rooms & sale user after mounting to avoid hydration mismatch
   useEffect(() => {
@@ -198,9 +201,21 @@ function RoomDetailContent() {
 
   const mapEmbedUrl = useMemo(() => {
     if (!currentRoom) return "";
-    // Làm sạch địa chỉ tối ưu cho Google Maps Embed:
-    // Tránh ghép tên Phường vào query vì cơ sở dữ liệu Google Maps tại Việt Nam thường lập chỉ mục phường không đồng bộ
-    // (Ví dụ: Lê Văn Duyệt được index theo địa danh Gia Định, nếu kèm "Phường 3" hoặc "Phường 1" Google Maps sẽ xung đột và không hiện ghim).
+
+    // 1. Ưu tiên: Nếu phòng có tọa độ GPS tùy chỉnh (khác với tâm quận mặc định)
+    const distCenter = DISTRICT_COORDINATES[currentRoom.district];
+    const isCustomGps =
+      currentRoom.lat &&
+      currentRoom.lng &&
+      distCenter &&
+      (Math.abs(currentRoom.lat - distCenter.lat) > 0.0001 ||
+        Math.abs(currentRoom.lng - distCenter.lng) > 0.0001);
+
+    if (isCustomGps) {
+      return `https://maps.google.com/maps?q=${currentRoom.lat},${currentRoom.lng}&z=16&output=embed`;
+    }
+
+    // 2. Dùng chuỗi tìm kiếm text đã làm sạch:
     let cleanAddr = currentRoom.address.trim();
 
     // Tự động chuẩn hóa lỗi gõ phím tên đường phổ biến tại TP.HCM (ví dụ: "Duệt" -> "Duyệt")
@@ -212,6 +227,19 @@ function RoomDetailContent() {
 
   const mapSearchUrl = useMemo(() => {
     if (!currentRoom) return "";
+    if (currentRoom.googleMapsUrl) {
+      return currentRoom.googleMapsUrl;
+    }
+    if (currentRoom.lat && currentRoom.lng) {
+      const distCenter = DISTRICT_COORDINATES[currentRoom.district];
+      const isCustomGps =
+        distCenter &&
+        (Math.abs(currentRoom.lat - distCenter.lat) > 0.0001 ||
+          Math.abs(currentRoom.lng - distCenter.lng) > 0.0001);
+      if (isCustomGps) {
+        return `https://www.google.com/maps/search/?api=1&query=${currentRoom.lat},${currentRoom.lng}`;
+      }
+    }
     let cleanAddr = currentRoom.address.trim();
     cleanAddr = cleanAddr.replace(/\b([Dd])uệt\b/g, (m, p) => (p === "D" ? "Duyệt" : "duyệt"));
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -231,6 +259,48 @@ function RoomDetailContent() {
     }
     setIsEditingAddress(false);
     showToast("Đã cập nhật địa chỉ phòng thành công!", "success");
+  };
+
+  const handleSaveLocation = ({
+    lat,
+    lng,
+    googleMapsUrl: gUrl,
+    resolvedAddress,
+  }: {
+    lat: number;
+    lng: number;
+    googleMapsUrl?: string;
+    resolvedAddress?: string;
+  }) => {
+    if (!currentRoom) return;
+    const updatedRoom: Room = {
+      ...currentRoom,
+      lat,
+      lng,
+      googleMapsUrl: gUrl || currentRoom.googleMapsUrl,
+      address: resolvedAddress || currentRoom.address,
+    };
+
+    setRooms((prev) =>
+      prev.map((r) => (r.id === currentRoom.id ? updatedRoom : r))
+    );
+
+    if (isSupabaseConfigured && supabase) {
+      const client = supabase;
+      client
+        .from("rooms")
+        .update({
+          lat,
+          lng,
+          googleMapsUrl: gUrl || currentRoom.googleMapsUrl,
+          address: resolvedAddress || currentRoom.address,
+        })
+        .eq("id", currentRoom.id)
+        .then();
+    }
+
+    setIsEditingLocation(false);
+    showToast("Đã lưu tọa độ vị trí phòng thành công!", "success");
   };
 
   const handleUpdateSaleUser = (user: { name: string; phone: string }) => {
@@ -743,7 +813,7 @@ function RoomDetailContent() {
                 </div>
               ) : (
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-zinc-500 pt-1 font-sans">
-                  <span className="flex items-center gap-2 flex-wrap">
+                  <span className="flex items-center gap-3 flex-wrap">
                     <span>
                       Địa chỉ: <strong className="text-zinc-800 dark:text-zinc-200">{currentRoom.address}, {currentRoom.ward ? currentRoom.ward + ", " : ""}{currentRoom.district}</strong>
                     </span>
@@ -757,12 +827,33 @@ function RoomDetailContent() {
                       <Edit3 className="w-3 h-3" />
                       <span>Sửa địa chỉ</span>
                     </button>
+                    <button
+                      onClick={() => setIsEditingLocation(!isEditingLocation)}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
+                    >
+                      <MapPin className="w-3 h-3" />
+                      <span>{isEditingLocation ? "Đóng bộ ghim map" : "Ghim vị trí / Dán link GG Maps"}</span>
+                    </button>
                   </span>
                   {currentRoom.lat && currentRoom.lng && (
                     <span className="text-[11px] font-mono text-zinc-400">
                       Tọa độ GPS: {currentRoom.lat.toFixed(4)}, {currentRoom.lng.toFixed(4)}
                     </span>
                   )}
+                </div>
+              )}
+
+              {/* Khung Chỉnh sửa vị trí nâng cao với 3 chế độ (Link GG Maps / Tự động / Tích chọn) */}
+              {isEditingLocation && (
+                <div className="pt-2">
+                  <MapLocationPicker
+                    lat={currentRoom.lat || DISTRICT_COORDINATES[currentRoom.district]?.lat || HCMC_CENTER[1]}
+                    lng={currentRoom.lng || DISTRICT_COORDINATES[currentRoom.district]?.lng || HCMC_CENTER[0]}
+                    address={currentRoom.address}
+                    district={currentRoom.district}
+                    googleMapsUrl={currentRoom.googleMapsUrl}
+                    onChangeLocation={handleSaveLocation}
+                  />
                 </div>
               )}
             </div>
