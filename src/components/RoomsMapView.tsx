@@ -23,6 +23,7 @@ import {
   ExternalLink,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Search,
   Loader2,
   Navigation2,
@@ -38,6 +39,8 @@ import {
   CheckCircle2,
   ShieldCheck,
   Calendar,
+  RotateCcw,
+  SlidersHorizontal,
 } from "lucide-react";
 
 interface RoomsMapViewProps {
@@ -144,6 +147,71 @@ export function RoomsMapView({
     coords: [number, number];
   } | null>(null);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Quản lý trạng thái mở menu bộ lọc dạng dropdown: 'district' | 'price' | 'status' | 'type' | 'features' | null
+  const [openFilterMenu, setOpenFilterMenu] = useState<
+    "district" | "price" | "status" | "type" | "features" | null
+  >(null);
+
+  // Đóng dropdown bộ lọc khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest(".filter-menu-container")) {
+        setOpenFilterMenu(null);
+      }
+    };
+    if (openFilterMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openFilterMenu]);
+
+  // Các tùy chọn bộ lọc
+  const roomTypeOptions: { id: RoomType; label: string }[] = useMemo(
+    () => [
+      { id: "studio", label: "Studio" },
+      { id: "duplex", label: "Duplex (Gác lửng)" },
+      { id: "1pn", label: "1 Phòng Ngủ (1PN)" },
+      { id: "2pn", label: "2 Phòng Ngủ (2PN)" },
+    ],
+    []
+  );
+
+  const priceBracketOptions: { id: PriceBracketKey; label: string; range: string }[] = useMemo(
+    () => [
+      { id: "under_6", label: "Dưới 6 triệu", range: "< 6.000.000đ" },
+      { id: "6_to_9", label: "6 - 9 triệu", range: "6.000.000đ - 9.000.000đ" },
+      { id: "9_to_12", label: "9 - 12 triệu", range: "9.000.000đ - 12.000.000đ" },
+      { id: "over_12", label: "Trên 12 triệu", range: "> 12.000.000đ" },
+    ],
+    []
+  );
+
+  const statusOptions: { id: RoomStatus | "all"; label: string; dot: string }[] = useMemo(
+    () => [
+      { id: "all", label: "Tất cả trạng thái", dot: "bg-zinc-400" },
+      { id: "available", label: "Trống sẵn (Dẫn cọc ngay)", dot: "bg-emerald-500" },
+      { id: "holding", label: "Đang giữ chỗ (Có sale dẫn)", dot: "bg-amber-500" },
+      { id: "soon_available", label: "Sắp trống (Sắp hết HĐ)", dot: "bg-sky-500" },
+    ],
+    []
+  );
+
+  const hasActiveFilters = useMemo(() => {
+    if (!filterOptions) return false;
+    return (
+      (filterOptions.districts && filterOptions.districts.length > 0) ||
+      (filterOptions.priceBrackets && filterOptions.priceBrackets.length > 0) ||
+      (filterOptions.roomTypes && filterOptions.roomTypes.length > 0) ||
+      (filterOptions.status && filterOptions.status !== "all") ||
+      Boolean(filterOptions.allowPet) ||
+      Boolean(filterOptions.hasBalcony) ||
+      Boolean(filterOptions.hasElevator)
+    );
+  }, [filterOptions]);
 
   // Danh sách các quận có phòng
   const availableDistricts = useMemo(() => {
@@ -623,6 +691,66 @@ export function RoomsMapView({
     onUpdateFilterOptions((prev) => ({ ...prev, hasBalcony: !prev.hasBalcony }));
   };
 
+  const handleToggleRoomType = (type: RoomType) => {
+    if (!onUpdateFilterOptions || !filterOptions) return;
+    onUpdateFilterOptions((prev) => {
+      const exists = prev.roomTypes.includes(type);
+      return {
+        ...prev,
+        roomTypes: exists
+          ? prev.roomTypes.filter((t) => t !== type)
+          : [...prev.roomTypes, type],
+      };
+    });
+  };
+
+  const handleToggleElevator = () => {
+    if (!onUpdateFilterOptions || !filterOptions) return;
+    onUpdateFilterOptions((prev) => ({ ...prev, hasElevator: !prev.hasElevator }));
+  };
+
+  const handleSelectAllDistricts = () => {
+    if (!onUpdateFilterOptions || !filterOptions) return;
+    onUpdateFilterOptions((prev) => ({
+      ...prev,
+      districts: [...availableDistricts],
+    }));
+  };
+
+  const handleClearDistricts = () => {
+    if (!onUpdateFilterOptions || !filterOptions) return;
+    onUpdateFilterOptions((prev) => ({
+      ...prev,
+      districts: [],
+    }));
+  };
+
+  const handleClearPriceBrackets = () => {
+    if (!onUpdateFilterOptions || !filterOptions) return;
+    onUpdateFilterOptions((prev) => ({
+      ...prev,
+      priceBrackets: [],
+    }));
+  };
+
+  const handleClearRoomTypes = () => {
+    if (!onUpdateFilterOptions || !filterOptions) return;
+    onUpdateFilterOptions((prev) => ({
+      ...prev,
+      roomTypes: [],
+    }));
+  };
+
+  const handleClearFeatures = () => {
+    if (!onUpdateFilterOptions || !filterOptions) return;
+    onUpdateFilterOptions((prev) => ({
+      ...prev,
+      allowPet: false,
+      hasBalcony: false,
+      hasElevator: false,
+    }));
+  };
+
   return (
     <div className="fixed inset-0 z-40 w-screen h-screen overflow-hidden bg-zinc-950 flex select-none">
       {/* 1. KHUNG MAPBOX TOÀN MÀN HÌNH (100vw x 100vh) */}
@@ -696,104 +824,394 @@ export function RoomsMapView({
           )}
         </div>
 
-        {/* B. DÃY NÚT BỘ LỌC CHUYÊN NGHIỆP CUỘN NGANG (GOOGLE MAPS CATEGORY CHIPS) */}
-        <div className="pointer-events-auto flex-1 min-w-0 flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
-          {/* Nút Trạng thái */}
-          <button
-            onClick={() => handleToggleStatusPill("available")}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer flex items-center gap-1.5 border ${
-              filterOptions?.status === "available"
-                ? "bg-emerald-600 text-white border-emerald-500 shadow-emerald-500/20"
-                : "bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>Trống sẵn</span>
-          </button>
-
-          <button
-            onClick={() => handleToggleStatusPill("holding")}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer flex items-center gap-1.5 border ${
-              filterOptions?.status === "holding"
-                ? "bg-amber-500 text-zinc-950 font-bold border-amber-400 shadow-amber-500/20"
-                : "bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span>Đang giữ chỗ</span>
-          </button>
-
-          {/* Phím lọc Giá tiền */}
-          <button
-            onClick={() => handleTogglePricePill("under_6")}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer border ${
-              filterOptions?.priceBrackets.includes("under_6")
-                ? "bg-amber-500 text-zinc-950 font-bold border-amber-400 shadow-amber-500/20"
-                : "bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
-            }`}
-          >
-            Dưới 6 triệu
-          </button>
-
-          <button
-            onClick={() => handleTogglePricePill("6_to_9")}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer border ${
-              filterOptions?.priceBrackets.includes("6_to_9")
-                ? "bg-amber-500 text-zinc-950 font-bold border-amber-400 shadow-amber-500/20"
-                : "bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
-            }`}
-          >
-            6 - 9 triệu
-          </button>
-
-          <button
-            onClick={() => handleTogglePricePill("9_to_12")}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer border ${
-              filterOptions?.priceBrackets.includes("9_to_12")
-                ? "bg-amber-500 text-zinc-950 font-bold border-amber-400 shadow-amber-500/20"
-                : "bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
-            }`}
-          >
-            9 - 12 triệu
-          </button>
-
-          {/* Phím tiện ích */}
-          <button
-            onClick={handleTogglePet}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer border ${
-              filterOptions?.allowPet
-                ? "bg-amber-500 text-zinc-950 font-bold border-amber-400"
-                : "bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
-            }`}
-          >
-            🐾 Nuôi Pet
-          </button>
-
-          <button
-            onClick={handleToggleBalcony}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer border ${
-              filterOptions?.hasBalcony
-                ? "bg-amber-500 text-zinc-950 font-bold border-amber-400"
-                : "bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
-            }`}
-          >
-            🌿 Ban công
-          </button>
-
-          {/* Phím lọc theo Quận */}
-          {availableDistricts.map((district) => (
+        {/* B. DÃY CÁC MENU BỘ LỌC CHUYÊN NGHIỆP DẠNG DROPDOWN */}
+        <div className="pointer-events-auto flex items-center gap-2 overflow-visible py-1">
+          {/* Menu 1: Khu Vực (Quận) */}
+          <div className="relative filter-menu-container">
             <button
-              key={district}
-              onClick={() => handleToggleDistrictPill(district)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer border ${
-                filterOptions?.districts.includes(district)
-                  ? "bg-amber-500 text-zinc-950 font-bold border-amber-400"
-                  : "bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
+              onClick={() => setOpenFilterMenu((prev) => (prev === "district" ? null : "district"))}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer flex items-center gap-1.5 border ${
+                filterOptions?.districts && filterOptions.districts.length > 0
+                  ? "bg-amber-500 text-zinc-950 font-bold border-amber-400 shadow-amber-500/20"
+                  : openFilterMenu === "district"
+                  ? "bg-white dark:bg-zinc-800 text-amber-500 border-amber-400 ring-2 ring-amber-400/30"
+                  : "bg-white/95 dark:bg-zinc-900/95 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
               }`}
             >
-              {district}
+              <span>📍</span>
+              <span>
+                {filterOptions?.districts && filterOptions.districts.length > 0
+                  ? filterOptions.districts.length === 1
+                    ? filterOptions.districts[0]
+                    : `${filterOptions.districts.length} Quận`
+                  : "Khu vực"}
+              </span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  openFilterMenu === "district" ? "rotate-180" : ""
+                }`}
+              />
             </button>
-          ))}
+
+            {openFilterMenu === "district" && (
+              <div className="absolute top-full left-0 mt-2 w-72 sm:w-80 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
+                    <span>📍</span> Khu vực TP.HCM
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleSelectAllDistricts}
+                      className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-medium cursor-pointer"
+                    >
+                      Chọn hết
+                    </button>
+                    <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                    <button
+                      onClick={handleClearDistricts}
+                      className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:underline font-medium cursor-pointer"
+                    >
+                      Bỏ chọn
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 max-h-60 overflow-y-auto pr-1">
+                  {availableDistricts.map((district) => {
+                    const isSelected = filterOptions?.districts.includes(district);
+                    return (
+                      <button
+                        key={district}
+                        onClick={() => handleToggleDistrictPill(district)}
+                        className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold text-left transition-all flex items-center justify-between cursor-pointer border ${
+                          isSelected
+                            ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold shadow-xs"
+                            : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200/60 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        <span className="truncate">{district}</span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-amber-500 shrink-0 ml-1" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Menu 2: Mức Giá */}
+          <div className="relative filter-menu-container">
+            <button
+              onClick={() => setOpenFilterMenu((prev) => (prev === "price" ? null : "price"))}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer flex items-center gap-1.5 border ${
+                filterOptions?.priceBrackets && filterOptions.priceBrackets.length > 0
+                  ? "bg-amber-500 text-zinc-950 font-bold border-amber-400 shadow-amber-500/20"
+                  : openFilterMenu === "price"
+                  ? "bg-white dark:bg-zinc-800 text-amber-500 border-amber-400 ring-2 ring-amber-400/30"
+                  : "bg-white/95 dark:bg-zinc-900/95 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
+              }`}
+            >
+              <span>💰</span>
+              <span>
+                {filterOptions?.priceBrackets && filterOptions.priceBrackets.length > 0
+                  ? filterOptions.priceBrackets.length === 1
+                    ? priceBracketOptions.find((b) => b.id === filterOptions.priceBrackets[0])?.label
+                    : `${filterOptions.priceBrackets.length} Mức giá`
+                  : "Khoảng giá"}
+              </span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  openFilterMenu === "price" ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {openFilterMenu === "price" && (
+              <div className="absolute top-full left-0 mt-2 w-72 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
+                    <span>💰</span> Khoảng giá thuê
+                  </span>
+                  {filterOptions?.priceBrackets && filterOptions.priceBrackets.length > 0 && (
+                    <button
+                      onClick={handleClearPriceBrackets}
+                      className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:underline font-medium cursor-pointer"
+                    >
+                      Bỏ chọn
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {priceBracketOptions.map((bracket) => {
+                    const isSelected = filterOptions?.priceBrackets.includes(bracket.id);
+                    return (
+                      <button
+                        key={bracket.id}
+                        onClick={() => handleTogglePricePill(bracket.id)}
+                        className={`w-full px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer border ${
+                          isSelected
+                            ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold shadow-xs"
+                            : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200/60 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        <div className="text-left">
+                          <p className="font-bold">{bracket.label}</p>
+                          <p className="text-[10px] text-zinc-400 font-normal">{bracket.range}</p>
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 text-amber-500 shrink-0 ml-2" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Menu 3: Trạng Thái Phòng */}
+          <div className="relative filter-menu-container">
+            <button
+              onClick={() => setOpenFilterMenu((prev) => (prev === "status" ? null : "status"))}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer flex items-center gap-1.5 border ${
+                filterOptions?.status && filterOptions.status !== "all"
+                  ? "bg-amber-500 text-zinc-950 font-bold border-amber-400 shadow-amber-500/20"
+                  : openFilterMenu === "status"
+                  ? "bg-white dark:bg-zinc-800 text-amber-500 border-amber-400 ring-2 ring-amber-400/30"
+                  : "bg-white/95 dark:bg-zinc-900/95 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
+              }`}
+            >
+              {filterOptions?.status === "available" ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                  <span>Trống sẵn</span>
+                </>
+              ) : filterOptions?.status === "holding" ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                  <span>Đang giữ chỗ</span>
+                </>
+              ) : filterOptions?.status === "soon_available" ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
+                  <span>Sắp trống</span>
+                </>
+              ) : (
+                <>
+                  <span>🏷️</span>
+                  <span>Trạng thái</span>
+                </>
+              )}
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  openFilterMenu === "status" ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {openFilterMenu === "status" && (
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="space-y-1">
+                  {statusOptions.map((opt) => {
+                    const isSelected =
+                      (opt.id === "all" && (!filterOptions?.status || filterOptions.status === "all")) ||
+                      filterOptions?.status === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        onClick={() => {
+                          handleToggleStatusPill(opt.id);
+                          setOpenFilterMenu(null);
+                        }}
+                        className={`w-full px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer border ${
+                          isSelected
+                            ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold shadow-xs"
+                            : "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                          <span>{opt.label}</span>
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 text-amber-500 shrink-0 ml-2" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Menu 4: Kiểu Phòng */}
+          <div className="relative filter-menu-container">
+            <button
+              onClick={() => setOpenFilterMenu((prev) => (prev === "type" ? null : "type"))}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer flex items-center gap-1.5 border ${
+                filterOptions?.roomTypes && filterOptions.roomTypes.length > 0
+                  ? "bg-amber-500 text-zinc-950 font-bold border-amber-400 shadow-amber-500/20"
+                  : openFilterMenu === "type"
+                  ? "bg-white dark:bg-zinc-800 text-amber-500 border-amber-400 ring-2 ring-amber-400/30"
+                  : "bg-white/95 dark:bg-zinc-900/95 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
+              }`}
+            >
+              <span>🏠</span>
+              <span>
+                {filterOptions?.roomTypes && filterOptions.roomTypes.length > 0
+                  ? filterOptions.roomTypes.length === 1
+                    ? roomTypeOptions.find((t) => t.id === filterOptions.roomTypes[0])?.label
+                    : `${filterOptions.roomTypes.length} Kiểu phòng`
+                  : "Kiểu phòng"}
+              </span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  openFilterMenu === "type" ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {openFilterMenu === "type" && (
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
+                    <span>🏠</span> Kiểu phòng
+                  </span>
+                  {filterOptions?.roomTypes && filterOptions.roomTypes.length > 0 && (
+                    <button
+                      onClick={handleClearRoomTypes}
+                      className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:underline font-medium cursor-pointer"
+                    >
+                      Bỏ chọn
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {roomTypeOptions.map((type) => {
+                    const isSelected = filterOptions?.roomTypes.includes(type.id);
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => handleToggleRoomType(type.id)}
+                        className={`w-full px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer border ${
+                          isSelected
+                            ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold shadow-xs"
+                            : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200/60 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        <span>{type.label}</span>
+                        {isSelected && <Check className="w-4 h-4 text-amber-500 shrink-0 ml-2" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Menu 5: Tiện Ích */}
+          <div className="relative filter-menu-container">
+            {(() => {
+              const activeFeaturesCount =
+                (filterOptions?.allowPet ? 1 : 0) +
+                (filterOptions?.hasBalcony ? 1 : 0) +
+                (filterOptions?.hasElevator ? 1 : 0);
+              const hasFeatures = activeFeaturesCount > 0;
+              return (
+                <>
+                  <button
+                    onClick={() => setOpenFilterMenu((prev) => (prev === "features" ? null : "features"))}
+                    className={`px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer flex items-center gap-1.5 border ${
+                      hasFeatures
+                        ? "bg-amber-500 text-zinc-950 font-bold border-amber-400 shadow-amber-500/20"
+                        : openFilterMenu === "features"
+                        ? "bg-white dark:bg-zinc-800 text-amber-500 border-amber-400 ring-2 ring-amber-400/30"
+                        : "bg-white/95 dark:bg-zinc-900/95 text-zinc-700 dark:text-zinc-200 border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800"
+                    }`}
+                  >
+                    <span>✨</span>
+                    <span>Tiện ích {hasFeatures ? `(${activeFeaturesCount})` : ""}</span>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        openFilterMenu === "features" ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {openFilterMenu === "features" && (
+                    <div className="absolute top-full left-0 mt-2 w-64 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
+                        <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
+                          <span>✨</span> Tiện ích phòng
+                        </span>
+                        {hasFeatures && (
+                          <button
+                            onClick={handleClearFeatures}
+                            className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:underline font-medium cursor-pointer"
+                          >
+                            Bỏ chọn
+                          </button>
+                        )}
+                      </div>
+                      <div className="space-y-1.5">
+                        <button
+                          onClick={handleTogglePet}
+                          className={`w-full px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer border ${
+                            filterOptions?.allowPet
+                              ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold shadow-xs"
+                              : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200/60 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">🐾 Cho phép nuôi Pet</span>
+                          {filterOptions?.allowPet && (
+                            <Check className="w-4 h-4 text-amber-500 shrink-0 ml-2" />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={handleToggleBalcony}
+                          className={`w-full px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer border ${
+                            filterOptions?.hasBalcony
+                              ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold shadow-xs"
+                              : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200/60 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">🌿 Có ban công / Cửa sổ lớn</span>
+                          {filterOptions?.hasBalcony && (
+                            <Check className="w-4 h-4 text-amber-500 shrink-0 ml-2" />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={handleToggleElevator}
+                          className={`w-full px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer border ${
+                            filterOptions?.hasElevator
+                              ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold shadow-xs"
+                              : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200/60 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">🛗 Có thang máy di chuyển</span>
+                          {filterOptions?.hasElevator && (
+                            <Check className="w-4 h-4 text-amber-500 shrink-0 ml-2" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+
+          {/* Nút Đặt lại toàn bộ bộ lọc */}
+          {hasActiveFilters && onResetFilters && (
+            <button
+              onClick={() => {
+                onResetFilters();
+                setOpenFilterMenu(null);
+              }}
+              className="px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center gap-1.5"
+              title="Xóa toàn bộ bộ lọc"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Đặt lại</span>
+            </button>
+          )}
         </div>
 
         {/* C. CÁC NÚT ĐIỀU HƯỚNG GÓC PHẢI (TOP-RIGHT ACTIONS) */}

@@ -899,3 +899,32 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành thành công (0 lỗi TypeScript).
 - Camera bay mượt mà đến vị trí phòng với mức zoom chuẩn 15.0 và góc nhìn 2D thẳng đứng.
+
+---
+## [Tái Cấu Trúc Thanh Lọc Thành Các Menu Dropdown Tương Tác Chuẩn Google Maps]
+**Thời gian:** 2026-10-30 22:58:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Thanh lọc (filter bar) phía trên bản đồ trước đây hiển thị tràn lan hàng chục phím con khiến màn hình bị thiếu chỗ, tràn viền và không hiển thị hết các nút lọc.
+- Yêu cầu gom nhóm các bộ lọc thành **các menu gọn gàng**, khi người dùng click vào nút nào thì menu đó mới mở ra dạng dropdown để chọn.
+
+### 2. Chi tiết thực hiện
+
+1. **Thiết Kế Lại Giao Diện 5 Nhóm Menu Dropdown Thông Minh ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - Thay thế toàn bộ hàng phím tĩnh tràn viền bằng 5 nút menu cô đọng, chiếm diện tích siêu nhỏ (~500px), hiển thị trọn vẹn 100% trên mọi độ phân giải màn hình (từ Laptop 1366px đến Màn hình lớn 1707px+):
+     1. **Menu Khu vực (`📍 Khu vực`):** Dropdown lưới 2 cột hiển thị toàn bộ các Quận/Huyện TP.HCM, có nút *"Chọn hết"* và *"Bỏ chọn"*, tự động đổi nhãn thành tên quận hoặc số lượng quận đã chọn.
+     2. **Menu Mức giá (`💰 Khoảng giá`):** Dropdown 4 phân khúc giá (Dưới 6tr, 6 - 9tr, 9 - 12tr, Trên 12tr) kèm khoảng tiền cụ thể và dấu tích xanh.
+     3. **Menu Trạng thái (`🏷️ Trạng thái`):** Dropdown 4 trạng thái (Tất cả, 🟢 Trống sẵn, 🟠 Đang giữ chỗ, 🔵 Sắp trống) với chấm màu trực quan.
+     4. **Menu Kiểu phòng (`🏠 Kiểu phòng`):** Dropdown chọn nhanh Studio, Duplex (Gác lửng), 1PN, 2PN.
+     5. **Menu Tiện ích (`✨ Tiện ích`):** Popover chọn các tiện ích phòng (🐾 Nuôi Pet, 🌿 Ban công, 🛗 Thang máy).
+     6. **Nút Đặt lại (`↺ Đặt lại`):** Tự động xuất hiện màu đỏ nổi bật khi có bất kỳ điều kiện lọc nào đang kích hoạt.
+
+2. **Cơ Chế Trải Nghiệm Tương Tác Người Dùng (UX):**
+   - Click vào nút menu để mở ra dropdown bên dưới; click lại hoặc click menu khác sẽ tự chuyển đổi mượt mà.
+   - Tự động đóng dropdown khi click chuột ra bất kỳ vị trí nào bên ngoài (`handleClickOutside`).
+   - Nút menu tự động chuyển sang màu vàng hổ phách nổi bật (`bg-amber-500 text-zinc-950 font-bold`) khi đang có giá trị lọc được chọn bên trong, giúp người dùng nắm bắt trạng thái tức thì.
+   - Thẻ menu nổi sử dụng hiệu ứng kính mờ `backdrop-blur-md`, viền hiện đại, hoạt ảnh fade-in zoom-95 mượt mà.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành thành công trong **2.4s** với Next.js Turbopack (0 lỗi TypeScript).
+- Thanh công cụ phía trên bản đồ gọn gàng, hiển thị trọn vẹn, không còn hiện tượng tràn viền hay che khuất.
