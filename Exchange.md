@@ -1011,3 +1011,25 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: thành công 100% trong **2.8s** với Next.js Turbopack, 0 lỗi TypeScript.
 - Cả địa chỉ `30.1 đường đặng lộ` và `87/57/20 Lê văn duyệt` đều được Google Maps Embed định vị chính xác và hiển thị ghim rõ ràng.
+
+---
+## [Sửa Lỗi Rules of Hooks Trong RoomDetailContent]
+**Thời gian:** 2026-10-31 03:28:00
+
+### 1. Nội dung lỗi
+- Trình duyệt ném lỗi runtime:
+  `React has detected a change in the order of Hooks called by RoomDetailContent.`
+  `Rendered more hooks than during the previous render.`
+- Vị trí phát sinh: `src/app/rooms/[id]/page.tsx:317:30` tại `useMemo` của `mapEmbedUrl`.
+
+### 2. Nguyên nhân & Giải pháp Kỹ thuật
+- **Nguyên nhân:**
+  - Hai hook `useMemo` tạo `mapEmbedUrl` và `mapSearchUrl` trước đó được đặt sau các câu lệnh điều kiện rẽ nhánh (early return) `if (!isMounted || isLoadingRemote)` và `if (!currentRoom)`.
+  - Ở lần render đầu tiên (khi `isMounted` còn là `false`), component trả về sớm trước khi gọi đến 2 hook này (chỉ chạy 19 hooks).
+  - Ở lần render tiếp theo (khi `isMounted` chuyển thành `true`), component tiếp tục thực thi và gọi thêm 2 hook `useMemo` này (tổng cộng 21 hooks), vi phạm trực tiếp quy tắc của React (Rules of Hooks: hooks không được đặt sau return hoặc bên trong điều kiện).
+- **Giải pháp Kỹ thuật:**
+  - Di chuyển toàn bộ khai báo `mapEmbedUrl` và `mapSearchUrl` lên đầu component ([`src/app/rooms/[id]/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/rooms/[id]/page.tsx)) ngay sau hook `relatedRooms`, trước mọi câu lệnh early return.
+  - Đảm bảo số lượng và thứ tự hooks luôn luôn đồng nhất 100% giữa các lần render.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: biên dịch thành công hoàn hảo trong **821ms** với Next.js Turbopack, 0 lỗi TypeScript, không còn bất kỳ cảnh báo hook nào.

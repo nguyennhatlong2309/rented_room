@@ -193,6 +193,24 @@ function RoomDetailContent() {
       .map((item) => item.room);
   }, [currentRoom, rooms]);
 
+  const mapEmbedUrl = useMemo(() => {
+    if (!currentRoom) return "";
+    // Làm sạch địa chỉ tối ưu cho Google Maps Embed:
+    // Tránh ghép tên Phường vào query vì cơ sở dữ liệu Google Maps tại Việt Nam thường lập chỉ mục phường không đồng bộ
+    // (Ví dụ: Lê Văn Duyệt được index theo địa danh Gia Định, nếu kèm "Phường 3" hoặc "Phường 1" Google Maps sẽ xung đột và không hiện ghim).
+    const cleanAddr = currentRoom.address.trim();
+    const query = `${cleanAddr}, ${currentRoom.district}, TP.HCM`;
+    return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  }, [currentRoom]);
+
+  const mapSearchUrl = useMemo(() => {
+    if (!currentRoom) return "";
+    const cleanAddr = currentRoom.address.trim();
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      `${cleanAddr}, ${currentRoom.district}, TP.HCM`
+    )}`;
+  }, [currentRoom]);
+
   const handleUpdateSaleUser = (user: { name: string; phone: string }) => {
     setSaleUser(user);
     safeSetLocalStorage("roomsales_current_user", user);
@@ -313,24 +331,6 @@ function RoomDetailContent() {
       </div>
     );
   }
-
-  const mapEmbedUrl = useMemo(() => {
-    if (!currentRoom) return "";
-    // Làm sạch địa chỉ tối ưu cho Google Maps Embed:
-    // Tránh ghép tên Phường vào query vì cơ sở dữ liệu Google Maps tại Việt Nam thường lập chỉ mục phường không đồng bộ
-    // (Ví dụ: Lê Văn Duyệt được index theo địa danh Gia Định, nếu kèm "Phường 3" hoặc "Phường 1" Google Maps sẽ xung đột và không hiện ghim).
-    const cleanAddr = currentRoom.address.trim();
-    const query = `${cleanAddr}, ${currentRoom.district}, TP.HCM`;
-    return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-  }, [currentRoom]);
-
-  const mapSearchUrl = useMemo(() => {
-    if (!currentRoom) return "";
-    const cleanAddr = currentRoom.address.trim();
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-      `${cleanAddr}, ${currentRoom.district}, TP.HCM`
-    )}`;
-  }, [currentRoom]);
 
   const statusInfo = ROOM_STATUS_MAP[currentRoom.status];
   const cleanLandlordPhone = currentRoom.landlord?.phone
