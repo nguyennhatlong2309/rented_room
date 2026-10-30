@@ -5,6 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Room } from "@/lib/types";
 import { INITIAL_ROOMS } from "@/data/initialRooms";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import {
+  safeSetLocalStorage,
+  CURRENT_ROOMS_CACHE_KEY,
+} from "@/lib/storageUtils";
 import {
   formatVND,
   formatPriceNumber,
@@ -52,6 +57,7 @@ function RoomDetailContent() {
   const roomId = params.id as string;
 
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoadingRemote, setIsLoadingRemote] = useState(false);
 
   // 1. Rooms state (synced with localStorage safely after mount)
   const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
@@ -68,19 +74,77 @@ function RoomDetailContent() {
   // Load client-side cached rooms & sale user after mounting to avoid hydration mismatch
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("roomsales_rooms_cache_hcm_v4");
+      const saved =
+        localStorage.getItem(CURRENT_ROOMS_CACHE_KEY) ||
+        localStorage.getItem("roomsales_rooms_cache_hcm_v4");
       if (saved) {
-        setRooms(JSON.parse(saved));
+        const parsed: Room[] = JSON.parse(saved);
+        // Tự động bù đắp tọa độ GPS chính xác nếu cache cũ bị thiếu lat/lng
+        const merged = parsed.map((r) => {
+          const init = INITIAL_ROOMS.find((i) => i.id === r.id);
+          if (init && (!r.lat || !r.lng || r.lat !== init.lat || r.lng !== init.lng)) {
+            return { ...r, lat: init.lat, lng: init.lng };
+          }
+          return r;
+        });
+        setRooms(merged);
+        safeSetLocalStorage(CURRENT_ROOMS_CACHE_KEY, merged);
+      } else {
+        safeSetLocalStorage(CURRENT_ROOMS_CACHE_KEY, INITIAL_ROOMS);
       }
+
       const savedUser = localStorage.getItem("roomsales_current_user");
       if (savedUser) {
         setSaleUser(JSON.parse(savedUser));
       }
     } catch (e) {
-      console.error("Error reading localStorage:", e);
+      console.warn("Error reading localStorage:", e);
     }
     setIsMounted(true);
   }, []);
+
+  // Remote fetch fallback from Supabase if room not found in local cache
+  useEffect(() => {
+    if (!isMounted || !isSupabaseConfigured || !supabase || !roomId) return;
+    const existsLocally = rooms.some((r) => r.id === roomId);
+    if (existsLocally) return;
+
+    const client = supabase;
+    let isSubscribed = true;
+    setIsLoadingRemote(true);
+
+    const fetchSingleRoom = async () => {
+      try {
+        const { data, error } = await client
+          .from("rooms")
+          .select("*")
+          .eq("id", roomId)
+          .maybeSingle();
+
+        if (!error && data && isSubscribed) {
+          setRooms((prev) => {
+            const exists = prev.some((r) => r.id === data.id);
+            if (exists) {
+              return prev.map((r) => (r.id === data.id ? { ...r, ...data } : r));
+            }
+            return [data as Room, ...prev];
+          });
+        }
+      } catch (err: unknown) {
+        console.warn("Error fetching room from Supabase:", err);
+      } finally {
+        if (isSubscribed) {
+          setIsLoadingRemote(false);
+        }
+      }
+    };
+
+    fetchSingleRoom();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [roomId, isMounted, rooms]);
 
   // Reset image and scroll to top on roomId switch
   useEffect(() => {
@@ -93,11 +157,7 @@ function RoomDetailContent() {
   // Sync rooms state to local cache for persistence (only after initial load to avoid overwriting)
   useEffect(() => {
     if (!isMounted) return;
-    try {
-      localStorage.setItem("roomsales_rooms_cache_hcm_v4", JSON.stringify(rooms));
-    } catch (e) {
-      console.error("Error saving to localStorage:", e);
-    }
+    safeSetLocalStorage(CURRENT_ROOMS_CACHE_KEY, rooms);
   }, [rooms, isMounted]);
 
   // Current Room
@@ -135,14 +195,19 @@ function RoomDetailContent() {
 
   const handleUpdateSaleUser = (user: { name: string; phone: string }) => {
     setSaleUser(user);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("roomsales_current_user", JSON.stringify(user));
-    }
+    safeSetLocalStorage("roomsales_current_user", user);
     showToast("Đã cập nhật thông tin cá nhân của bạn!", "success");
   };
 
-  const handleCreateRoom = (newRoom: Room) => {
+  const handleCreateRoom = async (newRoom: Room) => {
     setRooms((prev) => [newRoom, ...prev]);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from("rooms").insert([newRoom]);
+      } catch (err) {
+        console.error("Supabase insert error:", err);
+      }
+    }
   };
 
   const handleConfirmHold = (
@@ -202,7 +267,7 @@ function RoomDetailContent() {
   };
 
   // Guard while mounting to prevent SSR / Client hydration mismatch
-  if (!isMounted) {
+  if (!isMounted || isLoadingRemote) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FBFBFA] dark:bg-[#0E1218]">
         <div className="flex flex-col items-center gap-3">
@@ -240,6 +305,11 @@ function RoomDetailContent() {
             <span>Quay lại trang danh sách phòng</span>
           </Link>
         </main>
+        <CreateRoomModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreateRoom={handleCreateRoom}
+        />
       </div>
     );
   }

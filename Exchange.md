@@ -961,3 +961,26 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành thành công trong **1.04s** với Next.js Turbopack (0 lỗi TypeScript).
 - Form đăng phòng trực quan, thao tác nhập tiền nhanh chóng, không cần gõ thủ công đơn vị.
+
+---
+## [Đồng Bộ Cache v5 & Xử Lý Xem Chi Tiết Phòng Vừa Upload]
+**Thời gian:** 2026-10-31 01:45:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Người dùng tạo và đăng thành công 1 phòng mới từ modal "Đăng Quỹ Phòng". Tuy nhiên khi click vào "Xem chi tiết" để sang trang chi tiết phòng (`/rooms/[id]`), màn hình hiển thị thông báo lỗi: *"Không tìm thấy thông tin phòng"*.
+
+### 2. Nguyên nhân & Giải pháp Kỹ thuật
+- **Nguyên nhân cốt lõi:**
+  - Ở trang chủ (`/`), danh sách phòng được lưu vào cache key `roomsales_rooms_cache_hcm_v5` thông qua `CURRENT_ROOMS_CACHE_KEY` và hàm an toàn `safeSetLocalStorage`. Đồng thời hàm `cleanupOldStorageCaches()` đã dọn dẹp các cache key cũ bao gồm `roomsales_rooms_cache_hcm_v4`.
+  - Trong khi đó, trang chi tiết phòng ([`src/app/rooms/[id]/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/rooms/[id]/page.tsx)) trước đó vẫn sử dụng hardcode key `roomsales_rooms_cache_hcm_v4`.
+  - Khi người dùng tạo phòng mới ở trang chủ rồi click vào xem chi tiết, trang `/rooms/[id]` đọc từ `v4` (đã bị dọn dẹp hoặc không có phòng mới), dẫn đến fallback về `INITIAL_ROOMS` và không tìm thấy ID của phòng vừa tạo, render ra màn hình *"Không tìm thấy thông tin phòng"*.
+- **Giải pháp Kỹ thuật:**
+  1. Cập nhật [`src/app/rooms/[id]/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/rooms/[id]/page.tsx) nhập `CURRENT_ROOMS_CACHE_KEY` và `safeSetLocalStorage` từ [`src/lib/storageUtils.ts`](file:///C:/Long/Long/PersonalProject/rented_room/src/lib/storageUtils.ts).
+  2. Đồng bộ hóa việc đọc cache: đọc từ `CURRENT_ROOMS_CACHE_KEY` (v5) với fallback sang v4 nếu có.
+  3. Bổ sung cơ chế fallback truy vấn phòng trực tiếp từ database Supabase (`maybeSingle()`) cho trường hợp phòng được lưu trên backend hoặc người dùng truy cập trực tiếp bằng đường link.
+  4. Sử dụng `safeSetLocalStorage` khi cập nhật trạng thái phòng và thông tin cá nhân sale để phòng tránh lỗi `QuotaExceededError`.
+  5. Tích hợp sẵn `CreateRoomModal` trong nhánh hiển thị dự phòng để người dùng có thể mở modal đăng phòng từ bất kỳ đâu.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: biên dịch thành công 100% trong **974ms** với Next.js Turbopack, 0 lỗi TypeScript.
+- Sau khi tạo phòng mới, click vào "Xem chi tiết" phòng lập tức hiển thị đầy đủ thông tin, thông số, ảnh và nút copy Zalo.
