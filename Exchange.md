@@ -703,3 +703,40 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành trong **2.0s** với Next.js Turbopack (0 lỗi TypeScript).
 - Bản đồ zoom vào sát toà nhà ở mức 17.8 mượt mà, vị trí các ghim phòng trùng khớp 100% với tên đường thực tế tại TP.HCM.
+
+---
+## [Tái Cấu Trúc Bản Đồ Toàn Màn Hình 100vw x 100vh Chuẩn Google Maps]
+**Thời gian:** 2026-10-30 22:11:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Khi người dùng chọn chế độ tìm kiếm bằng bản đồ, bản đồ phải hiển thị tràn viền toàn màn hình (**100vw x 100vh**) giống hệt giao diện web của **Google Maps** (dựa trên ảnh chụp màn hình người dùng cung cấp).
+- Có thanh tìm kiếm nổi ở góc trên bên trái, dải nút bộ lọc danh mục cuộn ngang, ngăn kéo kết quả bên trái thu gọn được, nút "Lớp" bản đồ ở góc dưới bên trái và cụm điều khiển zoom/la bàn/GPS ở góc dưới bên phải.
+
+### 2. Chi tiết thực hiện
+
+1. **Phân tách Chế độ Hiển thị Độc lập ([`src/app/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/page.tsx)):**
+   - **Chế độ Thẻ (`viewMode === "grid"`):** Hiển thị đầy đủ bố cục trang web truyền thống gồm Header, Hero Banner, Thống kê quỹ phòng, Bộ lọc đa năng FilterBar, Lưới thẻ phòng RoomCard và chân trang.
+   - **Chế độ Bản đồ (`viewMode === "map"`):** Chuyển trực tiếp sang giao diện Bản đồ Toàn Màn Hình (`fixed inset-0 z-40 w-screen h-screen overflow-hidden`), không bị giới hạn trong khung chứa 640px như trước.
+
+2. **Thiết kế Giao diện Toàn Màn hình Chuẩn Google Maps ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - **Thẻ Tìm kiếm Google Maps (Top-Left):**
+     - Nút Menu/Drawer để mở/đóng ngăn kéo kết quả.
+     - Ô nhập tìm kiếm địa chỉ, trường học, tòa nhà thời gian thực qua Mapbox Geocoding.
+     - Nút Xóa tìm kiếm và Biểu tượng Tìm kiếm.
+   - **Dãy Nút Bộ Lọc Danh Mục Cuộn Ngang (Category Chips):**
+     - Nằm nổi ngay cạnh thanh tìm kiếm, cho phép sale lọc tức thì: Trạng thái (Trống sẵn, Giữ chỗ, Sắp trống), Khoảng giá (Dưới 6tr, 6-9tr, 9-12tr), Tiện ích (Nuôi Pet, Ban công) và danh sách các Quận TP.HCM.
+   - **Ngăn Kéo Kết Quả Bên Trái (Left Drawer):**
+     - Nổi phía trên bản đồ với hiệu ứng kính mờ (Backdrop Blur), bo tròn hiện đại, hiển thị danh sách phòng kèm khoảng cách GPS khi tìm quanh địa điểm.
+     - Hỗ trợ nút mũi tên `[ < ]` thu gọn sang mép trái màn hình và nút mở ra `[ > ]` nhanh gọn.
+   - **Nút "Lớp" Bản Đồ (Layers) Góc Dưới Trái:**
+     - Thiết kế nút vuông nổi góc dưới bên trái giống hệt Google Maps, bấm vào mở menu chọn: Đường phố, Vệ tinh 3D, Tối Obsidian, Sáng Luxury.
+   - **Cụm Điều Khiển Góc Dưới Phải:**
+     - Nút Phóng to (+), Thu nhỏ (-), Đặt lại hướng Bắc (La bàn), Định vị GPS (Geolocate) và nút Về toàn cảnh TP.HCM.
+   - **Các Nút Điều Hướng Góc Trên Phải:**
+     - Nút nổi bật **"← Danh sách Thẻ"** để chuyển ngay về giao diện web truyền thống.
+     - Nút **"+ Đăng Quỹ Phòng"** để mở form upload phòng mới.
+     - Thẻ thông tin cá nhân của Sale.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: biên dịch thành công 100% trong **1.2s** với Next.js Turbopack (0 lỗi TypeScript).
+- Bản đồ chiếm trọn màn hình 100%, thao tác chuyển đổi qua lại giữa Danh sách thẻ và Google Maps mượt mà, trực quan.

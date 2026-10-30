@@ -352,196 +352,193 @@ function SalesRentedRoomContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-[#0E1218]">
-      {/* Top App Header with Upload button */}
-      <Header
-        saleUser={saleUser}
-        onUpdateSaleUser={handleUpdateSaleUser}
-        onOpenCreateRoom={() => setIsCreateModalOpen(true)}
-      />
-
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner Hero - Luxury Real Estate Full-Image Showcase */}
-        <div className="relative overflow-hidden rounded-3xl min-h-[300px] sm:min-h-[340px] flex items-center p-5 sm:p-9 shadow-xl border border-zinc-200/80 dark:border-zinc-800">
-          {/* Full-bleed high-res background image */}
-          <div className="absolute inset-0 z-0">
-            <img
-              src={bannerTheme === "penthouse" ? "/banner-hero.jpg" : "/banner-saigon.jpg"}
-              alt="Luxury Real Estate TP.HCM"
-              className="w-full h-full object-cover object-center transition-all duration-700 ease-out"
-            />
-            {/* Subtle natural vignette - only slight darkening for text readability, avoiding heavy solid black */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-black/10" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
-          </div>
-
-          {/* Elegant Frosted Glass Content Box on the left */}
-          <div className="relative z-10 max-w-xl p-6 sm:p-8 rounded-3xl bg-zinc-950/65 dark:bg-zinc-900/80 backdrop-blur-md border border-white/20 dark:border-amber-500/30 text-white shadow-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40 font-sans">
-              <MapPin className="w-3.5 h-3.5 text-amber-400" />
-              <span>Hệ Thống Quỹ Phòng Đội Sale • TP.HCM</span>
-            </div>
-            <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-              Tra Cứu SĐT Chủ Hộ & Quỹ Phòng Tức Thì
-            </h1>
-            <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed font-sans">
-              Số điện thoại chủ nhà, pass cửa vân tay và hoa hồng sale. Nút bấm 1-chạm gọi trực tiếp cho chủ hộ hoặc tải ảnh và đăng quỹ phòng mới bất kỳ lúc nào.
-            </p>
-          </div>
-
-          {/* Quick theme switcher on banner */}
-          <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-[11px] text-zinc-200 shadow-lg">
-            <ImageIcon className="w-3.5 h-3.5 text-amber-400 mr-0.5" />
-            <button
-              onClick={() => setBannerTheme("penthouse")}
-              className={`px-2.5 py-0.5 rounded-lg transition-all cursor-pointer ${
-                bannerTheme === "penthouse"
-                  ? "bg-amber-500 text-zinc-950 font-bold shadow-xs"
-                  : "hover:text-white"
-              }`}
-            >
-              Penthouse
-            </button>
-            <span className="text-zinc-500">|</span>
-            <button
-              onClick={() => setBannerTheme("saigon")}
-              className={`px-2.5 py-0.5 rounded-lg transition-all cursor-pointer ${
-                bannerTheme === "saigon"
-                  ? "bg-amber-500 text-zinc-950 font-bold shadow-xs"
-                  : "hover:text-white"
-              }`}
-            >
-              Sài Gòn Đêm
-            </button>
-          </div>
-        </div>
-
-        {/* Stats Overview */}
-        <StatsOverview
+      {/* 1. CHẾ ĐỘ BẢN ĐỒ TOÀN MÀN HÌNH CHUẨN GOOGLE MAPS (100VW x 100VH) */}
+      {viewMode === "map" ? (
+        <RoomsMapView
           rooms={rooms}
-          selectedStatus={filters.status}
-          onSelectStatus={(status) => handleUpdateFilters({ status })}
-        />
-
-        {/* Multi-Select Filter Bar (Zero Layout Shift) */}
-        <FilterBar
-          filters={filters}
-          districts={uniqueDistricts}
-          totalResults={filteredRooms.length}
-          totalRooms={rooms.length}
-          onUpdateFilters={handleUpdateFilters}
+          filteredRooms={filteredRooms}
+          filterOptions={filters}
+          onUpdateFilterOptions={setFilters}
           onResetFilters={handleResetFilters}
+          saleUser={saleUser}
+          onOpenHoldModal={(r) => setSelectedRoomForHold(r)}
+          onReleaseHold={handleReleaseHold}
+          onSwitchToGrid={() => setViewMode("grid")}
+          onOpenCreateModal={() => setIsCreateModalOpen(true)}
         />
-
-        {/* Thanh chuyển đổi Chế độ hiển thị: Danh sách thẻ vs Tìm trên Bản đồ */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-sans">
-              Chế độ hiển thị:
-            </span>
-            <div className="flex items-center gap-1 p-1 bg-zinc-200/60 dark:bg-zinc-900/90 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 shadow-2xs">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                  viewMode === "grid"
-                    ? "bg-white text-zinc-950 dark:bg-zinc-800 dark:text-white shadow-xs"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Danh sách Thẻ ({filteredRooms.length})</span>
-              </button>
-
-              <button
-                onClick={() => setViewMode("map")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === "map"
-                    ? "bg-amber-500 text-zinc-950 shadow-xs shadow-amber-500/20"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
-                }`}
-              >
-                <MapIcon className="w-3.5 h-3.5" />
-                <span>🗺️ Tìm trên Bản đồ (Map)</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
-            {viewMode === "map" ? (
-              <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20">
-                <Sparkles className="w-3 h-3 text-amber-500" />
-                <span>Bấm vào ghim giá tiền để xem phòng & gọi chủ hộ</span>
-              </span>
-            ) : (
-              <span>Đang lọc {filteredRooms.length} phòng theo tiêu chí</span>
-            )}
-          </div>
-        </div>
-
-        {/* Nội dung theo Chế độ hiển thị */}
-        {viewMode === "map" ? (
-          <RoomsMapView
-            rooms={filteredRooms}
+      ) : (
+        /* 2. CHẾ ĐỘ TRANG WEB TRUYỀN THỐNG (DANH SÁCH THẺ + BỘ LỌC + BANNER) */
+        <>
+          {/* Top App Header with Upload button */}
+          <Header
             saleUser={saleUser}
-            onOpenHoldModal={(r) => setSelectedRoomForHold(r)}
-            onReleaseHold={handleReleaseHold}
+            onUpdateSaleUser={handleUpdateSaleUser}
+            onOpenCreateRoom={() => setIsCreateModalOpen(true)}
           />
-        ) : filteredRooms.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filteredRooms.map((room) => (
-              <RoomCard
-                key={room.id}
-                room={room}
-                saleUser={saleUser}
-                onOpenDetail={(r) => router.push(`/rooms/${r.id}`)}
-                onOpenHoldModal={(r) => setSelectedRoomForHold(r)}
-                onReleaseHold={handleReleaseHold}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="p-12 text-center rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 space-y-3">
-            <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
-              <AlertCircle className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-zinc-800 dark:text-zinc-200">
-              Không tìm thấy phòng nào phù hợp với các điều kiện đã chọn
-            </h3>
-            <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              Bạn có thể bật thêm các quận lân cận hoặc chọn thêm khoảng giá để xem nhiều lựa chọn hơn.
-            </p>
-            <div className="flex items-center justify-center gap-2 pt-2">
-              <button
-                onClick={handleResetFilters}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Xóa bộ lọc</span>
-              </button>
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 transition-colors"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span>Đăng phòng mới</span>
-              </button>
-            </div>
-          </div>
-        )}
 
-        {/* Bottom Utility Bar */}
-        <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs text-zinc-500">
-          <div>
-            Đang hiển thị {filteredRooms.length} / {rooms.length} phòng khả dụng tại TP.HCM.
-          </div>
-          <button
-            onClick={handleResetData}
-            className="hover:text-zinc-800 dark:hover:text-zinc-200 underline cursor-pointer"
-          >
-            Khôi phục danh sách phòng gốc
-          </button>
-        </div>
-      </main>
+          {/* Main Container */}
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+            {/* Banner Hero - Luxury Real Estate Full-Image Showcase */}
+            <div className="relative overflow-hidden rounded-3xl min-h-[300px] sm:min-h-[340px] flex items-center p-5 sm:p-9 shadow-xl border border-zinc-200/80 dark:border-zinc-800">
+              {/* Full-bleed high-res background image */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  src={bannerTheme === "penthouse" ? "/banner-hero.jpg" : "/banner-saigon.jpg"}
+                  alt="Luxury Real Estate TP.HCM"
+                  className="w-full h-full object-cover object-center transition-all duration-700 ease-out"
+                />
+                {/* Subtle natural vignette - only slight darkening for text readability, avoiding heavy solid black */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-black/10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+              </div>
+
+              {/* Elegant Frosted Glass Content Box on the left */}
+              <div className="relative z-10 max-w-xl p-6 sm:p-8 rounded-3xl bg-zinc-950/65 dark:bg-zinc-900/80 backdrop-blur-md border border-white/20 dark:border-amber-500/30 text-white shadow-2xl space-y-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40 font-sans">
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Hệ Thống Quỹ Phòng Đội Sale • TP.HCM</span>
+                </div>
+                <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+                  Tra Cứu SĐT Chủ Hộ & Quỹ Phòng Tức Thì
+                </h1>
+                <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed font-sans">
+                  Số điện thoại chủ nhà, pass cửa vân tay và hoa hồng sale. Nút bấm 1-chạm gọi trực tiếp cho chủ hộ hoặc tải ảnh và đăng quỹ phòng mới bất kỳ lúc nào.
+                </p>
+              </div>
+
+              {/* Quick theme switcher on banner */}
+              <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-[11px] text-zinc-200 shadow-lg">
+                <ImageIcon className="w-3.5 h-3.5 text-amber-400 mr-0.5" />
+                <button
+                  onClick={() => setBannerTheme("penthouse")}
+                  className={`px-2.5 py-0.5 rounded-lg transition-all cursor-pointer ${
+                    bannerTheme === "penthouse"
+                      ? "bg-amber-500 text-zinc-950 font-bold shadow-xs"
+                      : "hover:text-white"
+                  }`}
+                >
+                  Penthouse
+                </button>
+                <span className="text-zinc-500">|</span>
+                <button
+                  onClick={() => setBannerTheme("saigon")}
+                  className={`px-2.5 py-0.5 rounded-lg transition-all cursor-pointer ${
+                    bannerTheme === "saigon"
+                      ? "bg-amber-500 text-zinc-950 font-bold shadow-xs"
+                      : "hover:text-white"
+                  }`}
+                >
+                  Sài Gòn Đêm
+                </button>
+              </div>
+            </div>
+
+            {/* Stats Overview */}
+            <StatsOverview
+              rooms={rooms}
+              selectedStatus={filters.status}
+              onSelectStatus={(status) => handleUpdateFilters({ status })}
+            />
+
+            {/* Multi-Select Filter Bar (Zero Layout Shift) */}
+            <FilterBar
+              filters={filters}
+              districts={uniqueDistricts}
+              totalResults={filteredRooms.length}
+              totalRooms={rooms.length}
+              onUpdateFilters={handleUpdateFilters}
+              onResetFilters={handleResetFilters}
+            />
+
+            {/* Thanh chuyển đổi Chế độ hiển thị: Danh sách thẻ vs Tìm trên Bản đồ */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-sans">
+                  Chế độ hiển thị:
+                </span>
+                <div className="flex items-center gap-1 p-1 bg-zinc-200/60 dark:bg-zinc-900/90 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 shadow-2xs">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer bg-white text-zinc-950 dark:bg-zinc-800 dark:text-white shadow-xs"
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>Danh sách Thẻ ({filteredRooms.length})</span>
+                  </button>
+
+                  <button
+                    onClick={() => setViewMode("map")}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white/60 dark:hover:bg-zinc-800"
+                  >
+                    <MapIcon className="w-3.5 h-3.5 text-amber-500" />
+                    <span>🗺️ Mở Bản đồ Toàn Màn Hình</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                <span>Đang hiển thị {filteredRooms.length} phòng theo tiêu chí</span>
+              </div>
+            </div>
+
+            {/* Danh sách phòng dạng thẻ */}
+            {filteredRooms.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {filteredRooms.map((room) => (
+                  <RoomCard
+                    key={room.id}
+                    room={room}
+                    saleUser={saleUser}
+                    onOpenDetail={(r) => router.push(`/rooms/${r.id}`)}
+                    onOpenHoldModal={(r) => setSelectedRoomForHold(r)}
+                    onReleaseHold={handleReleaseHold}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="p-12 text-center rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 space-y-3">
+                <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-bold text-zinc-800 dark:text-zinc-200">
+                  Không tìm thấy phòng nào phù hợp với các điều kiện đã chọn
+                </h3>
+                <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                  Bạn có thể bật thêm các quận lân cận hoặc chọn thêm khoảng giá để xem nhiều lựa chọn hơn.
+                </p>
+                <div className="flex items-center justify-center gap-2 pt-2">
+                  <button
+                    onClick={handleResetFilters}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Xóa bộ lọc</span>
+                  </button>
+                  <button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Đăng phòng mới</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Utility Bar */}
+            <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs text-zinc-500">
+              <div>
+                Đang hiển thị {filteredRooms.length} / {rooms.length} phòng khả dụng tại TP.HCM.
+              </div>
+              <button
+                onClick={handleResetData}
+                className="hover:text-zinc-800 dark:hover:text-zinc-200 underline cursor-pointer"
+              >
+                Khôi phục danh sách phòng gốc
+              </button>
+            </div>
+          </main>
+        </>
+      )}
 
       {/* Modals */}
       <HoldRoomModal
