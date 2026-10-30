@@ -314,6 +314,24 @@ function RoomDetailContent() {
     );
   }
 
+  const mapEmbedUrl = useMemo(() => {
+    if (!currentRoom) return "";
+    // Làm sạch địa chỉ tối ưu cho Google Maps Embed:
+    // Tránh ghép tên Phường vào query vì cơ sở dữ liệu Google Maps tại Việt Nam thường lập chỉ mục phường không đồng bộ
+    // (Ví dụ: Lê Văn Duyệt được index theo địa danh Gia Định, nếu kèm "Phường 3" hoặc "Phường 1" Google Maps sẽ xung đột và không hiện ghim).
+    const cleanAddr = currentRoom.address.trim();
+    const query = `${cleanAddr}, ${currentRoom.district}, TP.HCM`;
+    return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  }, [currentRoom]);
+
+  const mapSearchUrl = useMemo(() => {
+    if (!currentRoom) return "";
+    const cleanAddr = currentRoom.address.trim();
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      `${cleanAddr}, ${currentRoom.district}, TP.HCM`
+    )}`;
+  }, [currentRoom]);
+
   const statusInfo = ROOM_STATUS_MAP[currentRoom.status];
   const cleanLandlordPhone = currentRoom.landlord?.phone
     ? currentRoom.landlord.phone.replace(/\D/g, "")
@@ -634,9 +652,7 @@ function RoomDetailContent() {
                 </h2>
 
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                    `${currentRoom.buildingName}, ${currentRoom.address}, ${currentRoom.district}, TP.HCM`
-                  )}`}
+                  href={mapSearchUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 border border-amber-500/25 transition-colors cursor-pointer w-fit"
@@ -653,9 +669,7 @@ function RoomDetailContent() {
                   height="100%"
                   className="w-full h-full border-0"
                   loading="lazy"
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                    `${currentRoom.address}, ${currentRoom.ward ? currentRoom.ward + ", " : ""}${currentRoom.district}, TP.HCM`
-                  )}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                  src={mapEmbedUrl}
                 />
               </div>
 

@@ -984,3 +984,30 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: biên dịch thành công 100% trong **974ms** với Next.js Turbopack, 0 lỗi TypeScript.
 - Sau khi tạo phòng mới, click vào "Xem chi tiết" phòng lập tức hiển thị đầy đủ thông tin, thông số, ảnh và nút copy Zalo.
+
+---
+## [Tối Ưu Chuỗi Nhúng Bản Đồ Google Maps Cho Địa Chỉ Hẻm Nhiều Xuyệt]
+**Thời gian:** 2026-10-31 03:22:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Người dùng hỏi về cơ chế lấy bản đồ nhúng (map embed) của ứng dụng.
+- Phản hồi khi thêm 2 địa chỉ:
+  1. `30.1 đường đặng lộ`: Hiện đúng vị trí và ghim bản đồ.
+  2. `87/57/20 Lê văn duyệt`: Bản đồ nhúng không hiện vị trí / ghim địa điểm.
+
+### 2. Nguyên nhân & Giải pháp Kỹ thuật
+- **Cơ chế nhúng hiện tại:** Sử dụng thẻ `<iframe>` trỏ vào Google Maps Embed URL (`https://maps.google.com/maps?q={query}&output=embed`) tại [`src/app/rooms/[id]/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/rooms/[id]/page.tsx).
+- **Nguyên nhân lỗi không hiện điểm ở địa chỉ 2:**
+  - Chuỗi tìm kiếm trước đây được tạo theo công thức: `${address}, ${ward}, ${district}, TP.HCM`.
+  - Đối với `87/57/20 Lê văn duyệt`, hệ thống sinh ra chuỗi có chứa tên Phường (VD: `Phường 3` hoặc `Phường 1` Bình Thạnh).
+  - Tuy nhiên, trên cơ sở dữ liệu của Google Maps, khu vực đường Lê Văn Duyệt (vốn đổi tên từ Đinh Tiên Hoàng) được lập chỉ mục theo địa danh hành chính cũ là **"Gia Định, Hồ Chí Minh"**.
+  - Khi Google Maps nhận cùng lúc số nhà hẻm 3 xuyệt (`87/57/20`) kết hợp với `Phường 3`, bộ tìm kiếm của Google Maps bị xung đột địa danh nghiêm ngặt và trả về `Place: null` (mất ghim địa điểm).
+  - Ngược lại, nếu bỏ bớt tên phường (`87/57/20 Lê văn duyệt, Bình Thạnh, TP.HCM`), Google Maps tìm thấy ngay và cắm ghim chuẩn xác.
+- **Giải pháp Kỹ thuật:**
+  - Tối ưu hóa chuỗi query tìm kiếm tại [`src/app/rooms/[id]/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/rooms/[id]/page.tsx) thông qua helper `mapEmbedUrl` và `mapSearchUrl`:
+    - Loại bỏ tên Phường khỏi chuỗi tìm kiếm Google Maps Embed khi đã có địa chỉ cụ thể và Quận (`${address}, ${district}, TP.HCM`).
+    - Giúp Google Maps nhận diện linh hoạt các hẻm sâu nhiều xuyệt và các con đường mới đổi tên mà không bị xung đột tên phường.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: thành công 100% trong **2.8s** với Next.js Turbopack, 0 lỗi TypeScript.
+- Cả địa chỉ `30.1 đường đặng lộ` và `87/57/20 Lê văn duyệt` đều được Google Maps Embed định vị chính xác và hiển thị ghim rõ ràng.
