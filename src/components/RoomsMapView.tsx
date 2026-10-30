@@ -246,6 +246,15 @@ export function RoomsMapView({
       add3DBuildingsLayer(map);
     });
 
+    // Bấm vào khoảng trống trên bản đồ sẽ đóng thẻ phòng chi tiết ở góc
+    map.on("click", (e) => {
+      const originalEvent = e.originalEvent;
+      const target = originalEvent?.target as HTMLElement | null;
+      if (!target?.closest(".room-map-marker-container")) {
+        setActiveRoom(null);
+      }
+    });
+
     map.on("style.load", () => {
       if (is3DBuildingsEnabled) {
         add3DBuildingsLayer(map);
@@ -293,9 +302,9 @@ export function RoomsMapView({
       const isSoon = room.status === "soon_available";
 
       el.innerHTML = `
-        <div class="relative group select-none flex flex-col items-center">
-          <!-- CARD XEM NHANH ẢNH PHÒNG KHI HOVER TRỰC TIẾP TRÊN MARKER -->
-          <div class="room-hover-card absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-60 rounded-2xl bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md border border-zinc-200/90 dark:border-zinc-700/80 shadow-2xl p-2 z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+        <div class="relative select-none flex flex-col items-center">
+          <!-- CARD XEM NHANH ẢNH PHÒNG KHI HOVER TRỰC TIẾP TRÊN MARKER (Ẩn khi phòng đang được chọn) -->
+          <div class="room-hover-card absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-60 rounded-2xl bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md border border-zinc-200/90 dark:border-zinc-700/80 shadow-2xl p-2 z-50 pointer-events-none opacity-0 transition-all duration-200 translate-y-1">
             <!-- Hình ảnh phòng sắc nét -->
             <div class="relative w-full h-32 rounded-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800">
               <img src="${room.images[0]}" alt="${room.roomCode}" class="w-full h-full object-cover" />
@@ -338,18 +347,12 @@ export function RoomsMapView({
             <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white dark:border-t-zinc-900"></div>
           </div>
 
-          <!-- Ghim giá tiền (Pill Marker) -->
-          <div class="room-marker-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 shadow-xl ${
-            isHolding
-              ? "bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/90 dark:text-amber-200"
-              : isSoon
-              ? "bg-sky-100 text-sky-900 border border-sky-300 dark:bg-sky-950/90 dark:text-sky-200"
-              : "bg-zinc-950/90 text-white dark:bg-zinc-900 dark:text-amber-300 border border-amber-500/40 hover:scale-105"
-          }">
-            <span class="w-2 h-2 rounded-full ${
-              isHolding ? "bg-amber-600 animate-pulse" : isSoon ? "bg-sky-500" : "bg-emerald-500"
+          <!-- Ghim giá tiền (Pill Marker): Nền đen sang trọng viền vàng kim, chữ TRẮNG TINH tương phản tuyệt đối -->
+          <div class="room-marker-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 shadow-xl bg-zinc-950/95 text-white border border-amber-500/40 hover:scale-105">
+            <span class="room-status-dot w-2 h-2 rounded-full ${
+              isHolding ? "bg-amber-400 animate-pulse" : isSoon ? "bg-sky-400" : "bg-emerald-400"
             }"></span>
-            <span class="font-sans font-bold tracking-tight">${priceText}</span>
+            <span class="room-marker-price font-sans font-bold text-white tracking-tight">${priceText}</span>
           </div>
         </div>
       `;
@@ -357,6 +360,7 @@ export function RoomsMapView({
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         setActiveRoom(room);
+        setHoveredRoomId(null);
         map.flyTo({
           center: coords,
           zoom: 17.8, // Zoom siêu gần thấy rõ toà nhà, ngõ hẻm và khối 3D
@@ -396,24 +400,54 @@ export function RoomsMapView({
   useEffect(() => {
     Object.entries(markersRef.current).forEach(([roomId, marker]) => {
       const el = marker.getElement();
-      const hoverCard = el.querySelector(".room-hover-card");
-      const pill = el.querySelector(".room-marker-pill");
+      const hoverCard = el.querySelector<HTMLElement>(".room-hover-card");
+      const pill = el.querySelector<HTMLElement>(".room-marker-pill");
+      const priceSpan = el.querySelector<HTMLElement>(".room-marker-price");
 
       const isHovered = hoveredRoomId === roomId;
       const isSelected = activeRoom?.id === roomId;
 
-      if (isHovered || isSelected) {
-        el.style.zIndex = "1000";
-        if (isHovered) {
-          hoverCard?.classList.add("opacity-100", "translate-y-0", "pointer-events-auto");
-          hoverCard?.classList.remove("opacity-0", "translate-y-1", "pointer-events-none");
-        }
-        pill?.classList.add("scale-110", "ring-4", "ring-amber-500/40", "bg-amber-500", "text-zinc-950");
+      // 1. Chỉ hiện ảnh phòng trực tiếp trên Marker khi HOVER VÀ CHƯA BỊ CHỌN.
+      // Khi đã được chọn (click), ảnh và thông tin chi tiết chuyển sang hiển thị ở thẻ góc màn hình (Floating Card)
+      if (isHovered && !isSelected) {
+        hoverCard?.classList.add("opacity-100", "translate-y-0", "pointer-events-auto");
+        hoverCard?.classList.remove("opacity-0", "translate-y-1", "pointer-events-none");
       } else {
-        el.style.zIndex = "";
         hoverCard?.classList.remove("opacity-100", "translate-y-0", "pointer-events-auto");
         hoverCard?.classList.add("opacity-0", "translate-y-1", "pointer-events-none");
-        pill?.classList.remove("scale-110", "ring-4", "ring-amber-500/40", "bg-amber-500", "text-zinc-950");
+      }
+
+      // 2. Định dạng kiểu dáng Pill & màu chữ: Luôn luôn chữ TRẮNG TINH (text-white) tương phản tuyệt đối
+      if (isSelected) {
+        el.style.zIndex = "1000";
+        if (pill) {
+          // Trạng thái Được Chọn: Nền đen obsidian sang trọng, viền vàng kim 2px, viền sáng (ring) hổ phách, chữ trắng tinh đậm nét
+          pill.className =
+            "room-marker-pill flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all duration-200 shadow-2xl bg-zinc-950 text-white border-2 border-amber-400 ring-4 ring-amber-500/40 scale-110";
+        }
+        if (priceSpan) {
+          priceSpan.className = "room-marker-price font-sans font-black text-white tracking-tight drop-shadow-xs";
+        }
+      } else if (isHovered) {
+        el.style.zIndex = "900";
+        if (pill) {
+          // Trạng thái Hover (chưa chọn): Phóng to nhẹ, viền vàng kim sáng, chữ trắng tinh nổi bật
+          pill.className =
+            "room-marker-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold transition-all duration-200 shadow-xl bg-zinc-900 text-white border-2 border-amber-300 ring-2 ring-amber-400/30 scale-105";
+        }
+        if (priceSpan) {
+          priceSpan.className = "room-marker-price font-sans font-extrabold text-white tracking-tight drop-shadow-xs";
+        }
+      } else {
+        el.style.zIndex = "";
+        if (pill) {
+          // Trạng thái Bình Thường: Nền đen sang trọng viền hổ phách, chữ trắng rõ ràng
+          pill.className =
+            "room-marker-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 shadow-xl bg-zinc-950/95 text-white border border-amber-500/40 hover:scale-105";
+        }
+        if (priceSpan) {
+          priceSpan.className = "room-marker-price font-sans font-bold text-white tracking-tight";
+        }
       }
     });
   }, [hoveredRoomId, activeRoom?.id]);
@@ -867,6 +901,7 @@ export function RoomsMapView({
                   key={room.id}
                   onClick={() => {
                     setActiveRoom(room);
+                    setHoveredRoomId(null);
                     if (mapRef.current) {
                       mapRef.current.flyTo({
                         center: coords,

@@ -806,3 +806,34 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành trong **1.35s** với Next.js Turbopack (0 lỗi TypeScript).
 - Hover mượt mà, ảnh phòng hiện tức thì trên đầu ghim, mức zoom giữ cố định chuẩn xác.
+
+---
+## [Tối Ưu Hiển Thị Ghim Marker: Phân Định Rõ Hover/Select & Chữ Trắng Tương Phản Tuyệt Đối]
+**Thời gian:** 2026-10-30 22:28:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Khi rê chuột (hover) vào ghim: chỉ hiện thẻ hình ảnh xem nhanh trực tiếp trên đầu ghim khi phòng đó **chưa được chọn**.
+- Khi phòng/ghim đó **được chọn (click)**: hiển thị thông tin và ảnh tại thẻ góc màn hình (Floating Preview Card ở góc phải dưới), đồng thời **ẩn thẻ ảnh trực tiếp trên đầu ghim** để tránh trùng lặp thông tin và không che khuất toà nhà 3D.
+- Khắc phục màu chữ giá tiền khi hover/click: trước đây màu chữ bị trùng/tiệp vào màu nền (amber trên amber), chuyển sang **màu trắng tinh (`text-white`) tương phản cao** trên nền đen obsidian viền vàng kim hổ phách.
+
+### 2. Chi tiết thực hiện
+
+1. **Phân Định Trạng Thái Hover và Selected Độc Lập ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - Loại bỏ các class CSS `group` và `group-hover:opacity-100` tĩnh trên thẻ `.room-hover-card`. Chuyển quyền điều khiển hiển thị hoàn toàn sang state JavaScript có kiểm tra điều kiện logic:
+     - `isHovered && !isSelected`: Hiển thị thẻ ảnh nổi trực tiếp trên ghim (`opacity-100 translate-y-0 pointer-events-auto`).
+     - `isSelected` hoặc chuột rời khỏi: Ẩn thẻ ảnh trên ghim (`opacity-0 translate-y-1 pointer-events-none`).
+   - Khi chọn một phòng (bấm vào ghim trên bản đồ hoặc bấm vào thẻ trong danh sách Drawer bên trái):
+     - Gọi `setActiveRoom(room)` và `setHoveredRoomId(null)`. Thẻ góc màn hình (Floating Preview Card) lập tức xuất hiện với đầy đủ ảnh to, số tầng, nút "Gọi Chủ Hộ" và "Xem chi tiết". Thẻ ảnh phía trên đầu ghim được đóng lại ngay lập tức.
+   - Bổ sung sự kiện `map.on("click")`: khi người dùng nhấp chuột vào khoảng trống trên bản đồ ngoài các ghim, hệ thống tự động đóng thẻ chi tiết ở góc (`setActiveRoom(null)`), mang lại trải nghiệm tra cứu chuẩn Google Maps.
+
+2. **Khắc Phục Triệt Để Độ Tương Phản Màu Chữ Giá Tiền ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - **Nguyên nhân trước đây:** Các class Tailwind `dark:text-amber-300` có độ ưu tiên CSS (specificity) cao hơn class động `text-zinc-950`, dẫn đến khi nền chuyển sang màu cam hổ phách (`bg-amber-500`), chữ vẫn giữ màu vàng cam gây hiện tượng chìm chữ, khó đọc.
+   - **Giải pháp thiết kế Luxury High-Contrast:**
+     - Thiết lập nhãn giá tiền `.room-marker-price` sử dụng thẻ riêng biệt với màu chữ **trắng tinh (`text-white`)** ở cả 3 trạng thái.
+     - **Trạng thái Bình Thường:** Nền đen sang trọng `bg-zinc-950/95`, viền vàng hổ phách tinh tế `border border-amber-500/40`, chấm trạng thái phát sáng (`emerald` trống sẵn, `amber` đang giữ chỗ, `sky` sắp trống), chữ trắng tinh nổi bật.
+     - **Trạng thái Hover (chưa chọn):** Phóng to nhẹ `scale-105`, viền vàng kim sáng `border-2 border-amber-300`, vòng hào quang `ring-2 ring-amber-400/30`, chữ trắng tinh `font-extrabold text-white`.
+     - **Trạng thái Được Chọn:** Tăng kích thước `scale-110`, viền vàng kim 2px `border-2 border-amber-400`, vòng hào quang lớn `ring-4 ring-amber-500/40`, chữ trắng tinh siêu đậm `font-black text-white`, phân cấp thị giác rõ nét trên mọi chế độ bản đồ (Streets, Vệ Tinh 3D, Obsidian Dark, Light Luxury).
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành thành công trong **1.32s** với Turbopack (0 lỗi TypeScript, 0 lỗi cú pháp).
+- Tương phản màu chữ hoàn hảo 100%, thẻ ảnh chỉ xuất hiện trên đầu ghim khi hover phòng chưa chọn, và hiển thị gọn gàng ở góc màn hình khi click.
