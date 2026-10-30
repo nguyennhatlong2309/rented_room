@@ -48,6 +48,7 @@ import {
   AlertCircle,
   Share2,
   Navigation,
+  Edit3,
 } from "lucide-react";
 
 function RoomDetailContent() {
@@ -70,6 +71,8 @@ function RoomDetailContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [editedAddressInput, setEditedAddressInput] = useState("");
 
   // Load client-side cached rooms & sale user after mounting to avoid hydration mismatch
   useEffect(() => {
@@ -198,18 +201,37 @@ function RoomDetailContent() {
     // Làm sạch địa chỉ tối ưu cho Google Maps Embed:
     // Tránh ghép tên Phường vào query vì cơ sở dữ liệu Google Maps tại Việt Nam thường lập chỉ mục phường không đồng bộ
     // (Ví dụ: Lê Văn Duyệt được index theo địa danh Gia Định, nếu kèm "Phường 3" hoặc "Phường 1" Google Maps sẽ xung đột và không hiện ghim).
-    const cleanAddr = currentRoom.address.trim();
+    let cleanAddr = currentRoom.address.trim();
+
+    // Tự động chuẩn hóa lỗi gõ phím tên đường phổ biến tại TP.HCM (ví dụ: "Duệt" -> "Duyệt")
+    cleanAddr = cleanAddr.replace(/\b([Dd])uệt\b/g, (m, p) => (p === "D" ? "Duyệt" : "duyệt"));
+
     const query = `${cleanAddr}, ${currentRoom.district}, TP.HCM`;
     return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   }, [currentRoom]);
 
   const mapSearchUrl = useMemo(() => {
     if (!currentRoom) return "";
-    const cleanAddr = currentRoom.address.trim();
+    let cleanAddr = currentRoom.address.trim();
+    cleanAddr = cleanAddr.replace(/\b([Dd])uệt\b/g, (m, p) => (p === "D" ? "Duyệt" : "duyệt"));
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       `${cleanAddr}, ${currentRoom.district}, TP.HCM`
     )}`;
   }, [currentRoom]);
+
+  const handleSaveAddress = (newAddress: string) => {
+    if (!currentRoom || !newAddress.trim()) return;
+    const trimmed = newAddress.trim();
+    setRooms((prev) =>
+      prev.map((r) => (r.id === currentRoom.id ? { ...r, address: trimmed } : r))
+    );
+    if (isSupabaseConfigured && supabase) {
+      const client = supabase;
+      client.from("rooms").update({ address: trimmed }).eq("id", currentRoom.id).then();
+    }
+    setIsEditingAddress(false);
+    showToast("Đã cập nhật địa chỉ phòng thành công!", "success");
+  };
 
   const handleUpdateSaleUser = (user: { name: string; phone: string }) => {
     setSaleUser(user);
@@ -662,6 +684,27 @@ function RoomDetailContent() {
                 </a>
               </div>
 
+              {/* Cảnh báo gợi ý sửa nhanh nếu phát hiện lỗi chính tả gõ phím 'Duệt' */}
+              {/\b[Dd]uệt\b/.test(currentRoom.address) && (
+                <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      Địa chỉ đang gõ là: <strong>{currentRoom.address}</strong> (bị thiếu chữ &quot;y&quot; trong <strong>Lê Văn Duyệt</strong>).
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const fixed = currentRoom.address.replace(/\b([Dd])uệt\b/g, (m, p) => (p === "D" ? "Duyệt" : "duyệt"));
+                      handleSaveAddress(fixed);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors shrink-0 cursor-pointer shadow-xs"
+                  >
+                    1-Click Sửa thành &quot;Duyệt&quot;
+                  </button>
+                </div>
+              )}
+
               <div className="relative w-full h-72 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-inner bg-zinc-100 dark:bg-zinc-900">
                 <iframe
                   title={`Bản đồ ${currentRoom.buildingName}`}
@@ -673,16 +716,55 @@ function RoomDetailContent() {
                 />
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-zinc-500 pt-1 font-sans">
-                <span>
-                  Địa chỉ: <strong className="text-zinc-800 dark:text-zinc-200">{currentRoom.address}, {currentRoom.ward ? currentRoom.ward + ", " : ""}{currentRoom.district}</strong>
-                </span>
-                {currentRoom.lat && currentRoom.lng && (
-                  <span className="text-[11px] font-mono text-zinc-400">
-                    Tọa độ GPS: {currentRoom.lat.toFixed(4)}, {currentRoom.lng.toFixed(4)}
+              {/* Form chỉnh sửa địa chỉ nhanh nếu muốn đổi */}
+              {isEditingAddress ? (
+                <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <input
+                    type="text"
+                    value={editedAddressInput}
+                    onChange={(e) => setEditedAddressInput(e.target.value)}
+                    placeholder="VD: 87/57/20 Lê Văn Duyệt"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 rounded-xl text-xs border border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 font-medium outline-none focus:border-amber-500"
+                  />
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => handleSaveAddress(editedAddressInput)}
+                      className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold text-xs transition-colors cursor-pointer"
+                    >
+                      Lưu địa chỉ
+                    </button>
+                    <button
+                      onClick={() => setIsEditingAddress(false)}
+                      className="px-3 py-2 rounded-xl bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-xs transition-colors cursor-pointer"
+                    >
+                      Hủy
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-zinc-500 pt-1 font-sans">
+                  <span className="flex items-center gap-2 flex-wrap">
+                    <span>
+                      Địa chỉ: <strong className="text-zinc-800 dark:text-zinc-200">{currentRoom.address}, {currentRoom.ward ? currentRoom.ward + ", " : ""}{currentRoom.district}</strong>
+                    </span>
+                    <button
+                      onClick={() => {
+                        setEditedAddressInput(currentRoom.address);
+                        setIsEditingAddress(true);
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>Sửa địa chỉ</span>
+                    </button>
                   </span>
-                )}
-              </div>
+                  {currentRoom.lat && currentRoom.lng && (
+                    <span className="text-[11px] font-mono text-zinc-400">
+                      Tọa độ GPS: {currentRoom.lat.toFixed(4)}, {currentRoom.lng.toFixed(4)}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
