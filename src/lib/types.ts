@@ -64,6 +64,8 @@ export interface Room {
   hasElevator: boolean;
   hasBalcony: boolean;
   maxTenants: number;
+  lat?: number;          // Tọa độ Vĩ độ để hiển thị trên bản đồ (VD: 10.7485)
+  lng?: number;          // Tọa độ Kinh độ để hiển thị trên bản đồ (VD: 106.7025)
   createdAt: string;
 }
 

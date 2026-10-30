@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, Suspense } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Room, FilterOptions } from "@/lib/types";
 import { INITIAL_ROOMS } from "@/data/initialRooms";
@@ -12,7 +13,32 @@ import { RoomCard } from "@/components/RoomCard";
 import { HoldRoomModal } from "@/components/HoldRoomModal";
 import { CreateRoomModal } from "@/components/CreateRoomModal";
 import { useToast } from "@/components/Toast";
-import { Sparkles, RefreshCw, AlertCircle, MapPin, Upload, Image as ImageIcon } from "lucide-react";
+import {
+  Sparkles,
+  RefreshCw,
+  AlertCircle,
+  MapPin,
+  Upload,
+  Image as ImageIcon,
+  LayoutGrid,
+  Map as MapIcon,
+} from "lucide-react";
+
+// Tải linh hoạt Map View với WebGL (tránh hydration mismatch trên Server)
+const RoomsMapView = dynamic(
+  () => import("@/components/RoomsMapView").then((mod) => mod.RoomsMapView),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[620px] rounded-3xl flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 animate-pulse">
+        <div className="flex flex-col items-center gap-3 text-zinc-500">
+          <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-medium">Đang tải bản đồ Mapbox TP.HCM...</span>
+        </div>
+      </div>
+    ),
+  }
+);
 
 function SalesRentedRoomContent() {
   const router = useRouter();
@@ -31,6 +57,9 @@ function SalesRentedRoomContent() {
 
   // Banner image theme state
   const [bannerTheme, setBannerTheme] = useState<"penthouse" | "saigon">("penthouse");
+
+  // Chế độ hiển thị: Danh sách thẻ (grid) hoặc Tìm trên bản đồ (map)
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
 
   // Load client-side cached rooms & sale user after mounting to prevent SSR hydration mismatch
   useEffect(() => {
@@ -390,8 +419,60 @@ function SalesRentedRoomContent() {
           onResetFilters={handleResetFilters}
         />
 
-        {/* Room Grid */}
-        {filteredRooms.length > 0 ? (
+        {/* Thanh chuyển đổi Chế độ hiển thị: Danh sách thẻ vs Tìm trên Bản đồ */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-sans">
+              Chế độ hiển thị:
+            </span>
+            <div className="flex items-center gap-1 p-1 bg-zinc-200/60 dark:bg-zinc-900/90 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 shadow-2xs">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-white text-zinc-950 dark:bg-zinc-800 dark:text-white shadow-xs"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>Danh sách Thẻ ({filteredRooms.length})</span>
+              </button>
+
+              <button
+                onClick={() => setViewMode("map")}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === "map"
+                    ? "bg-amber-500 text-zinc-950 shadow-xs shadow-amber-500/20"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
+                }`}
+              >
+                <MapIcon className="w-3.5 h-3.5" />
+                <span>🗺️ Tìm trên Bản đồ (Map)</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+            {viewMode === "map" ? (
+              <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20">
+                <Sparkles className="w-3 h-3 text-amber-500" />
+                <span>Bấm vào ghim giá tiền để xem phòng & gọi chủ hộ</span>
+              </span>
+            ) : (
+              <span>Đang lọc {filteredRooms.length} phòng theo tiêu chí</span>
+            )}
+          </div>
+        </div>
+
+        {/* Nội dung theo Chế độ hiển thị */}
+        {viewMode === "map" ? (
+          <RoomsMapView
+            rooms={filteredRooms}
+            saleUser={saleUser}
+            onOpenHoldModal={(r) => setSelectedRoomForHold(r)}
+            onReleaseHold={handleReleaseHold}
+          />
+        ) : filteredRooms.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filteredRooms.map((room) => (
               <RoomCard

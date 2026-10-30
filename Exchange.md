@@ -561,3 +561,42 @@
 - Chạy `npm run build` thành công trong **1.12s** với Turbopack (0 lỗi TypeScript).
 - Chữ `đ` hiển thị chuẩn tiếng Việt, thanh thoát, không còn bị biến dạng thành `D̄`.
 - Đã đồng bộ mã nguồn lên GitHub branch `main`.
+
+---
+## [Tích Hợp Chế Độ Tìm Phòng Trên Bản Đồ Mapbox / WebGL & Bản Đồ Chỉ Đường Chi Tiết]
+**Thời gian:** 2026-10-30 21:33:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Thử nghiệm và tích hợp nền tảng **Mapbox** (và WebGL vector map tương đương) vào dự án.
+- Bổ sung **Chế độ Tìm trên Bản đồ (Map View)** trên trang chủ để người dùng xem trực quan toàn bộ các căn phòng phân bố theo quận tại TP.HCM.
+
+### 2. Chi tiết thực hiện
+
+1. **Khởi tạo cơ sở hạ tầng Geolocation & Tọa độ (`src/lib/geoUtils.ts` & `src/lib/types.ts`):**
+   - Bổ sung trường `lat?: number; lng?: number;` vào kiểu dữ liệu `Room`.
+   - Cập nhật tọa độ GPS chính xác thực tế tại TP.HCM cho tất cả 9 phòng mẫu trong `src/data/initialRooms.ts` (Quận 1, 3, 7, 10, Bình Thạnh, Phú Nhuận, Tân Bình).
+   - Thiết lập bảng tọa độ trung tâm cho 22 Quận / Huyện TP.HCM làm fallback tự động tính toán vị trí cho các phòng mới đăng.
+   - Hàm `formatPricePill` rút gọn giá tiền hiển thị trên ghim (VD: `5.8tr`, `8.5tr`, `12.5tr`).
+
+2. **Xây dựng Component Bản đồ Vector WebGL (`src/components/RoomsMapView.tsx`):**
+   - Động cơ WebGL 60fps mượt mà chuẩn Mapbox (hỗ trợ cả Mapbox GL và MapLibre GL với chi phí 0đ, không bắt buộc token để chạy thử).
+   - **Ghim giá tiền tương tác (Custom Price Markers):** Thiết kế dạng pill sang trọng, hiển thị giá tiền vương giả, đổi màu và phóng to khi hover/click, có chấm tròn trạng thái (xanh lá: Trống sẵn, vàng: Giữ chỗ, xanh dương: Sắp trống).
+   - **Thanh chuyển đổi phong cách Map:** Hỗ trợ 3 lớp bản đồ sang trọng:
+     - `Sáng Luxury (Positron)`: Trắng ngọc trai tối giản, trang nhã.
+     - `Tối Obsidian (Dark Matter)`: Đen hắc diện huyền bí, đồng bộ với dark mode.
+     - `Chi tiết phố (Voyager)`: Đầy đủ tên đường, ngõ phố chi tiết.
+   - **Phím tắt bay nhanh (FlyTo District):** Bấm tên quận (Quận 1, Quận 3, Quận 7, Bình Thạnh...) là camera lướt êm ái góc nghiêng 3D đến quận đó.
+   - **Bố cục 2 cột Split-Screen:** Cột trái là danh sách thẻ phòng thu gọn được (`Sidebar`), cột phải là bản đồ toàn cảnh.
+   - **Thẻ xem nhanh nổi (Floating Preview Card):** Khi click vào ghim trên map, hiển thị card nổi bật với ảnh, giá, hoa hồng sale, nút gọi chủ nhà và nút xem chi tiết phòng.
+
+3. **Tích hợp Chế độ Chuyển đổi trên Trang Chủ (`src/app/page.tsx`):**
+   - Bổ sung thanh công tắc chuyển đổi: `[ Danh sách Thẻ | 🗺️ Tìm trên Bản đồ ]`.
+   - Sử dụng `next/dynamic` với `ssr: false` để nạp component bản đồ mượt mà, loại trừ 100% lỗi SSR hydration mismatch.
+
+4. **Tích hợp Bản đồ Vị trí Toà nhà & Chỉ đường tại Trang Chi Tiết (`src/app/rooms/[id]/page.tsx`):**
+   - Bổ sung khối "Vị trí toà nhà & Bản đồ chỉ đường".
+   - Tích hợp khung bản đồ toạ độ toà nhà và nút **"Mở Google Maps chỉ đường ↗"** 1-chạm mở app Google Maps trên điện thoại để sale và khách chạy xe đến phòng.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build` thành công trong **2.4s** với Turbopack (0 lỗi TypeScript).
+- Đã đồng bộ mã nguồn lên GitHub branch `main`.

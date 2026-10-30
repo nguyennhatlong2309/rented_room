@@ -42,6 +42,7 @@ import {
   Layers,
   AlertCircle,
   Share2,
+  Navigation,
 } from "lucide-react";
 
 function RoomDetailContent() {
@@ -553,6 +554,52 @@ function RoomDetailContent() {
                 </p>
               </div>
             )}
+
+            {/* Vị trí toà nhà trên bản đồ & Chỉ đường */}
+            <div className="luxury-glass rounded-3xl p-6 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <h2 className="font-serif text-lg font-bold text-zinc-950 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-amber-500" />
+                  <span>Vị trí toà nhà & Bản đồ chỉ đường</span>
+                </h2>
+
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    `${currentRoom.buildingName}, ${currentRoom.address}, ${currentRoom.district}, TP.HCM`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 border border-amber-500/25 transition-colors cursor-pointer w-fit"
+                >
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span>Mở Google Maps chỉ đường ↗</span>
+                </a>
+              </div>
+
+              <div className="relative w-full h-72 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-inner bg-zinc-100 dark:bg-zinc-900">
+                <iframe
+                  title={`Bản đồ ${currentRoom.buildingName}`}
+                  width="100%"
+                  height="100%"
+                  className="w-full h-full border-0"
+                  loading="lazy"
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                    `${currentRoom.address}, ${currentRoom.ward ? currentRoom.ward + ", " : ""}${currentRoom.district}, TP.HCM`
+                  )}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-zinc-500 pt-1 font-sans">
+                <span>
+                  Địa chỉ: <strong className="text-zinc-800 dark:text-zinc-200">{currentRoom.address}, {currentRoom.ward ? currentRoom.ward + ", " : ""}{currentRoom.district}</strong>
+                </span>
+                {currentRoom.lat && currentRoom.lng && (
+                  <span className="text-[11px] font-mono text-zinc-400">
+                    Tọa độ GPS: {currentRoom.lat.toFixed(4)}, {currentRoom.lng.toFixed(4)}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* CỘT PHẢI: Bảng giá, Hoa hồng & SĐT Chủ Hộ (4 cột Sticky) */}
