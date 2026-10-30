@@ -306,13 +306,22 @@ export function CreateRoomModal({
   const [doorPassword, setDoorPassword] = useState("");
   const [callNotice, setCallNotice] = useState("");
 
-  // Services
-  const [electricity, setElectricity] = useState("3.800đ/kWh");
-  const [waterPerPerson, setWaterPerPerson] = useState("100.000đ/người");
-  const [waterPerM3, setWaterPerM3] = useState("");
-  const [internet, setInternet] = useState("Miễn phí");
-  const [parking, setParking] = useState("100.000đ/xe");
-  const [serviceFee, setServiceFee] = useState("150.000đ/phòng");
+  // Services - Tách biệt số tiền và đơn vị tính
+  const [elecAmount, setElecAmount] = useState("3.800");
+  const [elecUnit, setElecUnit] = useState<"/kWh" | "/tháng" | "state" | "free">("/kWh");
+
+  const [waterUnit, setWaterUnit] = useState<"/người" | "/m³" | "/phòng" | "both" | "state" | "free">("/người");
+  const [waterAmount, setWaterAmount] = useState("100.000");
+  const [waterAmountM3, setWaterAmountM3] = useState("25.000");
+
+  const [parkingUnit, setParkingUnit] = useState<"/xe" | "/phòng" | "free_1" | "free">("/xe");
+  const [parkingAmount, setParkingAmount] = useState("100.000");
+
+  const [internetUnit, setInternetUnit] = useState<"free" | "/phòng" | "/người">("free");
+  const [internetAmount, setInternetAmount] = useState("50.000");
+
+  const [serviceFeeUnit, setServiceFeeUnit] = useState<"/phòng" | "/người" | "free">("/phòng");
+  const [serviceFeeAmount, setServiceFeeAmount] = useState("150.000");
 
   // Furniture list state
   const [furnitureList, setFurnitureList] = useState<string[]>([
@@ -426,17 +435,59 @@ export function CreateRoomModal({
       "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80",
     ];
 
-    // Compose water fee string
-    let formattedWater = "";
-    if (waterPerPerson.trim() && waterPerM3.trim()) {
-      formattedWater = `${waterPerPerson.trim()} (hoặc ${waterPerM3.trim()})`;
-    } else if (waterPerPerson.trim()) {
-      formattedWater = waterPerPerson.trim();
-    } else if (waterPerM3.trim()) {
-      formattedWater = waterPerM3.trim();
-    } else {
-      formattedWater = "100.000đ/người";
+    // Helper chuẩn hóa chuỗi chi phí dịch vụ
+    const formatCleanFee = (amount: string, unit: string) => {
+      const trimmed = amount.trim();
+      if (!trimmed) return "Miễn phí";
+      if (trimmed.toLowerCase().includes("miễn phí")) return "Miễn phí";
+      if (trimmed.toLowerCase().includes("nhà nước")) return "Giá nhà nước";
+      const cleanNum = trimmed.replace(/[^\d.,]/g, "") || trimmed;
+      return `${cleanNum}đ${unit}`;
+    };
+
+    // 1. Tiền điện
+    let finalElectricity = "3.800đ/kWh";
+    if (elecUnit === "state") finalElectricity = "Giá nhà nước";
+    else if (elecUnit === "free") finalElectricity = "Miễn phí";
+    else finalElectricity = formatCleanFee(elecAmount || "3.800", elecUnit);
+
+    // 2. Tiền nước
+    let finalWater = "100.000đ/người";
+    let finalWaterPerson: string | undefined = undefined;
+    let finalWaterM3: string | undefined = undefined;
+    if (waterUnit === "state") {
+      finalWater = "Giá nhà nước";
+    } else if (waterUnit === "free") {
+      finalWater = "Miễn phí";
+    } else if (waterUnit === "both") {
+      finalWaterPerson = formatCleanFee(waterAmount || "100.000", "/người");
+      finalWaterM3 = formatCleanFee(waterAmountM3 || "25.000", "/m³");
+      finalWater = `${finalWaterPerson} (hoặc ${finalWaterM3})`;
+    } else if (waterUnit === "/người") {
+      finalWater = formatCleanFee(waterAmount || "100.000", "/người");
+      finalWaterPerson = finalWater;
+    } else if (waterUnit === "/m³") {
+      finalWater = formatCleanFee(waterAmount || "25.000", "/m³");
+      finalWaterM3 = finalWater;
+    } else if (waterUnit === "/phòng") {
+      finalWater = formatCleanFee(waterAmount || "100.000", "/phòng");
     }
+
+    // 3. Tiền gửi xe
+    let finalParking = "100.000đ/xe";
+    if (parkingUnit === "free") finalParking = "Miễn phí";
+    else if (parkingUnit === "free_1") finalParking = "Miễn phí 1 xe";
+    else finalParking = formatCleanFee(parkingAmount || "100.000", parkingUnit);
+
+    // 4. Wifi / Internet
+    let finalInternet = "Miễn phí";
+    if (internetUnit === "free") finalInternet = "Miễn phí";
+    else finalInternet = formatCleanFee(internetAmount || "50.000", internetUnit);
+
+    // 5. Phí dịch vụ chung
+    let finalServiceFee = "150.000đ/phòng";
+    if (serviceFeeUnit === "free") finalServiceFee = "Miễn phí";
+    else finalServiceFee = formatCleanFee(serviceFeeAmount || "150.000", serviceFeeUnit);
 
     const newRoom: Room = {
       id: `room-${Date.now()}`,
@@ -456,13 +507,13 @@ export function CreateRoomModal({
       images: uploadedImages.length > 0 ? uploadedImages : defaultImages,
       furniture: furnitureList.length > 0 ? furnitureList : ["Nội thất cơ bản"],
       serviceFees: {
-        electricity: electricity.trim() || "3.800đ/kWh",
-        water: formattedWater,
-        waterPerPerson: waterPerPerson.trim() || undefined,
-        waterPerM3: waterPerM3.trim() || undefined,
-        internet: internet.trim() || "Miễn phí",
-        parking: parking.trim() || "100.000đ/xe",
-        serviceFee: serviceFee.trim() || "150.000đ/phòng",
+        electricity: finalElectricity,
+        water: finalWater,
+        waterPerPerson: finalWaterPerson,
+        waterPerM3: finalWaterM3,
+        internet: finalInternet,
+        parking: finalParking,
+        serviceFee: finalServiceFee,
       },
       landlord: {
         name: landlordName.trim() || "Chủ nhà / Quản lý",
@@ -881,227 +932,398 @@ export function CreateRoomModal({
                 <Zap className="w-3.5 h-3.5 text-amber-500" />
                 <span>4. Chi phí dịch vụ hàng tháng</span>
               </label>
-              <span className="text-[11px] text-zinc-400 font-sans">Có thể chỉnh sửa giá hoặc bấm chọn nhanh mẫu</span>
+              <span className="text-[11px] text-zinc-400 font-sans">
+                Chỉ cần nhập số tiền đ, đơn vị hiển thị ở nhãn hoặc menu
+              </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {/* Tiền điện */}
-              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5">
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
-                  <Zap className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Tiền điện</span>
-                </label>
-                <input
-                  type="text"
-                  value={electricity}
-                  onChange={(e) => setElectricity(e.target.value)}
-                  placeholder="VD: 3.800đ/kWh"
-                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
-                />
-                <div className="flex flex-wrap gap-1 pt-0.5">
-                  {["3.500đ/kWh", "3.800đ/kWh", "4.000đ/kWh", "Giá nhà nước"].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setElectricity(preset)}
-                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
-                        electricity === preset
-                          ? "bg-amber-500 text-zinc-950 font-bold border-amber-500"
-                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
-                      }`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
+              {/* 1. Tiền điện - Mặc định đơn vị là /kWh */}
+              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                    <Zap className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Tiền điện</span>
+                  </label>
+                  <select
+                    value={elecUnit}
+                    onChange={(e) => setElecUnit(e.target.value as any)}
+                    className="text-[11px] font-bold bg-white dark:bg-zinc-900 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-700/60 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-xs"
+                    title="Chọn đơn vị tính tiền điện"
+                  >
+                    <option value="/kWh">/kWh</option>
+                    <option value="/tháng">/tháng</option>
+                    <option value="state">Giá nhà nước</option>
+                    <option value="free">Miễn phí</option>
+                  </select>
                 </div>
+
+                {elecUnit === "/kWh" || elecUnit === "/tháng" ? (
+                  <>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={elecAmount}
+                        onChange={(e) => setElecAmount(e.target.value)}
+                        placeholder="3.800"
+                        className="w-full pl-3 pr-8 py-2 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold focus:outline-none focus:ring-1.5 focus:ring-amber-500 shadow-xs"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 pointer-events-none">
+                        đ
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 pt-0.5">
+                      {["3.500", "3.800", "4.000"].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => {
+                            setElecAmount(preset);
+                            setElecUnit("/kWh");
+                          }}
+                          className={`text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
+                            elecAmount === preset && elecUnit === "/kWh"
+                              ? "bg-amber-500 text-zinc-950 font-bold border-amber-500"
+                              : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                          }`}
+                        >
+                          {preset}đ
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-medium text-amber-800 dark:text-amber-300 flex items-center justify-center min-h-[58px]">
+                    {elecUnit === "state" ? "Theo biểu giá nhà nước" : "Miễn phí tiền điện"}
+                  </div>
+                )}
               </div>
 
-              {/* Tiền nước - Chia thành 2 input: theo người & theo m3 */}
+              {/* 2. Tiền nước - Menu chọn đơn vị (/người, /m3, /phòng, cả 2, miễn phí, giá nhà nước) */}
               <div className="p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-2 sm:col-span-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 font-sans">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                     <Droplets className="w-3.5 h-3.5 text-sky-500" />
-                    <span>Tiền nước (Chia 2 input: Theo người & Theo m³)</span>
+                    <span>Tiền nước</span>
                   </label>
-                  <span className="text-[11px] text-zinc-400">Có thể điền 1 hoặc cả 2 cách tính</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] text-zinc-400">Menu đơn vị:</span>
+                    <select
+                      value={waterUnit}
+                      onChange={(e) => {
+                        const val = e.target.value as any;
+                        setWaterUnit(val);
+                        if (val === "/người") setWaterAmount("100.000");
+                        else if (val === "/m³") setWaterAmount("25.000");
+                        else if (val === "/phòng") setWaterAmount("100.000");
+                      }}
+                      className="text-xs font-bold bg-white dark:bg-zinc-900 text-sky-600 dark:text-sky-400 border border-sky-300 dark:border-sky-700/60 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1.5 focus:ring-sky-500 cursor-pointer shadow-xs"
+                    >
+                      <option value="/người">/người (Đầu người)</option>
+                      <option value="/m³">/m³ (Đồng hồ khối)</option>
+                      <option value="/phòng">/phòng (Khoán phòng)</option>
+                      <option value="both">Cả 2 (/người & /m³)</option>
+                      <option value="state">Giá nhà nước</option>
+                      <option value="free">Miễn phí</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {/* Input 1: Theo người */}
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-700 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-                        1. Tính theo người (/người)
-                      </span>
-                      {waterPerPerson && (
-                        <button
-                          type="button"
-                          onClick={() => setWaterPerPerson("")}
-                          className="text-[10px] text-zinc-400 hover:text-rose-500 cursor-pointer"
-                        >
-                          Xóa
-                        </button>
-                      )}
+                {waterUnit === "both" ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {/* Ô 1: /người */}
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-700 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        <span>1. Theo người (/người)</span>
+                        <span className="text-[10px] text-sky-500 font-bold bg-sky-500/10 px-1.5 py-0.5 rounded">/người</span>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={waterAmount}
+                          onChange={(e) => setWaterAmount(e.target.value)}
+                          placeholder="100.000"
+                          className="w-full pl-3 pr-8 py-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold focus:outline-none focus:ring-1 focus:ring-sky-500"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 pointer-events-none">
+                          đ
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {["100.000", "120.000"].map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => setWaterAmount(preset)}
+                            className={`text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
+                              waterAmount === preset
+                                ? "bg-sky-500 text-white font-bold border-sky-500"
+                                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                            }`}
+                          >
+                            {preset}đ
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      value={waterPerPerson}
-                      onChange={(e) => setWaterPerPerson(e.target.value)}
-                      placeholder="VD: 100.000đ/người"
-                      className="w-full px-2.5 py-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
-                    />
+
+                    {/* Ô 2: /m3 */}
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-700 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        <span>2. Theo khối (/m³)</span>
+                        <span className="text-[10px] text-sky-500 font-bold bg-sky-500/10 px-1.5 py-0.5 rounded">/m³</span>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={waterAmountM3}
+                          onChange={(e) => setWaterAmountM3(e.target.value)}
+                          placeholder="25.000"
+                          className="w-full pl-3 pr-8 py-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold focus:outline-none focus:ring-1 focus:ring-sky-500"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 pointer-events-none">
+                          đ
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {["20.000", "25.000", "30.000"].map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => setWaterAmountM3(preset)}
+                            className={`text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
+                              waterAmountM3 === preset
+                                ? "bg-sky-500 text-white font-bold border-sky-500"
+                                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                            }`}
+                          >
+                            {preset}đ
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : waterUnit === "/người" || waterUnit === "/m³" || waterUnit === "/phòng" ? (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-zinc-500 font-medium">Nhập số tiền ({waterUnit}):</span>
+                      <span className="font-bold text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-md">
+                        {waterUnit}
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={waterAmount}
+                        onChange={(e) => setWaterAmount(e.target.value)}
+                        placeholder={waterUnit === "/m³" ? "25.000" : "100.000"}
+                        className="w-full pl-3 pr-8 py-2 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold focus:outline-none focus:ring-1.5 focus:ring-sky-500 shadow-xs"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 pointer-events-none">
+                        đ
+                      </span>
+                    </div>
                     <div className="flex flex-wrap gap-1 pt-0.5">
-                      {["100.000đ/người", "120.000đ/người", "Miễn phí"].map((preset) => (
+                      {(waterUnit === "/m³"
+                        ? ["20.000", "25.000", "30.000"]
+                        : ["100.000", "120.000", "150.000"]
+                      ).map((preset) => (
                         <button
                           key={preset}
                           type="button"
-                          onClick={() => setWaterPerPerson(preset)}
+                          onClick={() => setWaterAmount(preset)}
                           className={`text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
-                            waterPerPerson === preset
+                            waterAmount === preset
                               ? "bg-sky-500 text-white font-bold border-sky-500"
-                              : "bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                              : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
                           }`}
                         >
-                          {preset}
+                          {preset}đ
                         </button>
                       ))}
                     </div>
                   </div>
+                ) : (
+                  <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs font-medium text-sky-800 dark:text-sky-300 flex items-center justify-center min-h-[58px]">
+                    {waterUnit === "state"
+                      ? "Tính theo biểu giá hoá đơn nước sạch nhà nước"
+                      : "Miễn phí tiền nước sinh hoạt"}
+                  </div>
+                )}
+              </div>
 
-                  {/* Input 2: Theo khối m3 */}
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-700 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-                        2. Tính theo khối (/m³)
+              {/* 3. Tiền gửi xe - Menu chọn đơn vị (/xe, /phòng, miễn phí 1 xe, miễn phí) */}
+              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                    <Car className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Gửi xe máy</span>
+                  </label>
+                  <select
+                    value={parkingUnit}
+                    onChange={(e) => setParkingUnit(e.target.value as any)}
+                    className="text-[11px] font-bold bg-white dark:bg-zinc-900 text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-700/60 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer shadow-xs"
+                    title="Chọn đơn vị gửi xe"
+                  >
+                    <option value="/xe">/xe</option>
+                    <option value="/phòng">/phòng</option>
+                    <option value="free_1">Free 1 xe</option>
+                    <option value="free">Miễn phí</option>
+                  </select>
+                </div>
+
+                {parkingUnit === "/xe" || parkingUnit === "/phòng" ? (
+                  <>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={parkingAmount}
+                        onChange={(e) => setParkingAmount(e.target.value)}
+                        placeholder="100.000"
+                        className="w-full pl-3 pr-8 py-2 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold focus:outline-none focus:ring-1.5 focus:ring-indigo-500 shadow-xs"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 pointer-events-none">
+                        đ
                       </span>
-                      {waterPerM3 && (
-                        <button
-                          type="button"
-                          onClick={() => setWaterPerM3("")}
-                          className="text-[10px] text-zinc-400 hover:text-rose-500 cursor-pointer"
-                        >
-                          Xóa
-                        </button>
-                      )}
                     </div>
-                    <input
-                      type="text"
-                      value={waterPerM3}
-                      onChange={(e) => setWaterPerM3(e.target.value)}
-                      placeholder="VD: 25.000đ/m³"
-                      className="w-full px-2.5 py-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
-                    />
                     <div className="flex flex-wrap gap-1 pt-0.5">
-                      {["20.000đ/m³", "25.000đ/m³", "30.000đ/m³", "Giá nhà nước"].map((preset) => (
+                      {["100.000", "120.000", "150.000"].map((preset) => (
                         <button
                           key={preset}
                           type="button"
-                          onClick={() => setWaterPerM3(preset)}
+                          onClick={() => setParkingAmount(preset)}
                           className={`text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
-                            waterPerM3 === preset
-                              ? "bg-sky-500 text-white font-bold border-sky-500"
-                              : "bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                            parkingAmount === preset
+                              ? "bg-indigo-500 text-white font-bold border-indigo-500"
+                              : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
                           }`}
                         >
-                          {preset}
+                          {preset}đ
                         </button>
                       ))}
                     </div>
+                  </>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-800 dark:text-indigo-300 flex items-center justify-center min-h-[58px]">
+                    {parkingUnit === "free_1"
+                      ? "Miễn phí 1 xe (xe thứ 2 thu phí)"
+                      : "Miễn phí gửi xe hoàn toàn"}
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* Tiền gửi xe */}
-              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5">
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
-                  <Car className="w-3.5 h-3.5 text-indigo-500" />
-                  <span>Gửi xe máy</span>
-                </label>
-                <input
-                  type="text"
-                  value={parking}
-                  onChange={(e) => setParking(e.target.value)}
-                  placeholder="VD: 100.000đ/xe"
-                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
-                />
-                <div className="flex flex-wrap gap-1 pt-0.5">
-                  {["100.000đ/xe", "120.000đ/xe", "150.000đ/xe", "Miễn phí 1 xe", "Miễn phí"].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setParking(preset)}
-                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
-                        parking === preset
-                          ? "bg-indigo-500 text-white font-bold border-indigo-500"
-                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
-                      }`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
+              {/* 4. Wifi / Internet - Menu đơn vị (Miễn phí, /phòng, /người) */}
+              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                    <Wifi className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Wifi / Internet</span>
+                  </label>
+                  <select
+                    value={internetUnit}
+                    onChange={(e) => setInternetUnit(e.target.value as any)}
+                    className="text-[11px] font-bold bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700/60 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer shadow-xs"
+                    title="Chọn đơn vị Wifi"
+                  >
+                    <option value="free">Miễn phí</option>
+                    <option value="/phòng">/phòng</option>
+                    <option value="/người">/người</option>
+                  </select>
                 </div>
+
+                {internetUnit !== "free" ? (
+                  <>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={internetAmount}
+                        onChange={(e) => setInternetAmount(e.target.value)}
+                        placeholder="50.000"
+                        className="w-full pl-3 pr-8 py-2 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold focus:outline-none focus:ring-1.5 focus:ring-emerald-500 shadow-xs"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 pointer-events-none">
+                        đ
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 pt-0.5">
+                      {["50.000", "80.000", "100.000"].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setInternetAmount(preset)}
+                          className={`text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
+                            internetAmount === preset
+                              ? "bg-emerald-600 text-white font-bold border-emerald-600"
+                              : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                          }`}
+                        >
+                          {preset}đ
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-800 dark:text-emerald-300 flex items-center justify-center min-h-[58px]">
+                    Miễn phí Wifi tốc độ cao
+                  </div>
+                )}
               </div>
 
-              {/* Wifi / Internet */}
-              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5">
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
-                  <Wifi className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Wifi / Internet</span>
-                </label>
-                <input
-                  type="text"
-                  value={internet}
-                  onChange={(e) => setInternet(e.target.value)}
-                  placeholder="VD: Miễn phí"
-                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
-                />
-                <div className="flex flex-wrap gap-1 pt-0.5">
-                  {["Miễn phí", "50.000đ/người", "100.000đ/phòng"].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setInternet(preset)}
-                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
-                        internet === preset
-                          ? "bg-emerald-600 text-white font-bold border-emerald-600"
-                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
-                      }`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
+              {/* 5. Phí dịch vụ chung - Menu đơn vị (/phòng, /người, Miễn phí) */}
+              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-2 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                    <span>Phí dịch vụ chung (Rác, hành lang, máy giặt, thang máy...)</span>
+                  </label>
+                  <select
+                    value={serviceFeeUnit}
+                    onChange={(e) => setServiceFeeUnit(e.target.value as any)}
+                    className="text-[11px] font-bold bg-white dark:bg-zinc-900 text-purple-600 dark:text-purple-400 border border-purple-300 dark:border-purple-700/60 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer shadow-xs"
+                    title="Chọn đơn vị phí dịch vụ"
+                  >
+                    <option value="/phòng">/phòng (Theo phòng)</option>
+                    <option value="/người">/người (Theo người)</option>
+                    <option value="free">Miễn phí</option>
+                  </select>
                 </div>
-              </div>
 
-              {/* Phí quản lý / Dịch vụ chung */}
-              <div className="p-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 space-y-1.5 sm:col-span-2">
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-purple-500" />
-                  <span>Phí dịch vụ chung (Rác, hành lang, máy giặt chung, thang máy...)</span>
-                </label>
-                <input
-                  type="text"
-                  value={serviceFee}
-                  onChange={(e) => setServiceFee(e.target.value)}
-                  placeholder="VD: 150.000đ/phòng"
-                  className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium"
-                />
-                <div className="flex flex-wrap gap-1 pt-0.5">
-                  {["150.000đ/phòng", "200.000đ/phòng", "100.000đ/người", "Miễn phí"].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setServiceFee(preset)}
-                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
-                        serviceFee === preset
-                          ? "bg-purple-600 text-white font-bold border-purple-600"
-                          : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
-                      }`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
-                </div>
+                {serviceFeeUnit !== "free" ? (
+                  <>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={serviceFeeAmount}
+                        onChange={(e) => setServiceFeeAmount(e.target.value)}
+                        placeholder="150.000"
+                        className="w-full pl-3 pr-8 py-2 bg-white dark:bg-zinc-900 rounded-xl text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold focus:outline-none focus:ring-1.5 focus:ring-purple-500 shadow-xs"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 pointer-events-none">
+                        đ
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 pt-0.5">
+                      {["100.000", "150.000", "200.000"].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setServiceFeeAmount(preset)}
+                          className={`text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
+                            serviceFeeAmount === preset
+                              ? "bg-purple-600 text-white font-bold border-purple-600"
+                              : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                          }`}
+                        >
+                          {preset}đ
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs font-medium text-purple-800 dark:text-purple-300 flex items-center justify-center min-h-[58px]">
+                    Đã bao gồm trong tiền phòng / Miễn phí dịch vụ
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -928,3 +928,36 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành thành công trong **2.4s** với Next.js Turbopack (0 lỗi TypeScript).
 - Thanh công cụ phía trên bản đồ gọn gàng, hiển thị trọn vẹn, không còn hiện tượng tràn viền hay che khuất.
+
+---
+## [Tách Biệt Số Tiền & Menu Đơn Vị Trong Form Đăng Phòng Cho Thuê]
+**Thời gian:** 2026-10-31 01:30:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Ở phần nhập chi phí dịch vụ hàng tháng trong form Đăng phòng mới (`CreateRoomModal`):
+  - Hiển thị sẵn nhãn `/đơn vị` rõ ràng, người dùng không cần gõ lặp lại chữ đơn vị (`đ/kWh`, `đ/người`, `đ/xe`, `đ/phòng`).
+  - Trong ô input chỉ cần nhập số tiền `đ` (có ký hiệu `đ` hiển thị tự động).
+  - Đối với các dịch vụ có nhiều đơn vị tính (đặc biệt là Tiền nước, Tiền gửi xe, Wifi, Dịch vụ chung), trang bị **menu chọn đơn vị** linh hoạt.
+
+### 2. Chi tiết thực hiện
+
+1. **Chuẩn Hóa Giao Diện Chi Phí Dịch Vụ ([`src/components/CreateRoomModal.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/CreateRoomModal.tsx)):**
+   - **Tiền điện:** Sẵn nhãn `/kWh` nổi bật. Menu chọn đơn vị linh hoạt (`/kWh`, `/tháng`, `Giá nhà nước`, `Miễn phí`). Input chỉ cần gõ số tiền (VD `3.800`) với hậu tố `đ` cố định.
+   - **Tiền nước (Trường có nhiều đơn vị nhất):** Trang bị Menu chọn đơn vị chuyên dụng:
+     - `/người` (Mặc định: tính theo đầu người)
+     - `/m³` (Tính theo đồng hồ khối)
+     - `/phòng` (Khoán cố định theo phòng)
+     - `Cả 2 (/người & /m³)`: Mở 2 ô nhập tiền riêng biệt (1 ô nhập tiền/người, 1 ô nhập tiền/m³)
+     - `Giá nhà nước`: Tự động ghi nhận theo biểu giá nước sạch nhà nước
+     - `Miễn phí`: Miễn phí tiền nước sinh hoạt
+   - **Gửi xe máy:** Menu chọn đơn vị (`/xe`, `/phòng`, `Free 1 xe`, `Miễn phí`). Input chỉ cần nhập số tiền (VD `100.000` đ).
+   - **Wifi / Internet:** Menu chọn đơn vị (`Miễn phí`, `/phòng`, `/người`). Tự động hiển thị "Miễn phí" hoặc mở ô nhập số tiền đ.
+   - **Phí dịch vụ chung:** Menu chọn đơn vị (`/phòng`, `/người`, `Miễn phí`). Input chỉ cần nhập số tiền (VD `150.000` đ).
+
+2. **Cập Nhật Nút Chọn Nhanh (Presets) & Tự Động Tổng Hợp Chuỗi Dữ Liệu:**
+   - Các nút preset cập nhật trực tiếp số tiền (VD `3.800đ`, `100.000đ`, `25.000đ`) tương thích hoàn hảo với đơn vị đang chọn.
+   - Khi submit form, hàm `formatCleanFee` tự động ghép số tiền và đơn vị thành chuỗi chuẩn (`3.800đ/kWh`, `100.000đ/người (hoặc 25.000đ/m³)`, `100.000đ/xe`,...), tương thích 100% với hệ thống hiển thị chi tiết phòng và mẫu tin nhắn sao chép Zalo cho khách hàng.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành thành công trong **1.04s** với Next.js Turbopack (0 lỗi TypeScript).
+- Form đăng phòng trực quan, thao tác nhập tiền nhanh chóng, không cần gõ thủ công đơn vị.
