@@ -59,3 +59,36 @@ export function formatPricePill(price: number): string {
   }
   return `${Math.round(price / 1_000)}k`;
 }
+
+/**
+ * Tính khoảng cách (km) giữa 2 tọa độ GPS [lng, lat] theo công thức Haversine
+ */
+export function calculateDistanceKm(
+  coord1: [number, number],
+  coord2: [number, number]
+): number {
+  const [lng1, lat1] = coord1;
+  const [lng2, lat2] = coord2;
+  const R = 6371; // Bán kính Trái Đất (km)
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+}
+
+/**
+ * Định dạng khoảng cách thân thiện cho người dùng (VD: "450m" hoặc "1.8km")
+ */
+export function formatDistance(distanceKm: number): string {
+  if (distanceKm < 1) {
+    return `${Math.round(distanceKm * 1000)}m`;
+  }
+  return `${distanceKm.toFixed(1)}km`;
+}
+

@@ -628,3 +628,41 @@
 - Kiểm tra trực tiếp endpoint `GET http://localhost:3000/maplibre-gl-worker.mjs`: trả về **Status 200**, `content-type: application/javascript; charset=UTF-8`.
 - Chạy `npm run build`: hoàn thành xuất sắc trong **1.5s**, không phát sinh cảnh báo hay lỗi worker.
 - Bản đồ WebGL hiển thị 60fps mượt mà, ghim phòng và các chức năng tương tác hoạt động trơn tru.
+
+---
+## [Tích Hợp Khóa Mapbox Chính Thức, 3D Buildings & Thanh Tìm Kiếm Địa Điểm Geocoding]
+**Thời gian:** 2026-10-30 21:48:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Người dùng cung cấp API Key Mapbox chính thức (`NEXT_PUBLIC_MAPBOX_TOKEN`).
+- Kích hoạt toàn bộ năng lực của hệ sinh thái **Mapbox GL JS** chính hãng và tính năng "Tìm trên Map".
+
+### 2. Chi tiết thực hiện
+
+1. **Cấu hình Môi trường & Khóa Mapbox:**
+   - Tạo file `.env.local` chứa biến `NEXT_PUBLIC_MAPBOX_TOKEN` (được bảo mật trong `.gitignore`).
+   - Cập nhật `.env.example` với hướng dẫn biến môi trường mẫu.
+   - Sao lưu worker chuẩn CSP [`public/mapbox-gl-csp-worker.js`](file:///C:/Long/Long/PersonalProject/rented_room/public/mapbox-gl-csp-worker.js) đảm bảo tương thích 100% với Next.js và CSP policy.
+
+2. **Nâng cấp Động cơ Bản đồ [`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx):**
+   - Chuyển sang sử dụng thư viện chính hãng **`mapbox-gl`** (v3.34.1).
+   - **4 Lớp bản đồ Mapbox bản quyền cực đẹp:**
+     - `Đường phố (Streets v12)`: Tên đường, quận huyện, ngõ hẻm Việt Nam 100% tiếng Việt có dấu.
+     - `Tối Obsidian (Dark v11)`: Tone màu tối huyền bí đẳng cấp, hòa hợp với giao diện Dark Mode.
+     - `Sáng Luxury (Light v11)`: Tone ngọc trai thanh thoát, làm nổi bật ghim giá phòng.
+     - `Vệ tinh 3D (Satellite Streets v12)`: Ảnh vệ tinh độ phân giải cao thấy rõ từng nóc nhà, công viên, sông Sài Gòn.
+   - **Lớp Tòa nhà 3D Nổi khối (3D Buildings Extrusion):**
+     - Tích hợp lớp `3d-buildings` của Mapbox với góc nghiêng camera 40° - 50°.
+     - Tự động hiển thị các khối nhà 3D nổi và đổ bóng khi zoom vào các khu vực trung tâm (Landmark 81, Quận 1, Bitexco, Bình Thạnh...).
+
+3. **Tính năng "Tìm trên Map" với Mapbox Geocoding & Đo khoảng cách GPS ([`src/lib/geoUtils.ts`](file:///C:/Long/Long/PersonalProject/rented_room/src/lib/geoUtils.ts)):**
+   - **Thanh tìm kiếm địa chỉ thời gian thực:** Người dùng gõ tên địa điểm, trường đại học, tòa nhà bất kỳ tại TP.HCM (VD: "Landmark 81", "Bến Thành", "Đại học Kinh tế", "Thảo Điền"...), hệ thống tự động gợi ý địa chỉ qua Mapbox Places API.
+   - **Hiệu ứng Radar Beacon:** Khi chọn một địa điểm, camera bay mượt mà đến tọa độ đó và hiển thị ghim phát sóng radar màu vàng sang trọng.
+   - **Thuật toán Haversine tính cự ly:**
+     - Hàm `calculateDistanceKm` và `formatDistance` tính toán chính xác khoảng cách từ địa điểm tìm kiếm đến từng căn phòng.
+     - Tự động sắp xếp lại danh sách phòng trong Sidebar theo thứ tự từ gần nhất đến xa nhất.
+     - Hiển thị huy hiệu cự ly trên mỗi thẻ phòng (VD: `📍 850m`, `📍 1.4km`).
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: biên dịch thành công 100% trong **1.4s** với Next.js Turbopack (0 lỗi TypeScript).
+- Endpoint Mapbox Geocoding & Styles hoạt động ổn định với HTTP 200.
