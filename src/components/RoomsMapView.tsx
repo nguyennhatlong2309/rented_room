@@ -235,7 +235,7 @@ export function RoomsMapView({
       style: MAP_STYLES[initialStyleKey].url,
       center: HCMC_CENTER,
       zoom: 12.5,
-      pitch: 45, // Góc nghiêng 3D điện ảnh Google Maps
+      pitch: 0, // Thẳng đứng 90 độ từ trên xuống chuẩn Google Maps (không nghiêng)
       bearing: 0,
       attributionControl: false,
     });
@@ -363,8 +363,8 @@ export function RoomsMapView({
         setHoveredRoomId(null);
         map.flyTo({
           center: coords,
-          zoom: 17.8, // Zoom siêu gần thấy rõ toà nhà, ngõ hẻm và khối 3D
-          pitch: 55,  // Góc nghiêng 3D điện ảnh
+          zoom: 17.8, // Mức zoom cận cảnh toà nhà & ngõ hẻm
+          pitch: 0,   // Thẳng đứng 90 độ, không nghiêng bản đồ
           duration: 1200,
         });
       });
@@ -521,7 +521,7 @@ export function RoomsMapView({
     map.flyTo({
       center: item.center,
       zoom: 16.5,
-      pitch: 50,
+      pitch: 0,
       duration: 1400,
     });
   };
@@ -547,7 +547,7 @@ export function RoomsMapView({
       mapRef.current.flyTo({
         center: HCMC_CENTER,
         zoom: 12.5,
-        pitch: 35,
+        pitch: 0,
         bearing: 0,
         duration: 1200,
       });
@@ -563,7 +563,7 @@ export function RoomsMapView({
           mapRef.current?.flyTo({
             center: [pos.coords.longitude, pos.coords.latitude],
             zoom: 16.5,
-            pitch: 50,
+            pitch: 0,
             duration: 1400,
           });
         },
@@ -905,8 +905,8 @@ export function RoomsMapView({
                     if (mapRef.current) {
                       mapRef.current.flyTo({
                         center: coords,
-                        zoom: 17.8, // Zoom siêu gần toà nhà
-                        pitch: 55,
+                        zoom: 17.8, // Mức zoom cận cảnh toà nhà & ngõ hẻm
+                        pitch: 0,   // Thẳng đứng 90 độ, không nghiêng bản đồ
                         duration: 1200,
                       });
                     }

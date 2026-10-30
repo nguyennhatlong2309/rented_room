@@ -837,3 +837,32 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành thành công trong **1.32s** với Turbopack (0 lỗi TypeScript, 0 lỗi cú pháp).
 - Tương phản màu chữ hoàn hảo 100%, thẻ ảnh chỉ xuất hiện trên đầu ghim khi hover phòng chưa chọn, và hiển thị gọn gàng ở góc màn hình khi click.
+
+---
+## [Cố Định Góc Nhìn Thẳng Đứng 2D (Pitch 0°) & Thông Số Mức Zoom Cận Cảnh]
+**Thời gian:** 2026-10-30 22:38:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Khi click vào xem phòng: giữ góc nhìn camera **thẳng đứng (top-down 2D vuông góc 90° từ trên xuống)**, không tự động nghiêng bản đồ (loại bỏ góc nghiêng pitch 3D).
+- Giải đáp thắc mắc: khi click vào 1 phòng thì hiện tại hệ thống đang áp dụng mức zoom bao nhiêu?
+
+### 2. Chi tiết thực hiện
+
+1. **Chuyển Toàn Bộ Góc Camera Sang Thẳng Đứng (`pitch: 0`) ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - Loại bỏ các thiết lập góc nghiêng 3D (`pitch: 45°`, `pitch: 50°`, `pitch: 55°`) trước đây.
+   - Khi khởi tạo bản đồ ban đầu: đặt `pitch: 0` (góc nhìn thẳng đứng 2D truyền thống như Google Maps).
+   - Khi click vào ghim trên bản đồ hoặc chọn phòng từ danh sách Sidebar: `map.flyTo` giữ nguyên `pitch: 0` để người dùng dễ quan sát ngã tư, ngõ hẻm và hướng di chuyển mà không bị nghiêng hình ảnh toà nhà.
+   - Thao tác Reset TP.HCM, Tìm kiếm địa điểm, và Định vị GPS đều đồng bộ sang `pitch: 0`.
+
+2. **Thông Số Mức Zoom Hiện Tại:**
+   - Khi click vào 1 phòng: Hệ thống đang bay tới với mức zoom **`17.8`** (chi tiết tới từng toà nhà, thửa đất, số nhà và tên ngõ hẻm).
+   - Thang đo tham chiếu chuẩn Mapbox / Google Maps:
+     - `12.0 - 13.0`: Xem toàn cảnh thành phố (TP.HCM).
+     - `14.5 - 15.0`: Xem cấp Quận / Huyện.
+     - `16.0 - 16.5`: Xem cấp Phường / Trục đường chính.
+     - `17.0 - 17.5`: Thấy rõ các hẻm lớn và đường nhánh.
+     - `17.8` *(Hiện tại)*: Cận cảnh toà nhà, thấy rõ số nhà, ngách nhỏ và khối xây dựng.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành trong **1.53s** với Turbopack (0 lỗi TypeScript).
+- Bản đồ giữ thẳng đứng 100%, không bị nghiêng khi click chọn phòng, chuyển động mượt mà.
