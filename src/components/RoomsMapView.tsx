@@ -95,8 +95,8 @@ const MAP_STYLES = {
   },
 };
 
-// Mức zoom khi click chọn 1 phòng trọ (16.5: Vừa tầm thấy rõ trục đường, hẻm và các khu vực lân cận)
-const ROOM_DETAIL_ZOOM = 16.5;
+// Mức zoom khi click chọn 1 phòng trọ (15: Tầm nhìn rộng toàn khu vực quận/huyện)
+const ROOM_DETAIL_ZOOM = 15;
 
 interface SearchResultItem {
   id: string;

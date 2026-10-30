@@ -884,3 +884,18 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành thành công trong **1.31s** với Turbopack (0 lỗi TypeScript).
 - Camera zoom chuẩn xác 16.5, góc nhìn thẳng đứng trực quan.
+
+---
+## [Điều Chỉnh Mức Zoom Click Chọn Phòng Xuống 15.0]
+**Thời gian:** 2026-10-30 22:44:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Thay đổi mức zoom camera khi click chọn phòng sang **15.0**.
+
+### 2. Chi tiết thực hiện
+- Cập nhật hằng số `ROOM_DETAIL_ZOOM = 15` trong [`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx).
+- Mức zoom 15.0 cho góc nhìn bao quát toàn bộ quận/khu vực: người dùng có thể dễ dàng thấy vị trí phòng trong tương quan với toàn bộ các tuyến đường huyết mạch, công viên, trường đại học, bệnh viện và các tiện ích lớn của quận.
+
+### 3. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành thành công (0 lỗi TypeScript).
+- Camera bay mượt mà đến vị trí phòng với mức zoom chuẩn 15.0 và góc nhìn 2D thẳng đứng.
