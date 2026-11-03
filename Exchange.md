@@ -1134,3 +1134,33 @@
 ### 4. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành xuất sắc trong **3.3s**, biên dịch toàn bộ 6 trang tĩnh và động với 0 lỗi TypeScript / Turbopack.
 - Trải nghiệm chạm/click trên điện thoại qua mạng LAN mượt mà, phản hồi tức thì 100%.
+
+---
+## [Cấu Hình allowedDevOrigins & Điều Hướng Thẻ Phòng Cho Mạng LAN Mobile]
+**Thời gian:** 2026-11-03 21:02:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Hệ thống xuất hiện cảnh báo trên console:
+  `⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "192.168.1.230". Cross-origin access to Next.js dev resources is blocked by default for safety.`
+- Trên điện thoại di động qua LAN, người dùng lướt được nhưng không bấm được bất cứ thứ gì, TRỪ nút "Gọi điện chủ hộ" và "Zalo chủ".
+
+### 2. Phân tích nguyên nhân cốt lõi (Root Cause)
+1. **Next.js chặn 403 Forbidden toàn bộ tài nguyên Dev ([`block-cross-site-dev.js`](file:///C:/Long/Long/PersonalProject/rented_room/node_modules/next/dist/server/lib/router-utils/block-cross-site-dev.js)):**
+   - Từ Next.js 14.2+, tính năng bảo mật mặc định chỉ cho phép `localhost`. Khi truy cập qua IP LAN (`192.168.1.230`), Next.js chặn toàn bộ request đến `/_next/` (bao gồm HMR websocket và các gói script JavaScript client chunks) với mã phản hồi `403 Unauthorized`.
+   - Vì trình duyệt điện thoại bị chặn không tải được các tệp JavaScript, React **hoàn toàn không thể hydrate** trên điện thoại.
+   - Khi React không hydrate:
+     - Giao diện HTML tĩnh do Server render (SSR) vẫn hiển thị nên người dùng vẫn lướt cuộn trang được bình thường.
+     - Nút "Gọi điện chủ hộ" (`<a href="tel:...">`) và "Zalo chủ" (`<a href="https://zalo.me/...">`) bấm được vì đây là thẻ `<a>` thuần HTML có thuộc tính `href`, trình duyệt xử lý mở ứng dụng gốc mà không cần JavaScript.
+     - Tất cả các nút bấm `onClick`, chọn bộ lọc, click thẻ mở modal/trang chi tiết... đều không hoạt động do React Synthetic Events chưa được gắn vào DOM.
+
+### 3. Chi tiết xử lý
+1. **Thêm `allowedDevOrigins` vào [`next.config.ts`](file:///C:/Long/Long/PersonalProject/rented_room/next.config.ts):**
+   - Cấu hình whitelist cho dải IP mạng LAN: `"192.168.1.230"`, `"192.168.1.*"`, `"192.168.*.*"`, `"10.*.*.*"`, `"localhost"`, `"127.0.0.1"`.
+   - Giúp Next.js cho phép truyền tải đầy đủ mã nguồn JS và kết nối HMR về điện thoại khi truy cập qua mạng LAN.
+2. **Nâng cấp `RoomCard` với thẻ `<Link>` chuẩn ([`src/components/RoomCard.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomCard.tsx)):**
+   - Bọc ảnh bìa và tên tòa nhà bằng component `<Link href={`/rooms/${room.id}`}>` (thẻ `<a>` chuẩn HTML).
+   - Đảm bảo cơ chế Progressive Enhancement: người dùng chạm vào ảnh hoặc tên tòa nhà là có thể chuyển trang xem chi tiết ngay cả khi đường truyền mạng LAN đang kết nối hoặc trước khi React hydrate hoàn tất.
+
+### 4. Kết Quả Kiểm Tra
+- Chạy `npm run build`: biên dịch thành công 100% trong **2.7s**, không phát sinh lỗi.
+- Đã commit và đẩy mã nguồn lên GitHub.

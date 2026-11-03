@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Room } from "@/lib/types";
 import {
   formatVND,
@@ -74,7 +75,14 @@ export function RoomCard({
     >
       {/* Top Media & Badges */}
       <div>
-        <div className="relative aspect-[16/10] w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+        <Link
+          href={`/rooms/${room.id}`}
+          className="block relative aspect-[16/10] w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 group"
+          onClick={(e) => {
+            // Cho phép Link điều hướng tự nhiên
+            e.stopPropagation();
+          }}
+        >
           <img
             src={room.images[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80"}
             alt={`Phòng ${room.roomCode} - ${room.buildingName}`}
@@ -109,7 +117,7 @@ export function RoomCard({
 
           {/* Bottom-left: Building Name & Address */}
           <div className="absolute bottom-3.5 left-3.5 right-3.5 text-white">
-            <h3 className="font-serif font-bold text-base md:text-lg leading-snug drop-shadow-sm truncate tracking-wide">
+            <h3 className="font-serif font-bold text-base md:text-lg leading-snug drop-shadow-sm truncate tracking-wide group-hover:text-amber-300 transition-colors">
               {room.buildingName}
             </h3>
             <p className="text-xs text-zinc-300 flex items-center gap-1 drop-shadow-sm truncate font-sans">
@@ -117,7 +125,7 @@ export function RoomCard({
               {room.address}, {room.ward ? room.ward + ", " : ""}{room.district}
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* Content Details */}
         <div className="p-4 space-y-3.5">
