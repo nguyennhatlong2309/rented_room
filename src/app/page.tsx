@@ -354,7 +354,7 @@ function SalesRentedRoomContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-[#0E1218]">
+    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-[#0E1218] overflow-x-hidden w-full">
       {/* 1. CHẾ ĐỘ BẢN ĐỒ TOÀN MÀN HÌNH CHUẨN GOOGLE MAPS (100VW x 100VH) */}
       {viewMode === "map" ? (
         <RoomsMapView

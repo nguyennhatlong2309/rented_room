@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${cinzel.variable} ${josefin.variable} h-full antialiased`}
+      className={`${cinzel.variable} ${josefin.variable} h-full antialiased overflow-x-hidden`}
       suppressHydrationWarning
     >
       <head>
@@ -49,7 +49,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#FBFBFA] dark:bg-[#0E1218] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500 selection:text-white">
+      <body className="min-h-full flex flex-col bg-[#FBFBFA] dark:bg-[#0E1218] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500 selection:text-white overflow-x-hidden w-full">
         <ToastProvider>
           {children}
           <AgentationWrapper />

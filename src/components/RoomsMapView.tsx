@@ -132,6 +132,7 @@ export function RoomsMapView({
 
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [hoveredRoomId, setHoveredRoomId] = useState<string | null>(null);
+  const hoveredRoomIdRef = useRef<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Trên desktop tự động mở ngăn kéo, trên mobile thu gọn để không che khuất bản đồ
@@ -326,12 +327,14 @@ export function RoomsMapView({
       add3DBuildingsLayer(map);
     });
 
-    // Bấm vào khoảng trống trên bản đồ sẽ đóng thẻ phòng chi tiết ở góc
+    // Bấm vào khoảng trống trên bản đồ sẽ đóng thẻ phòng chi tiết ở góc và đóng cả hover preview
     map.on("click", (e) => {
       const originalEvent = e.originalEvent;
       const target = originalEvent?.target as HTMLElement | null;
       if (!target?.closest(".room-map-marker-container")) {
         setActiveRoom(null);
+        hoveredRoomIdRef.current = null;
+        setHoveredRoomId(null);
       }
     });
 
@@ -438,10 +441,34 @@ export function RoomsMapView({
       `;
 
       // Xử lý sự kiện click & touch tap mượt mà cho cả Desktop và Mobile
+      let lastHandledTime = 0;
+
       const handleMarkerSelect = (e: Event) => {
         e.stopPropagation();
-        setActiveRoom(room);
+
+        const now = Date.now();
+        // Chống hiện tượng trình duyệt bắn liên tiếp touchend rồi synthetic click cùng lúc
+        if (now - lastHandledTime < 350) {
+          return;
+        }
+        lastHandledTime = now;
+
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+        if (isMobile) {
+          // Trên Mobile: Cơ chế 2 lần chạm
+          // Lần chạm 1: Nếu chưa chạm xem phòng này -> Mở hover card xem nhanh ảnh phòng (giống hover chuột trên Desktop)
+          if (hoveredRoomIdRef.current !== room.id) {
+            hoveredRoomIdRef.current = room.id;
+            setHoveredRoomId(room.id);
+            return;
+          }
+        }
+
+        // Lần chạm 2 trên Mobile (hoặc click trực tiếp trên Desktop): Zoom tới và hiện bảng chi tiết thông tin phòng
+        hoveredRoomIdRef.current = null;
         setHoveredRoomId(null);
+        setActiveRoom(room);
         map.flyTo({
           center: coords,
           zoom: ROOM_DETAIL_ZOOM,
@@ -454,11 +481,17 @@ export function RoomsMapView({
       el.addEventListener("touchend", handleMarkerSelect);
 
       el.addEventListener("mouseenter", () => {
-        setHoveredRoomId(room.id);
+        if (typeof window !== "undefined" && window.innerWidth >= 768) {
+          hoveredRoomIdRef.current = room.id;
+          setHoveredRoomId(room.id);
+        }
       });
 
       el.addEventListener("mouseleave", () => {
-        setHoveredRoomId(null);
+        if (typeof window !== "undefined" && window.innerWidth >= 768) {
+          hoveredRoomIdRef.current = null;
+          setHoveredRoomId(null);
+        }
       });
 
       const marker = new mapboxgl.Marker({ element: el })

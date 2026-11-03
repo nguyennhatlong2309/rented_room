@@ -1190,3 +1190,40 @@
 ### 4. Kết Quả Kiểm Tra
 - Chạy `npm run build`: hoàn thành thành công trong **3.1s**, 0 lỗi TypeScript / Turbopack.
 - Đã commit và đẩy mã nguồn lên GitHub.
+
+---
+## [Tối Ưu Mobile: Loại Bỏ Tràn Viền Phải & Cơ Chế Chạm 2 Bước Trên Bản Đồ]
+**Thời gian:** 2026-11-03 21:26:00
+
+### 1. Nội dung yêu cầu từ người dùng
+1. Sửa lỗi giao diện trên điện thoại di động bị thừa một khoảng trắng lớn ở mép bên phải (tràn ngang / horizontal overflow).
+2. Tối ưu trải nghiệm bản đồ trên điện thoại:
+   - Chạm lần 1 vào ghim marker: Hiển thị card xem nhanh ảnh phòng (giống hành vi hover trên máy tính).
+   - Chạm lần 2 vào chính phần tử đã click: Mới thực hiện zoom bản đồ tới căn nhà và mở bảng chi tiết thông tin phòng bên dưới.
+
+### 2. Nguyên nhân cốt lõi (Root Cause)
+1. **Tràn viền màn hình di động (Khoảng trắng bên phải):**
+   - Thanh Header trước đây chứa đầy đủ: Logo, Badge "Nội Bộ Sale", Nút Đổi Theme, Nút "+ Đăng Quỹ Phòng", và đặc biệt là form sửa thông tin Sale dạng inline với 2 ô input + nút Lưu (rộng hơn 260px). Tổng bề rộng của Header đạt hơn 550px - 700px, vượt xa kích thước màn hình điện thoại (375px - 390px), khiến trình duyệt di động zoom out và tạo ra khoảng trắng khổng lồ bên phải.
+   - Container thông báo Toast sử dụng `w-full` và `right-5` cố định gây tràn mép phải trên màn hình hẹp.
+2. **Cơ chế tương tác Marker trên màn hình cảm ứng:**
+   - Trên di động không có con trỏ chuột (không có sự kiện `mouseenter/mouseleave`).
+   - Trước đây, chạm lần đầu lập tức gọi `setActiveRoom` và `map.flyTo`, bỏ qua toàn bộ thẻ xem trước hình ảnh phòng (`room-hover-card`).
+
+### 3. Chi tiết thực hiện & Giải pháp kỹ thuật
+1. **Thiết Kế Lại Header Chuẩn Responsive ([`src/components/Header.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/Header.tsx)):**
+   - Trên mobile: Giữ gọn gàng với Logo, nút Đổi Theme, nút "+ Đăng" rút gọn và nút icon Sale. Ẩn badge "Nội Bộ Sale" trên màn hình nhỏ.
+   - **Chuyển form sửa thông tin Sale thành Modal Dialog nổi:** Khi bấm nút Sale, một modal sang trọng với nền kính mờ `fixed inset-0` sẽ hiển thị ở giữa màn hình. Hoàn toàn không chiếm diện tích ngang của Header, triệt tiêu 100% hiện tượng tràn viền.
+2. **Ngăn Chặn Tràn Ngang Toàn Cục ([`src/app/layout.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/layout.tsx), [`src/app/page.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/page.tsx), [`src/components/Toast.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/Toast.tsx)):**
+   - Bổ sung `overflow-x-hidden w-full` cho thẻ `html`, `body` và container chính của trang.
+   - Sửa container Toast thành `left-4 right-4 sm:left-auto sm:right-5` ôm sát màn hình di động.
+3. **Cơ Chế Chạm 2 Bước Thông Minh Trên Bản Đồ ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - Sử dụng `hoveredRoomIdRef` và debounce 350ms chống double-tap giữa `touchend` và synthetic `click`.
+   - **Trên Mobile:**
+     - **Chạm Lần 1:** Kích hoạt hiển thị thẻ xem trước ảnh phòng (`room-hover-card`) ngay trên đầu ghim (ảnh sắc nét, mã phòng, toà nhà, giá thuê, hoa hồng), bản đồ giữ nguyên mức zoom.
+     - **Chạm Lần 2** (vào ghim hoặc vào chính card xem trước): Bay/zoom tới toà nhà và trượt mở bảng chi tiết thông tin phòng bên dưới.
+     - **Chạm ra ngoài khoảng trống bản đồ:** Đóng cả card xem nhanh lẫn bảng chi tiết.
+   - **Trên Desktop:** Giữ nguyên trải nghiệm chuột (rê chuột là hiện ảnh xem nhanh, click là zoom chọn phòng).
+
+### 4. Kết Quả Kiểm Tra
+- `npm run build` biên dịch thành công 100% trong **2.7s**, 0 lỗi TypeScript / Turbopack.
+- Đã commit và đẩy mã nguồn lên GitHub.
