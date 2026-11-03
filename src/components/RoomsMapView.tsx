@@ -132,7 +132,14 @@ export function RoomsMapView({
 
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [hoveredRoomId, setHoveredRoomId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Trên desktop tự động mở ngăn kéo, trên mobile thu gọn để không che khuất bản đồ
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      setIsSidebarOpen(true);
+    }
+  }, []);
   const [currentStyle, setCurrentStyle] = useState<keyof typeof MAP_STYLES>("streets");
   const [isLayersOpen, setIsLayersOpen] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -153,9 +160,9 @@ export function RoomsMapView({
     "district" | "price" | "status" | "type" | "features" | null
   >(null);
 
-  // Đóng dropdown bộ lọc khi click ra ngoài
+  // Đóng dropdown bộ lọc khi click hoặc chạm ra ngoài
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target?.closest(".filter-menu-container")) {
         setOpenFilterMenu(null);
@@ -163,9 +170,11 @@ export function RoomsMapView({
     };
     if (openFilterMenu) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside, { passive: true });
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [openFilterMenu]);
 
@@ -419,7 +428,7 @@ export function RoomsMapView({
           </div>
 
           <!-- Ghim giá tiền (Pill Marker): Nền đen sang trọng viền vàng kim, chữ TRẮNG TINH tương phản tuyệt đối -->
-          <div class="room-marker-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 shadow-xl bg-zinc-950/95 text-white border border-amber-500/40 hover:scale-105">
+          <div class="room-marker-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 shadow-xl bg-zinc-950/95 text-white border border-amber-500/40 hover:scale-105 cursor-pointer select-none touch-manipulation">
             <span class="room-status-dot w-2 h-2 rounded-full ${
               isHolding ? "bg-amber-400 animate-pulse" : isSoon ? "bg-sky-400" : "bg-emerald-400"
             }"></span>
@@ -428,17 +437,21 @@ export function RoomsMapView({
         </div>
       `;
 
-      el.addEventListener("click", (e) => {
+      // Xử lý sự kiện click & touch tap mượt mà cho cả Desktop và Mobile
+      const handleMarkerSelect = (e: Event) => {
         e.stopPropagation();
         setActiveRoom(room);
         setHoveredRoomId(null);
         map.flyTo({
           center: coords,
-          zoom: ROOM_DETAIL_ZOOM, // 16.5: Chuẩn tầm nhìn phường/khu phố & các hẻm xung quanh
+          zoom: ROOM_DETAIL_ZOOM,
           pitch: 0,   // Thẳng đứng 90 độ, không nghiêng bản đồ
           duration: 1200,
         });
-      });
+      };
+
+      el.addEventListener("click", handleMarkerSelect);
+      el.addEventListener("touchend", handleMarkerSelect);
 
       el.addEventListener("mouseenter", () => {
         setHoveredRoomId(room.id);
@@ -757,75 +770,100 @@ export function RoomsMapView({
       <div ref={mapContainerRef} className="absolute inset-0 z-0 w-full h-full" />
 
       {/* 2. THANH CÔNG CỤ TÌM KIẾM & BỘ LỌC CHUẨN GOOGLE MAPS (TOP BAR) */}
-      <div className="absolute top-3.5 left-3.5 right-3.5 z-20 flex items-start gap-3 pointer-events-none">
-        {/* A. THẺ TÌM KIẾM GOOGLE MAPS (TOP-LEFT CARD) */}
-        <div className="relative pointer-events-auto shrink-0 w-84 sm:w-96 shadow-2xl rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 transition-all">
-          <div className="flex items-center px-3 py-2 gap-2">
-            <button
-              onClick={() => setIsSidebarOpen((prev) => !prev)}
-              className="p-1.5 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-              title={isSidebarOpen ? "Thu gọn danh sách" : "Mở danh sách phòng"}
-            >
-              <Menu className="w-5 h-5 text-zinc-700 dark:text-zinc-200" />
-            </button>
-
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Tìm địa điểm, toà nhà, ĐH tại TP.HCM..."
-              className="flex-1 bg-transparent text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none"
-            />
-
-            {isSearching && (
-              <Loader2 className="w-4 h-4 animate-spin text-amber-500 shrink-0" />
-            )}
-
-            {searchQuery && !isSearching && (
+      <div className="absolute top-3.5 left-3.5 right-3.5 z-20 flex flex-col sm:flex-row items-stretch sm:items-start gap-2 sm:gap-3 pointer-events-none">
+        {/* Hàng 1 trên Mobile (kèm nút đổi view và tạo phòng) */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* A. THẺ TÌM KIẾM GOOGLE MAPS (TOP-LEFT CARD) */}
+          <div className="relative pointer-events-auto flex-1 sm:w-84 md:w-96 shadow-2xl rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 transition-all">
+            <div className="flex items-center px-3 py-2 gap-2">
               <button
-                onClick={handleClearSelectedLocation}
-                className="p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-white cursor-pointer"
-                title="Xóa tìm kiếm"
+                onClick={() => setIsSidebarOpen((prev) => !prev)}
+                className="p-1.5 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                title={isSidebarOpen ? "Thu gọn danh sách" : "Mở danh sách phòng"}
               >
-                <X className="w-4 h-4" />
+                <Menu className="w-5 h-5 text-zinc-700 dark:text-zinc-200" />
               </button>
+
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Tìm địa điểm, toà nhà, ĐH tại TP.HCM..."
+                className="flex-1 bg-transparent text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none"
+              />
+
+              {isSearching && (
+                <Loader2 className="w-4 h-4 animate-spin text-amber-500 shrink-0" />
+              )}
+
+              {searchQuery && !isSearching && (
+                <button
+                  onClick={handleClearSelectedLocation}
+                  className="p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-white cursor-pointer"
+                  title="Xóa tìm kiếm"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+
+              <div className="w-[1px] h-5 bg-zinc-200 dark:bg-zinc-800 my-auto" />
+
+              <button
+                onClick={() => handleSearchChange(searchQuery)}
+                className="p-1.5 rounded-xl text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
+                title="Tìm kiếm"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Gợi ý Geocoding Dropdown */}
+            {searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden z-50 py-1 max-h-80 overflow-y-auto">
+                {searchResults.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleSelectLocation(item)}
+                    className="w-full px-3.5 py-2.5 text-left hover:bg-amber-500/10 flex items-start gap-3 transition-colors cursor-pointer border-b border-zinc-100 dark:border-zinc-800/50 last:border-none"
+                  >
+                    <MapPin className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                        {item.text}
+                      </p>
+                      <p className="text-[11px] text-zinc-500 truncate">{item.place_name}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             )}
-
-            <div className="w-[1px] h-5 bg-zinc-200 dark:bg-zinc-800 my-auto" />
-
-            <button
-              onClick={() => handleSearchChange(searchQuery)}
-              className="p-1.5 rounded-xl text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
-              title="Tìm kiếm"
-            >
-              <Search className="w-4 h-4" />
-            </button>
           </div>
 
-          {/* Gợi ý Geocoding Dropdown */}
-          {searchResults.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden z-50 py-1 max-h-80 overflow-y-auto">
-              {searchResults.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleSelectLocation(item)}
-                  className="w-full px-3.5 py-2.5 text-left hover:bg-amber-500/10 flex items-start gap-3 transition-colors cursor-pointer border-b border-zinc-100 dark:border-zinc-800/50 last:border-none"
-                >
-                  <MapPin className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
-                      {item.text}
-                    </p>
-                    <p className="text-[11px] text-zinc-500 truncate">{item.place_name}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+          {/* CÁC NÚT ĐIỀU HƯỚNG TRÊN MOBILE */}
+          <div className="pointer-events-auto flex items-center gap-1.5 shrink-0 sm:hidden">
+            {onSwitchToGrid && (
+              <button
+                onClick={onSwitchToGrid}
+                className="p-2.5 rounded-2xl bg-zinc-900/95 text-white dark:bg-white/95 dark:text-zinc-950 shadow-xl backdrop-blur-md border border-white/20 transition-all cursor-pointer"
+                title="Danh sách Thẻ"
+              >
+                <LayoutGrid className="w-4 h-4 text-amber-400 dark:text-amber-600" />
+              </button>
+            )}
+            {onOpenCreateModal && (
+              <button
+                onClick={onOpenCreateModal}
+                className="p-2.5 rounded-2xl bg-amber-500 text-zinc-950 shadow-xl border border-amber-300 transition-all cursor-pointer"
+                title="Đăng Quỹ Phòng"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* B. DÃY CÁC MENU BỘ LỌC CHUYÊN NGHIỆP DẠNG DROPDOWN */}
-        <div className="pointer-events-auto flex items-center gap-2 overflow-visible py-1">
+        <div className="pointer-events-auto flex items-center gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none py-1">
           {/* Menu 1: Khu Vực (Quận) */}
           <div className="relative filter-menu-container">
             <button
@@ -1214,8 +1252,8 @@ export function RoomsMapView({
           )}
         </div>
 
-        {/* C. CÁC NÚT ĐIỀU HƯỚNG GÓC PHẢI (TOP-RIGHT ACTIONS) */}
-        <div className="pointer-events-auto flex items-center gap-2 shrink-0">
+        {/* C. CÁC NÚT ĐIỀU HƯỚNG GÓC PHẢI TRÊN DESKTOP (TOP-RIGHT ACTIONS) */}
+        <div className="hidden sm:flex pointer-events-auto items-center gap-2 shrink-0 ml-auto">
           {/* Nút Quay lại Danh sách Thẻ */}
           {onSwitchToGrid && (
             <button
@@ -1248,7 +1286,7 @@ export function RoomsMapView({
 
       {/* 3. NGĂN KÉO DANH SÁCH PHÒNG BÊN TRÁI (GOOGLE MAPS DRAWER) */}
       <div
-        className={`absolute top-16 bottom-4 left-3.5 z-20 w-84 sm:w-96 max-w-[90vw] transition-transform duration-300 ease-in-out pointer-events-auto flex flex-col bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-3xl border border-zinc-200/80 dark:border-zinc-800 shadow-2xl overflow-hidden ${
+        className={`absolute top-28 sm:top-16 bottom-4 left-3.5 z-20 w-84 sm:w-96 max-w-[90vw] transition-transform duration-300 ease-in-out pointer-events-auto flex flex-col bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-3xl border border-zinc-200/80 dark:border-zinc-800 shadow-2xl overflow-hidden ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-[110%]"
         }`}
       >
@@ -1405,7 +1443,7 @@ export function RoomsMapView({
       {!isSidebarOpen && (
         <button
           onClick={() => setIsSidebarOpen(true)}
-          className="absolute top-20 left-3.5 z-20 pointer-events-auto p-3 rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100 shadow-2xl hover:bg-white dark:hover:bg-zinc-800 transition-all flex items-center gap-2 cursor-pointer"
+          className="absolute top-28 sm:top-20 left-3.5 z-20 pointer-events-auto p-3 rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100 shadow-2xl hover:bg-white dark:hover:bg-zinc-800 transition-all flex items-center gap-2 cursor-pointer"
           title="Mở danh sách phòng"
         >
           <ChevronRight className="w-5 h-5 text-amber-500" />

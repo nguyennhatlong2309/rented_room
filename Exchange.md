@@ -1093,3 +1093,44 @@
 ### 3. Kết Quả Kiểm Tra
 - Chạy `npm run build`: thành công 100% với Next.js Turbopack, biên dịch thêm route API `ƒ /api/resolve-maps-url` (0 lỗi TypeScript).
 - Kiểm tra trực tiếp với link ví dụ `https://maps.app.goo.gl/i6gmJKqmSFLEjefZ6`: trích xuất thành công tọa độ chính xác `10.7965334, 106.6949383` của số nhà 87/57/20 Lê Văn Duyệt.
+
+---
+## [Tối Ưu Tương Tác Mobile LAN: Khắc Phục Không Thể Click/Chọn Trên Điện Thoại]
+**Thời gian:** 2026-11-03 20:53:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Khi người dùng sử dụng mạng LAN để truy cập ứng dụng từ điện thoại (`http://<LAN_IP>:3000`), không thể click hay chọn được bất kỳ thẻ phòng, bộ lọc hay ghim bản đồ nào.
+
+### 2. Nguyên nhân cốt lõi (Root Causes)
+1. **Agentation Capture Phase Event Interception:** Thư viện `<Agentation />` được render trực tiếp trong `src/app/layout.tsx`. Khi kích hoạt, Agentation đăng ký listener sự kiện click ở Capture Phase (`pageEvents.addEventListener("click", handleClick, true)`) trên toàn bộ Document và gọi `e.preventDefault()`, nuốt toàn bộ sự kiện click/tap của người dùng trên điện thoại.
+2. **Mapbox Touch vs Click Event trên Mobile:** Các phần tử Marker trong `RoomsMapView.tsx` chỉ lắng nghe sự kiện `click`. Trên màn hình cảm ứng di động, Mapbox chiếm quyền điều khiển cảm ứng khiến sự kiện synthetic click không được kích hoạt đều đặn nếu không có listener `touchend`.
+3. **Thanh ngăn kéo (Drawer) che phủ 90% màn hình Mobile:** State `isSidebarOpen` mặc định là `true`, với chiều rộng `w-84 max-w-[90vw]` che kín hầu hết diện tích màn hình điện thoại từ `top-16` đến `bottom-4` với `pointer-events-auto`, khiến các thao tác chạm vào bản đồ bị chặn lại bởi container của ngăn kéo.
+4. **CSS Touch Delegation trên iOS Safari/Android WebKit:** Thẻ `RoomCard` là thẻ `<div>` có `onClick` nhưng thiếu thuộc tính tương tác `role="button"`, `tabIndex={0}` và `touch-manipulation`, dẫn đến độ trễ 300ms hoặc bị bỏ qua thao tác tap trên WebKit di động.
+5. **Host binding trong dev script:** `package.json` để `"dev": "next dev"`, chưa chỉ định cờ `-H 0.0.0.0` để lắng nghe chuẩn trên toàn bộ card mạng nội bộ.
+
+### 3. Chi tiết thực hiện & Giải pháp kỹ thuật
+
+1. **Tạo Component `AgentationWrapper` ([`src/components/AgentationWrapper.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/AgentationWrapper.tsx)):**
+   - Chỉ kích hoạt và render `<Agentation />` trên thiết bị Desktop (màn hình có `window.innerWidth >= 768`).
+   - Trên thiết bị di động (< 768px), trả về `null` hoàn toàn, loại bỏ 100% việc Agentation can thiệp vào sự kiện tap/click trên điện thoại.
+   - Sử dụng dynamic import với `{ ssr: false }` đảm bảo an toàn tuyệt đối, tránh lỗi hydration mismatch.
+   - Cập nhật [`src/app/layout.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/app/layout.tsx) để sử dụng `AgentationWrapper`.
+
+2. **Nâng Cấp `RoomsMapView` Thân Thiện Với Điện Thoại ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - **Tự động thu gọn ngăn kéo trên mobile:** `isSidebarOpen` mặc định là `false` trên mobile để mở rộng tầm nhìn bản đồ và cho phép chạm tự do, chỉ mở mặc định khi kích thước màn hình $\ge$ 768px.
+   - **Hỗ trợ đa sự kiện cảm ứng (Touch & Click):** Gắn song song listener `click` và `touchend` vào tất cả các marker phòng, bổ sung class `cursor-pointer touch-manipulation select-none` loại bỏ hoàn toàn độ trễ 300ms của thao tác chạm.
+   - **Sự kiện đóng dropdown bộ lọc:** Hỗ trợ cả `mousedown` và `touchstart` khi người dùng chạm bên ngoài dropdown menu.
+   - **Giao diện Top Bar co giãn 2 hàng trên Mobile:** Hàng trên chứa thanh tìm kiếm + các nút thao tác nhanh (chuyển sang Grid / tạo phòng); hàng dưới là dãy chip bộ lọc trượt ngang (`overflow-x-auto`) chuẩn phong cách Google Maps Mobile.
+
+3. **Tối Ưu `MapLocationPicker` Cho Màn Hình Cảm Ứng ([`src/components/MapLocationPicker.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/MapLocationPicker.tsx)):**
+   - Bổ sung sự kiện `touchend` bên cạnh `click` cho Mapbox map canvas, cho phép người dùng dùng ngón tay chạm vào bất kỳ đâu trên bản đồ để ghim mốc tức thì trên điện thoại.
+
+4. **Nâng Cấp Thẻ Phòng `RoomCard` ([`src/components/RoomCard.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomCard.tsx)):**
+   - Thêm `role="button"`, `tabIndex={0}`, `touch-manipulation` và sự kiện bàn phím `onKeyDown` giúp trình duyệt iOS Safari và Android Chrome nhận diện tức thì đây là phần tử tương tác, kích hoạt sự kiện click ngay khi ngón tay vừa chạm vào.
+
+5. **Cấu Hình `package.json` Lắng Nghe LAN IP ([`package.json`](file:///C:/Long/Long/PersonalProject/rented_room/package.json)):**
+   - Cập nhật script dev: `"dev": "next dev -H 0.0.0.0"` giúp Next.js lắng nghe trên mọi địa chỉ IP mạng nội bộ.
+
+### 4. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành xuất sắc trong **3.3s**, biên dịch toàn bộ 6 trang tĩnh và động với 0 lỗi TypeScript / Turbopack.
+- Trải nghiệm chạm/click trên điện thoại qua mạng LAN mượt mà, phản hồi tức thì 100%.

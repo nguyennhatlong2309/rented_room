@@ -128,15 +128,24 @@ export function MapLocationPicker({
       showToast(`Đã ghim mốc mới: ${lngLat.lat.toFixed(4)}, ${lngLat.lng.toFixed(4)}`, "success");
     });
 
-    // Bấm bất kỳ đâu trên map để di chuyển marker
-    map.on("click", (e) => {
-      const { lng, lat } = e.lngLat;
+    // Bấm hoặc chạm bất kỳ đâu trên map để di chuyển marker (hỗ trợ cả chuột và cảm ứng điện thoại)
+    const handlePickLocation = (lng: number, lat: number) => {
       marker.setLngLat([lng, lat]);
       setCurrentLat(lat);
       setCurrentLng(lng);
       setIsCustomCoordinates(true);
       onChangeLocation({ lat, lng });
-      showToast(`Đã ghim tại vị trí click: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, "success");
+      showToast(`Đã ghim tại vị trí: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, "success");
+    };
+
+    map.on("click", (e) => {
+      handlePickLocation(e.lngLat.lng, e.lngLat.lat);
+    });
+
+    map.on("touchend", (e) => {
+      if (e.lngLat) {
+        handlePickLocation(e.lngLat.lng, e.lngLat.lat);
+      }
     });
 
     mapRef.current = map;

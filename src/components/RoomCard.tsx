@@ -61,8 +61,16 @@ export function RoomCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={() => onOpenDetail(room)}
-      className="luxury-glass luxury-card-hover group relative rounded-3xl overflow-hidden cursor-pointer flex flex-col justify-between border border-zinc-200/80 dark:border-zinc-800/80"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpenDetail(room);
+        }
+      }}
+      className="luxury-glass luxury-card-hover group relative rounded-3xl overflow-hidden cursor-pointer flex flex-col justify-between border border-zinc-200/80 dark:border-zinc-800/80 touch-manipulation select-none"
     >
       {/* Top Media & Badges */}
       <div>
