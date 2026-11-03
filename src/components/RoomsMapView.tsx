@@ -863,7 +863,7 @@ export function RoomsMapView({
         </div>
 
         {/* B. DÃY CÁC MENU BỘ LỌC CHUYÊN NGHIỆP DẠNG DROPDOWN */}
-        <div className="pointer-events-auto flex items-center gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none py-1">
+        <div className="pointer-events-auto flex items-center gap-2 overflow-x-auto sm:overflow-visible max-w-full pb-1 sm:pb-0 scrollbar-none py-1">
           {/* Menu 1: Khu Vực (Quận) */}
           <div className="relative filter-menu-container">
             <button
@@ -892,7 +892,7 @@ export function RoomsMapView({
             </button>
 
             {openFilterMenu === "district" && (
-              <div className="absolute top-full left-0 mt-2 w-72 sm:w-80 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="fixed inset-x-3.5 top-32 sm:absolute sm:top-full sm:left-0 sm:inset-auto mt-2 w-auto sm:w-80 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150 pointer-events-auto">
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
                   <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
                     <span>📍</span> Khu vực TP.HCM
@@ -964,7 +964,7 @@ export function RoomsMapView({
             </button>
 
             {openFilterMenu === "price" && (
-              <div className="absolute top-full left-0 mt-2 w-72 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="fixed inset-x-3.5 top-32 sm:absolute sm:top-full sm:left-0 sm:inset-auto mt-2 w-auto sm:w-72 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150 pointer-events-auto">
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
                   <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
                     <span>💰</span> Khoảng giá thuê
@@ -1045,7 +1045,7 @@ export function RoomsMapView({
             </button>
 
             {openFilterMenu === "status" && (
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="fixed inset-x-3.5 top-32 sm:absolute sm:top-full sm:left-0 sm:inset-auto mt-2 w-auto sm:w-64 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150 pointer-events-auto">
                 <div className="space-y-1">
                   {statusOptions.map((opt) => {
                     const isSelected =
@@ -1105,7 +1105,7 @@ export function RoomsMapView({
             </button>
 
             {openFilterMenu === "type" && (
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="fixed inset-x-3.5 top-32 sm:absolute sm:top-full sm:left-0 sm:inset-auto mt-2 w-auto sm:w-64 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150 pointer-events-auto">
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
                   <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
                     <span>🏠</span> Kiểu phòng
@@ -1172,7 +1172,7 @@ export function RoomsMapView({
                   </button>
 
                   {openFilterMenu === "features" && (
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="fixed inset-x-3.5 top-32 sm:absolute sm:top-full sm:left-0 sm:inset-auto mt-2 w-auto sm:w-64 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-md rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150 pointer-events-auto">
                       <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
                         <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
                           <span>✨</span> Tiện ích phòng

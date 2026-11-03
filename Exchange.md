@@ -1164,3 +1164,29 @@
 ### 4. Kết Quả Kiểm Tra
 - Chạy `npm run build`: biên dịch thành công 100% trong **2.7s**, không phát sinh lỗi.
 - Đã commit và đẩy mã nguồn lên GitHub.
+
+---
+## [Sửa Lỗi Hydration Mismatch & Hiển Thị Menu Bộ Lọc Dropdown Trên Bản Đồ]
+**Thời gian:** 2026-11-03 21:15:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Sửa lỗi Hydration Mismatch: `Hydration failed because the server rendered HTML didn't match the client` tại `RoomCard.tsx` (xung đột giữa thẻ `<Link>` (`<a>`) và `<div>`).
+- Sửa lỗi trên bản đồ `RoomsMapView`: Khi click vào các menu bộ lọc (Khu vực, Khoảng giá, Trạng thái, Kiểu phòng, Tiện ích), không có option nào xổ ra.
+
+### 2. Nguyên nhân cốt lõi (Root Cause)
+1. **Lỗi Hydration Mismatch trong `RoomCard`:** Thẻ `<Link href="...">` bọc bên trong một container vốn đã có `role="button"` và `onClick`, tạo ra việc lồng ghép phần tử tương tác không đồng nhất giữa kết quả SSR trên Server (`<div>`) và CSR trên Client (`<a>`).
+2. **Menu dropdown bị ẩn/cắt cụt bởi `overflow-x-auto`:** Thanh chứa các menu bộ lọc có class `overflow-x-auto`. Theo đặc tả CSS, khi một trục có thuộc tính overflow khác `visible` thì trục kia tự động thành `auto/hidden`. Do thanh bộ lọc chỉ cao 36px nên tất cả các bảng menu xổ xuống (`top-full`, cao ~300px) bị cắt cụt hoàn toàn và trở nên vô hình đối với người dùng (kể cả trên màn hình lớn 2133x1012).
+
+### 3. Chi tiết thực hiện & Giải pháp kỹ thuật
+1. **Sửa `RoomCard.tsx` ([`src/components/RoomCard.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomCard.tsx)):**
+   - Loại bỏ thẻ `<Link>` lồng bên trong, đưa ảnh phòng và tên tòa nhà về thẻ `<div>` nguyên bản đồng bộ 100% giữa SSR và Client.
+   - Thao tác click toàn thẻ phòng (`onClick={() => onOpenDetail(room)}`, `role="button"`, `touch-manipulation`) đảm bảo chuyển hướng mượt mà, triệt tiêu hoàn toàn lỗi Hydration.
+2. **Sửa `RoomsMapView.tsx` ([`src/components/RoomsMapView.tsx`](file:///C:/Long/Long/PersonalProject/rented_room/src/components/RoomsMapView.tsx)):**
+   - Đổi thanh chứa bộ lọc thành `overflow-x-auto sm:overflow-visible`, giúp Desktop mở rộng hoàn toàn không bị cắt cụt.
+   - Nâng cấp cả 5 bảng dropdown (Khu vực, Mức giá, Trạng thái, Kiểu phòng, Tiện ích) với cấu hình hiển thị đa màn hình:
+     - Trên **Desktop ($\ge$ 640px):** Sử dụng `sm:absolute sm:top-full sm:left-0 sm:inset-auto` xổ xuống ngay dưới nút bấm với bóng đổ và nền kính mờ.
+     - Trên **Mobile (< 640px):** Sử dụng `fixed inset-x-3.5 top-32` nổi trên bề mặt màn hình, thoát khỏi mọi giới hạn cuộn, hiển thị 100% rõ ràng và dễ thao tác chạm.
+
+### 4. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành thành công trong **3.1s**, 0 lỗi TypeScript / Turbopack.
+- Đã commit và đẩy mã nguồn lên GitHub.
