@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* Cho phép truy cập dev resources & HMR từ điện thoại / thiết bị khác trong mạng LAN */
+  /* Cho phép truy cập dev resources & HMR từ điện thoại / thiết bị khác trong mạng LAN & Hotspot */
   allowedDevOrigins: [
+    "172.20.10.3",
+    "172.20.*.*",
+    "172.*.*.*",
     "192.168.1.230",
     "192.168.1.*",
     "192.168.*.*",

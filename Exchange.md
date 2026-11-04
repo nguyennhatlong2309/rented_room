@@ -1227,3 +1227,30 @@
 ### 4. Kết Quả Kiểm Tra
 - `npm run build` biên dịch thành công 100% trong **2.7s**, 0 lỗi TypeScript / Turbopack.
 - Đã commit và đẩy mã nguồn lên GitHub.
+
+---
+## [Giải Thích 0.0.0.0 & Cấu Hình Mở Rộng allowedDevOrigins Cho Mạng Hotspot / LAN Mới]
+**Thời gian:** 2026-11-04 13:57:00
+
+### 1. Nội dung yêu cầu từ người dùng
+- Người dùng hỏi: *"khi truy cập 0.0.0.0:3000 trên điện thoại thì nó hiện about:blank và màn hình trắng tại sao vậy"*.
+
+### 2. Phân tích nguyên nhân cốt lõi (Root Cause)
+1. **Bản chất của địa chỉ `0.0.0.0` trong mạng máy tính:**
+   - Khi chạy lệnh máy chủ (`next dev -H 0.0.0.0`), `0.0.0.0` là **địa chỉ lắng nghe (bind address)** trên máy tính của bạn, nghĩa là *"cho phép máy chủ lắng nghe kết nối từ tất cả các card mạng của máy (Wi-Fi, LAN, Localhost)"*.
+   - Tuy nhiên, `0.0.0.0` **KHÔNG PHẢI là địa chỉ IP có thể định tuyến (routable address) từ thiết bị khác**.
+   - Khi bạn gõ `0.0.0.0:3000` trên trình duyệt điện thoại:
+     - Điện thoại sẽ hiểu là kết nối đến chính nó (tương tự `localhost` của riêng điện thoại).
+     - Vì trên điện thoại không chạy máy chủ Next.js nào ở cổng 3000, trình duyệt di động (Safari/Chrome) không tìm thấy dữ liệu và tự động chuyển về trang trắng `about:blank`.
+2. **Địa chỉ mạng của máy tính vừa thay đổi (chuyển sang mạng Hotspot/Wi-Fi mới):**
+   - Kiểm tra `ipconfig` cho thấy IP hiện tại của máy tính là **`172.20.10.3`** (dải mạng Personal Hotspot hoặc Wi-Fi mới).
+   - Vì vậy, trên điện thoại cần truy cập vào đúng địa chỉ IP thực tế của máy tính: `http://172.20.10.3:3000`.
+
+### 3. Chi tiết xử lý
+1. **Mở rộng dải IP trong `allowedDevOrigins` ([`next.config.ts`](file:///C:/Long/Long/PersonalProject/rented_room/next.config.ts)):**
+   - Bổ sung các dải mạng Hotspot và Private Network phổ biến: `"172.20.10.3"`, `"172.20.*.*"`, `"172.*.*.*"`, `"192.168.*.*"`, `"10.*.*.*"`.
+   - Đảm bảo khi người dùng phát 4G từ điện thoại cho máy tính (Hotspot) hoặc đổi sang bất kỳ mạng Wi-Fi nào, Next.js cũng không chặn tài nguyên HMR / script.
+
+### 4. Kết Quả Kiểm Tra
+- Chạy `npm run build`: hoàn thành thành công trong **1.5s**, 0 lỗi TypeScript.
+- Đã commit và đẩy mã nguồn lên GitHub.
